@@ -37,9 +37,12 @@ fort qu'une page entière.
 ### Les affiches
 
 Chaque révélation est une **affiche en aplat**, pas une carte sombre. Fond de couleur
-pleine, encre noire par-dessus, titre énorme, une forme plate, et le wordmark en bas.
-C'est la seule forme de carte du site : il n'y a plus de fiche papier, plus de carte
-teintée à 8 %, plus de filet de couleur sur fond noir.
+pleine, encre noire par-dessus, titre énorme, deux ou trois formes plates superposées, et
+le wordmark en bas. C'est la seule forme de carte du site : il n'y a plus de fiche papier,
+plus de carte teintée à 8 %, plus de filet de couleur sur fond noir.
+
+L'affiche se lit d'abord sur un téléphone. Toute décision de composition se prend à
+320 px de large, jamais sur un écran de bureau.
 
 Les huit teintes sont choisies pour passer **4.5:1 avec l'encre `#141414`**, donc le
 texte d'une affiche est toujours noir. Aucune exception, aucun texte clair sur couleur.
@@ -61,14 +64,53 @@ pour les chiffres de confidentialité, où le vert dit « sain ».
 
 ### Le vocabulaire de formes
 
-Des formes **plates et géométriques**, en encre noire sur l'aplat, empruntées au monde du
-dossier : barres de censure, pastilles, stries diagonales, arc. Une seule par affiche,
-jamais deux. Elles sont faites en CSS, jamais en SVG dessiné à la main.
+C'est ce qui remplit l'affiche. Une affiche avec une seule petite forme et beaucoup de
+vide est fade : la couleur seule ne porte pas, c'est la **superposition** qui porte.
 
-### Un aplat pleine largeur, un seul
+Huit formes, plates et géométriques, toutes empruntées au monde du dossier, toutes en CSS.
 
-La dernière section bascule en rouge plein sur toute la largeur. C'est la seule bascule
-de fond du site, et c'est ce qui lui donne son impact. Ailleurs, le fond ne change jamais.
+| Forme | Description | Où elle sert |
+|---|---|---|
+| Barre de censure | Rectangle plein, hauteur 13 à 40 px | En pile de 3 ou 4, largeurs inégales |
+| Disque | Cercle plein, du logo | Répété, tailles différentes, un débordant d'un coin |
+| Stries | Hachures diagonales de photocopie | En coin biseauté ou en fond de moitié d'affiche |
+| Arc | Demi-disque | Ancré sur un bord, très grand |
+| Cadre | Rectangle bordé 3 px | Encadre le chiffre, comme une pièce à conviction |
+| Faisceau | Triangles depuis un bord | Lumière de photocopieuse au-dessus du document |
+| Trame | Points réguliers, `radial-gradient` | Fond de zone, jamais sur du texte |
+| Onglet | Languette rectangulaire en haut | Onglet de chemise cartonnée |
+
+**Les cinq règles de composition, mobile d'abord.** L'affiche se dessine à 320 px de
+large et ne fait que grandir ensuite. Elle n'est jamais recomposée pour le bureau.
+
+1. **Deux à trois formes par affiche.** Une seule ne remplit rien, quatre font du bruit.
+2. **Une forme au moins déborde du cadre**, coupée par le bord. C'est ce qui donne
+   l'impression d'une image plus grande que l'affiche.
+3. **Contraste d'échelle obligatoire** : une forme très grande, au moins un tiers de la
+   hauteur, et une petite à côté. Deux formes moyennes ne produisent rien.
+4. **Aucune bande vide de plus de 15 % de la hauteur.** Le vide se comble par une forme,
+   jamais en agrandissant le texte.
+5. **Le texte passe toujours au-dessus** et garde ses 4.5:1 avec l'aplat. Une forme sous
+   du texte descend à `opacity: .25` maximum, ou s'écarte.
+
+**Trois niveaux de profondeur, pas plus** : l'aplat, les formes, le texte.
+
+**Deuxième ton autorisé.** L'encre à `.55` et `.25` compte comme un ton. Une seconde
+couleur de la palette est permise sur une affiche, jamais une troisième.
+
+**Contrainte d'export, à ne pas oublier.** Chaque affiche doit finir en image partageable.
+Une forme qui ne se redessine pas trivialement dans un `canvas` ou un SVG est interdite,
+quelle que soit sa beauté en CSS. Les huit formes ci-dessus tiennent en un rectangle, un
+cercle, un arc ou une répétition : c'est le critère.
+
+### Les aplats pleine largeur
+
+La dernière section bascule en rouge plein sur toute la largeur. **Validée, et c'est le
+seul aplat obligatoire du site.** C'est ce qui lui donne son impact.
+
+Ailleurs, on y va léger. Un deuxième aplat au maximum sur toute la page d'accueil, jamais
+deux qui se suivent, et jamais dans le tiers supérieur. L'impact du rouge final vient de
+sa rareté : trois aplats et il ne reste rien.
 
 ### Les boutons
 
@@ -174,3 +216,33 @@ S'il n'y en a aucun, l'écran n'est pas fini.
 
 Wordmark seul : `exposed.` en bas de casse, en mono, le `o` remplacé par un disque plein
 rouge. Aucune icône, aucun emprunt à Instagram.
+
+## Chantier en cours, décidé le 3 septembre 2026
+
+Ce qui reste à faire sur les affiches, dans l'ordre. Rien de tout cela n'est codé.
+
+1. **Écrire les huit formes** en classes CSS réutilisables, avec les variantes de taille et
+   les variantes débordantes. C'est une bibliothèque, pas huit bricolages.
+2. **Recomposer les huit affiches** avec deux ou trois formes chacune, contraste d'échelle,
+   une forme coupée par le bord. Aucune affiche ne garde une seule forme centrée.
+3. **Remonter l'échelle typographique de l'affiche** : le chiffre est l'élément le plus
+   grand de la composition, le titre vient ensuite.
+4. **Vérifier au doigt**, à 320 et 390 px, avant de regarder quoi que ce soit en 1440.
+
+### Ce que le passage à Next.js change, et ce qu'il ne change pas
+
+| Sujet | En HTML aujourd'hui | En Next.js ensuite |
+|---|---|---|
+| Les formes | Classes CSS | Identique, dans un composant `Forme` |
+| Les affiches | Huit blocs écrits à la main | Un composant `Affiche` et huit objets de données |
+| Le scrub au scroll | Un écouteur groupé par `requestAnimationFrame` | Un `useMotionValue`, jamais un `useState` |
+| L'export image | Impossible proprement | Le vrai sujet, voir ci-dessous |
+
+**L'export image est la seule vraie question ouverte.** Rendre une affiche CSS en PNG
+demande une bibliothèque qui relit le DOM, et ces bibliothèques rendent mal les dégradés,
+les `clip-path` et les polices web. La route fiable est de redessiner l'affiche dans un
+`canvas` au moment de l'export. Cela oblige à tenir les formes simples, ce qui est déjà la
+contrainte écrite plus haut. À trancher avant d'écrire le bouton de partage.
+
+**Ce qu'on ne fera pas** : ni 3D, ni WebGL, ni bibliothèque d'animation lourde. La page a
+déjà été ralentie une fois par une salle 3D, et le verdict était sans appel.
