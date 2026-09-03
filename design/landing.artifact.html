@@ -1,16 +1,7 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exposed. Ce que tes DMs disent de toi</title>
-<meta name="description" content="Un Wrapped pour tes DMs Instagram, analysé entièrement dans ton navigateur. Aucun message ne quitte ta machine.">
-
-<!-- Prototype : chargement par lien. En production, self-host via next/font (cf. DESIGN.md). -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
 <style>
 /* ============================================================
    TOKENS  (source unique : DESIGN.md)
@@ -208,7 +199,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   transition-delay: var(--d, 0ms);
 }
 .reveal.is-in { opacity: 1; transform: none; }
-.no-js .reveal { opacity: 1; transform: none; }
+html:not(.js) .reveal { opacity: 1; transform: none; }
 
 /* ============================================================
    1. HERO  /  split asymétrique, jamais centré
@@ -527,9 +518,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   * { animation: none !important; }
 }
 </style>
-</head>
 
-<body class="no-js">
 
 <!-- =========================== NAV =========================== -->
 <nav class="nav">
@@ -863,7 +852,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 </footer>
 
 <script>
-document.body.classList.remove('no-js');
+document.documentElement.classList.add('js');
 
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const items = [...document.querySelectorAll('.reveal')];
@@ -919,5 +908,3 @@ document.getElementById('ics')?.addEventListener('click', () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 </script>
-</body>
-</html>
