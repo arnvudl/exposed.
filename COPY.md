@@ -47,6 +47,21 @@ qui compte.
 Une énumération de faits reste permise quand elle est réellement informative : nommer les
 trois entrées d'un calcul n'est pas un effet de style.
 
+### 3 bis. L'antithèse et la paire parallèle
+
+Le tic le plus difficile à repérer, parce qu'il sonne bien. Trois formes à traquer :
+
+- **« Ce n'est pas X, c'est Y. »** « Ce n'est pas une promesse, c'est une contrainte. »
+- **« X, pas Y. »** « C'est leur délai, pas le nôtre. »
+- **La paire de négations.** « Pas d'IA, pas de devinettes. »
+
+Ces tournures donnent une impression de tranchant sans rien ajouter. Elles se remplacent
+par l'affirmation seule : « Il n'y a aucun serveur à qui l'envoyer. » Le fait suffit, et
+il porte plus loin que la figure de style.
+
+Corollaire : deux propositions de longueur égale reliées par une virgule sont presque
+toujours à couper en une seule.
+
 ### 4. Test de l'oral
 
 Chaque phrase doit pouvoir être dite à voix haute à un ami sans avoir l'air d'une
@@ -83,9 +98,10 @@ phrase ne pointe pas vers une donnée que le rapport affiche, elle sort.**
 | Emplacement | Réflexe à bannir | Retenu |
 |---|---|---|
 | Sous-titre du hero | Analysé dans ton navigateur, rien n'est envoyé nulle part. | Dépose le ZIP que t'envoie Instagram. Tout est lu dans ton navigateur. Rien ne part. |
-| Dossier, étape 2 | On compte, on croise, on te montre. | On compte tes messages, on croise tes listes d'abonnés. Pas d'IA, pas de devinettes. |
-| Confidentialité | Ce n'est pas une politique de confidentialité, c'est une contrainte technique. | Ce n'est pas une promesse, c'est une contrainte. |
+| Dossier, étape 2 | On compte, on croise, on te montre. | On compte tes messages et on croise tes listes d'abonnés. C'est de l'arithmétique, rien de plus. |
+| Confidentialité | Ce n'est pas une promesse, c'est une contrainte. | Il n'y a aucun serveur à qui l'envoyer. |
 | Chemin, étape 3 | Rien à installer, rien à configurer, rien à envoyer. | Rien à installer. |
+| Chemin, délai | C'est leur délai, pas le nôtre. | (supprimé, la phrase précédente le disait déjà) |
 | Les types | Quatre axes se croisent pour donner ton type. | Qui lance, à combien de gens, à quelle vitesse, avec quelle longueur. |
 | Appel final | Tes messages te connaissent mieux que toi. | Tout est déjà dans tes messages. |
 

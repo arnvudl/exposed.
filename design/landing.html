@@ -16,15 +16,23 @@
    TOKENS  (source unique : DESIGN.md)
    ============================================================ */
 :root {
-  --bg:         #0B0B0C;
-  --surface:    #121213;
-  --text:       #F2F1EE;
-  --muted:      #8A8A8E;
-  --line:       #2A2A2C;
+  /* Neutres biaises vers le chaud, pour aller avec le papier et le rouge. */
+  --bg:         #0D0B0A;
+  --surface:    #171412;
+  --text:       #F4F1EC;
+  --muted:      #8E8781;
+  --line:       #2C2724;
   --paper:      #F3EFE6;
   --ink:        #141414;
   --line-paper: #D9D3C6;
   --signal:     #E8442A;
+  --orange:     #F0803C;
+  --vert:       #5FA85C;
+
+  /* Onglets d'index. Un dossier d'archive a des onglets de couleur :
+     chaque revelation porte le sien, du sommaire jusqu'a sa carte. */
+  --t1: #E8442A;  --t2: #F0803C;  --t3: #4477D4;  --t4: #5FA85C;  --t5: #A45FB0;
+  --t6: #E9BE3C;  --t7: #2F9AA8;  --t8: #C4703A;  --t9: #D9538C;  --t10: #8FA33C;
 
   --ease-out:    cubic-bezier(.23, 1, .32, 1);
   --ease-drawer: cubic-bezier(.32, .72, 0, 1);
@@ -55,7 +63,9 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* clip, pas hidden : `overflow-x: hidden` force overflow-y a `auto` et fait du
+     body un conteneur de defilement, ce qui casse sticky et les timelines. */
+  overflow-x: clip;
 }
 
 h1, h2, h3 {
@@ -100,7 +110,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   height: 64px;
   display: flex;
   align-items: center;
-  background: rgb(11 11 12 / .72);
+  background: rgb(13 11 10 / .74);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   /* Fondu en bas plutôt qu'un filet : cf. scroll edge effects. */
@@ -125,9 +135,23 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 }
 .nav__links a[aria-current] { color: var(--text); }
 @media (hover: hover) and (pointer: fine) {
-  .nav__links a:hover, .nav__support:hover { color: var(--text); }
+  .nav__links a:hover { color: var(--text); }
 }
-.nav__support { text-decoration: none; }
+.nav__support {
+  text-decoration: none;
+  color: var(--orange);
+  border: 1px solid color-mix(in oklab, var(--orange) 45%, transparent);
+  border-radius: var(--r);
+  padding: 6px 13px;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .nav__support:hover {
+    color: var(--orange);
+    border-color: var(--orange);
+    background: color-mix(in oklab, var(--orange) 12%, transparent);
+  }
+}
 @media (max-width: 560px) { .nav__support { display: none; } }
 
 /* Wordmark : le "o" est un disque plein rouge. */
@@ -203,7 +227,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
    ============================================================ */
 .reveal {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(24px);
   transition: opacity 520ms var(--ease-out), transform 520ms var(--ease-out);
   transition-delay: var(--d, 0ms);
 }
@@ -242,6 +266,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
    CARTE PAPIER  /  vrai composant produit, pas un faux écran
    ============================================================ */
 .card-paper {
+  position: relative;
+  overflow: hidden;
   background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--line-paper);
@@ -249,6 +275,9 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   box-shadow: var(--shadow-paper);
   padding: clamp(22px, 3vw, 30px);
 }
+/* L'onglet : 4px de couleur en haut de chaque piece du dossier. */
+.tab { position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--tab, var(--signal)); }
+
 .card-paper__meta {
   font-family: var(--mono);
   font-size: 11px;
@@ -257,6 +286,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   color: #6B665C;
 }
 .card-paper__stat {
+  color: color-mix(in oklab, var(--tab, var(--signal)) 72%, var(--ink));
   font-family: var(--display);
   font-weight: 800;
   font-size: clamp(3rem, 8vw, 4.5rem);
@@ -302,30 +332,26 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 }
 .dossier__step p { max-width: 26ch; }
 
-@media (max-width: 900px) {
-  .dossier__stage { grid-template-columns: 1fr; gap: 3rem; }
-  /* La carte passe au-dessus du texte et cesse de bouger. */
-  .dossier__aside { position: static; order: -1; padding-top: clamp(4rem, 10vh, 7rem); }
-  .dossier__card { transform: none; }
+/* Sous 700px : une colonne, carte au-dessus, etapes a hauteur naturelle.
+   Attention, les etapes hautes sont ce qui donne sa longueur de scrub a la
+   section : les reduire ici et garder l'epinglage ailleurs supprime toute
+   plage d'animation sans prevenir. */
+@media (max-width: 699px) {
+  .dossier__stage { grid-template-columns: 1fr; gap: 2rem; }
+  .dossier__aside {
+    position: static; order: -1;
+    padding-top: clamp(4rem, 10vh, 7rem);
+    max-width: 420px;
+  }
   .dossier__step { min-height: 0; padding-block: 2.2rem; }
 }
 
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
-    .dossier__stage { view-timeline-name: --dossier; view-timeline-axis: block; }
-    .dossier__card {
-      animation: straighten linear both;
-      animation-timeline: --dossier;
-      /* `contain` est la seule plage correcte quand le sujet est plus haut
-         que l'écran : entry/exit s'inversent et l'animation joue à rebours. */
-      animation-range: contain 0% contain 100%;
-    }
-    @keyframes straighten {
-      from { transform: rotate(-3deg) scale(.94); }
-      to   { transform: rotate(0deg) scale(1); }
-    }
-  }
-}
+/* Le redressement de la carte est pilote en JS (voir le script en bas de page).
+   `animation-timeline` en CSS serait plus elegant et tournerait sur le
+   compositeur, mais il se revele inactif ou fige dans plusieurs contextes
+   embarques, sans lever la moindre erreur : la page parait simplement morte.
+   Un seul handler `scroll` groupe par requestAnimationFrame, qui n'ecrit que
+   des `transform`, est le compromis fiable. */
 
 /* ============================================================
    3. RÉVÉLATIONS  /  panoramique horizontal piloté au scroll
@@ -347,15 +373,17 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   width: max-content;
 }
 .rev {
+  position: relative;
+  overflow: hidden;
   scroll-snap-align: center;
   width: clamp(240px, 74vw, 320px);
   min-height: 340px;
   border-radius: var(--r);
-  padding: 24px;
+  padding: 28px 24px 24px;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--line);
-  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--tab) 26%, var(--line));
+  background: color-mix(in oklab, var(--tab) 8%, var(--surface));
 }
 .rev__t { font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: -.02em; line-height: 1.14; }
 .rev__s { font-size: 13.5px; color: var(--muted); margin-top: .5rem; }
@@ -363,38 +391,33 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 .rev__big {
   font-family: var(--display); font-weight: 800;
   font-size: 2.9rem; line-height: .95; letter-spacing: -.04em;
-  color: var(--signal);
+  color: var(--tab);
 }
 .rev__note { font-size: 12.5px; color: var(--muted); margin-top: .45rem; line-height: 1.45; }
 .rev__quote { font-size: 14px; line-height: 1.5; }
 /* Diversité de fond : trois cartes sur huit sont en papier. */
 .rev--paper {
   background: var(--paper); color: var(--ink);
-  border-color: var(--line-paper); box-shadow: var(--shadow-paper);
+  border-color: color-mix(in oklab, var(--tab) 30%, var(--line-paper));
+  box-shadow: var(--shadow-paper);
 }
 .rev--paper .rev__s, .rev--paper .rev__note { color: #6B665C; }
-.rev--paper .rev__big { color: var(--ink); }
+/* Sur papier, l'onglet est fonce pour rester lisible. */
+.rev--paper .rev__big { color: color-mix(in oklab, var(--tab) 78%, var(--ink)); }
 
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
-    .reveals__stage { height: 300vh; view-timeline-name: --reveals; view-timeline-axis: block; }
-    .reveals__viewport {
-      position: sticky; top: 64px;
-      height: calc(100dvh - 64px);
-      display: flex; align-items: center;
-      overflow: hidden;
-      scroll-snap-type: none;
-      padding-bottom: 0;
-    }
-    .reveals__track {
-      animation: pan linear both;
-      animation-timeline: --reveals;
-      animation-range: contain 0% contain 100%;
-    }
-    @keyframes pan {
-      from { transform: translateX(0); }
-      to   { transform: translateX(calc(-100% + 100vw)); }
-    }
+/* A partir de 700px, la bande se fige et defile horizontalement au rythme du
+   scroll vertical. La translation est appliquee en JS, comme pour la carte.
+   Sous 700px, on retombe sur un defilement horizontal au doigt : les regles
+   par defaut plus haut suffisent. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 700px) {
+  .reveals__stage { height: 300vh; }
+  .reveals__viewport {
+    position: sticky; top: 64px;
+    height: calc(100dvh - 64px);
+    display: flex; align-items: center;
+    overflow: hidden;
+    scroll-snap-type: none;
+    padding-bottom: 0;
   }
 }
 
@@ -417,6 +440,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   padding-top: 2.2rem;
 }
 .privacy__k {
+  color: var(--vert);
   font-family: var(--display); font-weight: 800;
   font-size: clamp(2.2rem, 5vw, 3.4rem);
   line-height: 1; letter-spacing: -.04em;
@@ -470,13 +494,13 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 }
 .types__flow a {
   text-decoration: none;
-  color: #55555A;
+  color: color-mix(in oklab, var(--tab) 52%, var(--bg));
   transition: color 170ms ease;
 }
 @media (hover: hover) and (pointer: fine) {
-  .types__flow a:hover { color: var(--text); }
+  .types__flow a:hover { color: var(--tab); }
 }
-.types__flow a.is-me { color: var(--text); }
+.types__flow a.is-me { color: var(--tab); }
 
 /* ============================================================
    7. APPEL FINAL
@@ -563,7 +587,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 
     <!-- Vrai composant produit (carte de partage), pas un faux écran. -->
     <div>
-      <div class="card-paper card-paper--tilt">
+      <div class="card-paper card-paper--tilt" style="--tab:var(--t6)">
+        <span class="tab" aria-hidden="true"></span>
         <p class="card-paper__meta">Révélation 06 · Records</p>
         <!-- mock : chiffre d'exemple -->
         <p class="card-paper__stat num">2 847</p>
@@ -585,13 +610,13 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
       <div class="dossier__step">
         <div>
           <h2 id="dossier-h" class="t-lg reveal">Huit révélations.</h2>
-          <p class="lede reveal" style="--d:80ms;margin-top:1rem">Une par écran. Toutes recalculables à la main si tu veux vérifier.</p>
+          <p class="lede reveal" style="--d:80ms;margin-top:1rem">Une par écran. Tu peux refaire chaque calcul à la main.</p>
         </div>
       </div>
       <div class="dossier__step">
         <div>
           <h2 class="t-lg reveal">Rien d'inventé.</h2>
-          <p class="lede reveal" style="--d:80ms;margin-top:1rem">On compte tes messages, on croise tes listes d'abonnés. Pas d'IA, pas de devinettes.</p>
+          <p class="lede reveal" style="--d:80ms;margin-top:1rem">On compte tes messages et on croise tes listes d'abonnés. C'est de l'arithmétique, rien de plus.</p>
         </div>
       </div>
       <div class="dossier__step">
@@ -604,7 +629,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 
     <aside class="dossier__aside" aria-hidden="true">
       <div class="dossier__card">
-        <div class="card-paper">
+        <div class="card-paper" style="--tab:var(--t1)">
+          <span class="tab" aria-hidden="true"></span>
           <p class="card-paper__meta">Révélation 01 · Ton cercle réel</p>
           <p class="card-paper__stat num">41</p>
           <p class="card-paper__line">jours de silence avec la personne à qui tu écrivais tous les jours en janvier.</p>
@@ -632,7 +658,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
     <div class="reveals__viewport">
       <div class="reveals__track">
 
-        <article class="rev rev--paper">
+        <article class="rev rev--paper" style="--tab:var(--t1)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Ton cercle réel</h3>
           <p class="rev__s">Les gens qui comptent vraiment.</p>
           <div class="rev__body">
@@ -640,7 +667,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           </div>
         </article>
 
-        <article class="rev">
+        <article class="rev" style="--tab:var(--t2)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Tes groupes</h3>
           <p class="rev__s">Les cercles de ta vie.</p>
           <div class="rev__body">
@@ -650,7 +678,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           </div>
         </article>
 
-        <article class="rev">
+        <article class="rev" style="--tab:var(--t3)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Qui ne te suit pas en retour</h3>
           <p class="rev__s">Tu les suis. Eux, non.</p>
           <div class="rev__body">
@@ -658,7 +687,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           </div>
         </article>
 
-        <article class="rev rev--paper">
+        <article class="rev rev--paper" style="--tab:var(--t4)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Ce que tu dis vraiment</h3>
           <p class="rev__s">Ton vocabulaire, sans filtre.</p>
           <div class="rev__body">
@@ -668,7 +698,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           </div>
         </article>
 
-        <article class="rev">
+        <article class="rev" style="--tab:var(--t5)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Tes inside jokes</h3>
           <p class="rev__s">Ce que vous êtes les seuls à comprendre.</p>
           <div class="rev__body">
@@ -676,7 +707,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           </div>
         </article>
 
-        <article class="rev">
+        <article class="rev" style="--tab:var(--t6)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Tes cinq records</h3>
           <p class="rev__s">Tes moments extrêmes.</p>
           <div class="rev__body">
@@ -686,7 +718,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           </div>
         </article>
 
-        <article class="rev rev--paper">
+        <article class="rev rev--paper" style="--tab:var(--t7)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Premier et dernier</h3>
           <p class="rev__s">Le début et la fin.</p>
           <div class="rev__body">
@@ -694,7 +727,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           </div>
         </article>
 
-        <article class="rev">
+        <article class="rev" style="--tab:var(--t8)">
+          <span class="tab" aria-hidden="true"></span>
           <h3 class="rev__t">Ton profil relationnel</h3>
           <p class="rev__s">Qui tu es dans tes relations.</p>
           <div class="rev__body">
@@ -715,8 +749,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
     </p>
     <p class="lede reveal" style="--d:80ms;margin-top:1.8rem">
       Ton fichier n'est jamais transféré. Il est lu sur place et oublié dès que tu fermes
-      l'onglet. Ce n'est pas une promesse, c'est une contrainte : il n'y a pas de serveur à
-      qui envoyer quoi que ce soit.
+      l'onglet. Il n'y a aucun serveur à qui l'envoyer.
     </p>
 
     <div class="privacy__cols">
@@ -741,7 +774,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   <div class="wrap">
     <h2 class="t-lg reveal">Il faut d'abord récupérer ton fichier.</h2>
     <p class="lede reveal" style="--d:80ms;margin-top:1.2rem">
-      Instagram ne te donne pas tes données tout de suite. Une seule corvée, une seule fois.
+      Instagram ne te donne pas tes données tout de suite. Ça se fait une fois.
     </p>
 
     <div class="path__steps">
@@ -765,8 +798,8 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
           <h3 class="path__h">Attends</h3>
           <p class="path__d">
             Instagram met de quelques minutes à <strong>48 heures</strong> à préparer le
-            fichier, puis t'envoie un lien. C'est leur délai, pas le nôtre. Mets-toi un rappel,
-            c'est là que la plupart des gens oublient de revenir.
+            fichier, puis t'envoie un lien. Mets-toi un rappel : c'est là que la plupart des gens
+            oublient de revenir.
           </p>
           <p class="path__remind">
             <button class="btn btn--ghost" id="ics">Me le rappeler demain</button>
@@ -779,7 +812,7 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
         <div>
           <h3 class="path__h">Dépose le ZIP</h3>
           <p class="path__d">
-            Reviens ici, glisse le fichier, lis ton dossier. Rien à installer.
+            Reviens ici et glisse le fichier. Rien à installer.
           </p>
         </div>
       </div>
@@ -790,22 +823,22 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 <!-- ========================== TYPES ========================== -->
 <section class="types">
   <div class="wrap">
-    <h2 class="t-lg reveal">Dix types. Le tien tombe à la dernière page.</h2>
+    <h2 class="t-lg reveal">Dix types. Le tien est à la dernière page.</h2>
     <p class="lede reveal" style="--d:80ms;margin-top:1.2rem">
       Quatre axes le déterminent : qui lance, à combien de gens tu parles, à quelle vitesse
       tu réponds, et la longueur de tes messages.
     </p>
     <nav class="types__flow reveal" style="--d:140ms" aria-label="Les dix types relationnels">
-      <a href="#" class="is-me">Le Pilier</a>
-      <a href="#">Le Confident</a>
-      <a href="#">Le Connecteur</a>
-      <a href="#">Le Fidèle discret</a>
-      <a href="#">Le Silencieux choisi</a>
-      <a href="#">L'Ouvert</a>
-      <a href="#">Le Veilleur</a>
-      <a href="#">Le Répondant</a>
-      <a href="#">Le Constant</a>
-      <a href="#">Le Sélectif</a>
+      <a href="#" class="is-me" style="--tab:var(--t1)">Le Pilier</a>
+      <a href="#" style="--tab:var(--t2)">Le Confident</a>
+      <a href="#" style="--tab:var(--t3)">Le Connecteur</a>
+      <a href="#" style="--tab:var(--t4)">Le Fidèle discret</a>
+      <a href="#" style="--tab:var(--t5)">Le Silencieux choisi</a>
+      <a href="#" style="--tab:var(--t6)">L'Ouvert</a>
+      <a href="#" style="--tab:var(--t7)">Le Veilleur</a>
+      <a href="#" style="--tab:var(--t8)">Le Répondant</a>
+      <a href="#" style="--tab:var(--t9)">Le Constant</a>
+      <a href="#" style="--tab:var(--t10)">Le Sélectif</a>
     </nav>
   </div>
 </section>
@@ -895,6 +928,61 @@ if (reduce || !('IntersectionObserver' in window)) {
   addEventListener('load', sweep);
   if ('onscrollend' in window === false) setTimeout(sweep, 1200); // repli Safari ancien
 }
+
+/* ------------------------------------------------------------------
+   Scrub lie au scroll.
+   Un seul handler `scroll`, groupe par requestAnimationFrame, qui n'ecrit
+   que des `transform`. C'est l'exception assumee a la regle « aucun
+   ecouteur scroll » de DESIGN.md : `animation-timeline` en CSS est plus
+   propre sur le papier, mais se revele inactif ou fige dans les contextes
+   embarques, sans erreur, et la page parait morte. La fiabilite prime.
+   ------------------------------------------------------------------ */
+const progression = (el) => {
+  const r = el.getBoundingClientRect();
+  const course = r.height - window.innerHeight;
+  if (course <= 0) return 0;
+  return Math.min(1, Math.max(0, -r.top / course));
+};
+
+const scrubs = [];
+const carte = document.querySelector('.dossier__card');
+const scene = document.querySelector('.dossier__stage');
+const rail = document.querySelector('.reveals__track');
+const railScene = document.querySelector('.reveals__stage');
+const railVue = document.querySelector('.reveals__viewport');
+
+function installerScrub() {
+  if (reduce || scrubs.length) return;
+
+  if (carte && scene) {
+    carte.style.animation = 'none';
+    scrubs.push(() => {
+      const p = progression(scene);
+      carte.style.transform =
+        `rotate(${(-3 + 3 * p).toFixed(2)}deg) scale(${(0.94 + 0.06 * p).toFixed(3)})`;
+    });
+  }
+
+  if (rail && railScene && railVue
+      && getComputedStyle(railVue).position === 'sticky') {
+    rail.style.animation = 'none';
+    scrubs.push(() => {
+      const p = progression(railScene);
+      const course = Math.max(0, rail.scrollWidth - window.innerWidth);
+      rail.style.transform = `translateX(${(-course * p).toFixed(1)}px)`;
+    });
+  }
+
+  if (!scrubs.length) return;
+  let enAttente = false;
+  const jouer = () => { enAttente = false; for (const f of scrubs) f(); };
+  const demander = () => { if (!enAttente) { enAttente = true; requestAnimationFrame(jouer); } };
+  addEventListener('scroll', demander, { passive: true });
+  addEventListener('resize', demander, { passive: true });
+  jouer();
+}
+
+installerScrub();
 
 /* Rappel calendrier : généré localement, aucune adresse e-mail, aucun serveur. */
 document.getElementById('ics')?.addEventListener('click', () => {

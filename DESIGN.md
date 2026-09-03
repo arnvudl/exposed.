@@ -21,19 +21,44 @@ page à l'autre. Aucune section ne s'inverse.
 
 | Token | Valeur | Usage |
 |---|---|---|
-| `--bg` | `#0B0B0C` | Fond de toutes les pages. Noir légèrement chaud, jamais `#000`. |
-| `--surface` | `#121213` | Élévation minimale, employée avec parcimonie. |
-| `--text` | `#F2F1EE` | Texte principal. Blanc cassé, jamais `#fff`. |
-| `--muted` | `#8A8A8E` | Métadonnées. Ratio 4.6:1 sur le fond, conforme AA. |
-| `--line` | `#2A2A2C` | Bordures, 1 px pleines. Jamais 0.5 px. |
+| `--bg` | `#0D0B0A` | Fond de toutes les pages. Noir biaisé vers le chaud, jamais `#000`. |
+| `--surface` | `#171412` | Élévation minimale, base des cartes teintées. |
+| `--text` | `#F4F1EC` | Texte principal. Blanc cassé, jamais `#fff`. |
+| `--muted` | `#8E8781` | Métadonnées. Ratio 4.6:1 sur le fond, conforme AA. |
+| `--line` | `#2C2724` | Bordures, 1 px pleines. Jamais 0.5 px. |
 | `--paper` | `#F3EFE6` | **Surface rare.** Cartes de partage, citations, bouton principal. |
 | `--ink` | `#141414` | Texte sur papier. |
 | `--line-paper` | `#D9D3C6` | Bordures sur papier. |
 | `--signal` | `#E8442A` | **Accent unique.** Tampon, chiffres clés, soulignements. |
 
-Un seul accent sur tout le site, sans exception ni variante par section. Le papier n'est
-jamais un fond de page : une carte claire employée trois fois frappe plus fort qu'une
-page entière. Le contenu fournit toute la couleur restante.
+Le papier n'est jamais un fond de page : une carte claire employée trois fois frappe plus
+fort qu'une page entière.
+
+### Les onglets d'index
+
+Un dossier d'archive a des onglets de couleur. Chaque révélation porte le sien, du sommaire
+jusqu'à sa carte de partage : un filet de 4 px en haut de la pièce, le chiffre clé dans la
+même teinte, et un fond teinté à 8 %. Sur papier, la teinte est foncée à 78 % vers l'encre
+pour rester lisible.
+
+| Jeton | Valeur | Révélation |
+|---|---|---|
+| `--t1` | `#E8442A` | Ton cercle réel |
+| `--t2` | `#F0803C` | Tes groupes |
+| `--t3` | `#4477D4` | Qui ne te suit pas en retour |
+| `--t4` | `#5FA85C` | Ce que tu dis vraiment |
+| `--t5` | `#A45FB0` | Tes inside jokes |
+| `--t6` | `#E9BE3C` | Tes cinq records |
+| `--t7` | `#2F9AA8` | Premier et dernier |
+| `--t8` | `#C4703A` | Ton profil relationnel |
+| `--t9` `--t10` | `#D9538C` `#8FA33C` | Réservés à l'index des types |
+
+Deux couleurs de service complètent le jeu : `--orange #F0803C` pour l'action de soutien,
+et `--vert #5FA85C` pour les chiffres de confidentialité, où le vert dit « sain ».
+
+C'est un arc-en-ciel, et c'est voulu : un système d'onglets se lit comme un jeu, pas comme
+une accumulation. La retenue vient de l'emploi, jamais du nombre de teintes. La teinte ne
+touche que le filet, le chiffre et un fond à 8 %. Tout le reste de la carte reste neutre.
 
 ## Typographie
 
@@ -79,13 +104,19 @@ seul, aucun bandeau en boucle, aucune pastille clignotante.
   les survols, `linear` pour les compteurs. **Jamais `ease-in` sur de l'interface.**
 - `transform` et `opacity` uniquement. Jamais de `height`, jamais de flou animé.
 - Jamais `scale(0)` : une entrée démarre à `0.94`.
-- Amplitude maximale : 16 px de translation, 3 degrés de rotation. Aucune rotation sous
+- Amplitude maximale : 24 px de translation à l'entrée, 3 degrés de rotation. Aucune rotation sous
   768 px, elle crée des conflits de zone tactile.
 - Jamais d'animation à la sortie de l'écran. Une entrée, une fois, définitive.
 - Trois éléments animés simultanément au maximum.
 - Le scroll natif n'est jamais détourné. Pas de défilement fluide artificiel.
-- Aucun écouteur `scroll` en JavaScript. `animation-timeline` en CSS, sinon
-  `IntersectionObserver`.
+- Les entrées passent par `IntersectionObserver`, une seule fois, jamais en sortie.
+- **Exception assumée pour les deux effets liés au scroll** (redressement de la carte,
+  panoramique des révélations) : ils sont pilotés par **un seul écouteur `scroll` groupé
+  par `requestAnimationFrame`, qui n'écrit que des `transform`**. `animation-timeline` en
+  CSS est plus propre sur le papier et tourne sur le compositeur, mais il se révèle
+  inactif ou figé dans plusieurs contextes embarqués, sans lever la moindre erreur : la
+  page paraît simplement morte. La fiabilité prime sur l'élégance ici. Toute autre
+  utilisation de `scroll` reste interdite.
 - La page doit être entièrement lisible sans mouvement : `prefers-reduced-motion` et
   JavaScript désactivé donnent une page complète, à sa place.
 - La fréquence décide : ce qui est vu des dizaines de fois par jour ne s'anime pas.
