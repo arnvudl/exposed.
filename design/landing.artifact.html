@@ -22,14 +22,13 @@
 
   /* Onglets d'index. Un dossier d'archive a des onglets de couleur :
      chaque revelation porte le sien, du sommaire jusqu'a sa carte. */
-  --t1: #E8442A;  --t2: #F0803C;  --t3: #4477D4;  --t4: #5FA85C;  --t5: #A45FB0;
-  --t6: #E9BE3C;  --t7: #2F9AA8;  --t8: #C4703A;  --t9: #D9538C;  --t10: #8FA33C;
+  --t1: #E8442A;  --t2: #F0803C;  --t3: #5C8CEA;  --t4: #5FA85C;  --t5: #BE7ACD;
+  --t6: #E9BE3C;  --t7: #2F9AA8;  --t8: #C4703A;  --t9: #E86FA0;  --t10: #A8BE49;
 
   --ease-out:    cubic-bezier(.23, 1, .32, 1);
   --ease-drawer: cubic-bezier(.32, .72, 0, 1);
 
-  --r: 0px;   /* Tout est a angle vif. Un dossier d'archive n'a pas de coins arrondis. */
-  --shadow-paper: 0 24px 48px -24px rgb(0 0 0 / .6);
+  --r: 3px;
 
   --gut: clamp(20px, 5vw, 80px);
   --col: 1200px;
@@ -167,62 +166,33 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 /* ============================================================
    BOUTONS
    ============================================================ */
-/* Deux boutons de formes differentes. Deux rectangles jumeaux cote a cote,
-   c'est la signature la plus reconnaissable d'une page generee. */
+/* Un bloc plein, en display gras. Le hero n'en porte qu'un seul : deux
+   rectangles jumeaux cote a cote sont le tell le plus visible de tous. */
 .btn {
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 19px 28px;
+  border: 0;
+  border-radius: var(--r);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -.015em;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  background: none;
-  border: 0;
+  transition: transform 140ms var(--ease-out), filter 160ms ease;
 }
-.btn:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
-
-/* Principal : une etiquette de dossier. Papier, angle vif, et une pastille
-   rouge collee au bord gauche, comme la pastille du logo. */
-.btn--primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  height: 54px;
-  padding: 0 26px 0 0;
-  background: var(--paper);
-  color: var(--ink);
-  transition: transform 140ms var(--ease-out), background-color 160ms ease;
-}
-.btn--primary::before {
-  content: "";
-  width: 10px;
-  align-self: stretch;
-  background: var(--signal);
-  flex: none;
-}
+.btn span { font-size: 22px; line-height: 0; transition: transform 220ms var(--ease-out); }
+.btn--signal { background: var(--signal); color: var(--ink); }
+.btn--paper  { background: var(--paper);  color: var(--ink); }
 @media (hover: hover) and (pointer: fine) {
-  .btn--primary:hover { background: #FFFCF4; }
+  .btn:hover { filter: brightness(1.07); }
+  .btn:hover span { transform: translateX(5px); }
 }
-.btn--primary:active { transform: translateY(1px); }
-
-/* Secondaire : pas de boite du tout. Un mot souligne, avec un chevron qui
-   avance au survol. */
-.btn--quiet {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  height: 54px;
-  color: var(--muted);
-  border-bottom: 1px solid var(--line);
-  transition: color 160ms ease, border-color 160ms ease;
-}
-.btn--quiet span { transition: transform 200ms var(--ease-out); }
-@media (hover: hover) and (pointer: fine) {
-  .btn--quiet:hover { color: var(--text); border-color: var(--muted); }
-  .btn--quiet:hover span { transform: translateX(4px); }
-}
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
 
 /* ============================================================
    TAMPON  /  la signature de chaque écran
@@ -285,46 +255,63 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
 }
 
 /* ============================================================
-   CARTE PAPIER  /  vrai composant produit, pas un faux écran
+   AFFICHE  /  la seule forme de carte du site
+   Aplat de couleur pleine, encre noire, une forme plate. Les huit teintes
+   sont choisies pour passer 4.5:1 avec l'encre.
    ============================================================ */
-.card-paper {
+.rev {
   position: relative;
   overflow: hidden;
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--line-paper);
+  flex: none;
   border-radius: var(--r);
-  box-shadow: var(--shadow-paper);
-  padding: clamp(22px, 3vw, 30px);
+  padding: 24px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  background: var(--tab);
+  color: var(--ink);
 }
-/* L'onglet : 4px de couleur en haut de chaque piece du dossier. */
-.tab { position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--tab, var(--signal)); }
+.reveals__track .rev { scroll-snap-align: center; width: clamp(268px, 78vw, 328px); aspect-ratio: 9 / 13; }
+.rev--tilt { transform: rotate(2deg); }
+@media (max-width: 768px) { .rev--tilt { transform: none; } }
 
-.card-paper__meta {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: #6B665C;
+.rev__k {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em;
+  text-transform: uppercase; opacity: .72;
 }
-.card-paper__stat {
-  color: color-mix(in oklab, var(--tab, var(--signal)) 72%, var(--ink));
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(3rem, 8vw, 4.5rem);
-  line-height: .92;
-  letter-spacing: -.045em;
-  margin-top: 1.2rem;
+.rev__t {
+  font-family: var(--display); font-weight: 800;
+  font-size: 1.85rem; letter-spacing: -.035em; line-height: .98;
+  margin-top: .45rem;
 }
-.card-paper__line { font-size: 14px; line-height: 1.5; margin-top: .6rem; max-width: 30ch; }
-.card-paper__rule { height: 1px; background: var(--line-paper); border: 0; margin: 1.4rem 0 .9rem; }
-.card-paper__foot {
-  font-family: var(--mono);
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #6B665C;
+.rev__big {
+  font-family: var(--display); font-weight: 800;
+  font-size: 3.5rem; line-height: .84; letter-spacing: -.05em;
 }
-.card-paper--tilt { transform: rotate(2deg); }
-@media (max-width: 768px) { .card-paper--tilt { transform: none; } }
+.rev__n { font-size: 13px; line-height: 1.4; margin-top: .5rem; max-width: 25ch; }
+.rev__foot {
+  margin-top: auto; padding-top: 14px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 10px;
+}
+.rev__mark { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; opacity: .62; }
+
+/* Formes plates empruntees au monde du dossier : barres de censure, pastilles,
+   stries, arc. Une seule par affiche. */
+.rev__bars { margin-top: 20px; display: grid; gap: 7px; }
+.rev__bar { height: 13px; background: var(--ink); border-radius: 1px; }
+.rev__bar:nth-child(2) { width: 72%; }
+.rev__bar:nth-child(3) { width: 45%; }
+.rev__discs { display: flex; gap: 9px; margin-top: 20px; }
+.rev__disc { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); }
+.rev__disc:nth-child(2) { opacity: .55; }
+.rev__disc:nth-child(3) { opacity: .28; }
+.rev__stripes {
+  margin-top: 20px; height: 70px; border-radius: 1px;
+  background: repeating-linear-gradient(-45deg, var(--ink) 0 9px, transparent 9px 20px);
+}
+.rev__arc {
+  margin-top: 20px; width: 92px; height: 46px;
+  background: var(--ink); border-radius: 92px 92px 0 0;
+}
 
 /* ============================================================
    2. DOSSIER  /  carte épinglée qui se redresse au scroll
@@ -376,127 +363,39 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
    des `transform`, est le compromis fiable. */
 
 /* ============================================================
-   3. LA SALLE  /  couloir d'exposition parcouru au scroll
+   3. RÉVÉLATIONS  /  panoramique horizontal piloté au scroll
    ============================================================ */
-.hall { padding-block: 0; }
-.hall__head { padding-block: clamp(5rem, 12vh, 8rem) 2.5rem; }
+.reveals { padding-block: 0; }
+.reveals__head { padding-block: clamp(5rem, 12vh, 8rem) 2.5rem; }
+.reveals__stage { position: relative; }
+.reveals__viewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1.5rem;
+}
+.reveals__track {
+  display: flex;
+  gap: 20px;
+  padding-inline: var(--gut);
+  width: max-content;
+}
 
-/* Etat par defaut : une liste verticale, lisible sans JS et sans 3D.
-   Le couloir n'est active qu'en ajoutant .hall--3d depuis le script. */
-.hall__scene { position: relative; }
-.hall__cam { display: grid; gap: clamp(1.5rem, 4vw, 2.5rem); padding-inline: var(--gut); }
 
-.piece {
-  position: relative;
-  max-width: 460px;
-  border-top: 4px solid var(--tab);
-  padding-top: 22px;
-}
-.piece__k {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--tab);
-}
-.piece__t {
-  font-family: var(--display); font-weight: 800;
-  font-size: clamp(1.5rem, 3.4vw, 2.2rem); letter-spacing: -.03em; line-height: 1.08;
-  margin-top: .5rem;
-}
-.piece__s { color: var(--muted); font-size: 15px; margin-top: .5rem; }
-.piece__b { margin-top: 1.4rem; }
-.piece__big {
-  font-family: var(--display); font-weight: 800; color: var(--tab);
-  font-size: clamp(3.4rem, 9vw, 5.5rem); line-height: .88; letter-spacing: -.045em;
-}
-.piece__note { color: var(--muted); font-size: 14px; line-height: 1.5; margin-top: .5rem; max-width: 34ch; }
-.piece__quote { font-size: 15px; line-height: 1.55; max-width: 36ch; }
-
-/* Une piece sur trois est imprimee sur papier. */
-.piece--paper {
-  background: var(--paper); color: var(--ink);
-  padding: 22px 24px 24px;
-  box-shadow: var(--shadow-paper);
-}
-.piece--paper .piece__s, .piece--paper .piece__note { color: #6B665C; }
-.piece--paper .piece__big { color: color-mix(in oklab, var(--tab) 78%, var(--ink)); }
-
-/* Le mur d'etiquettes de la piece 02, et la liste barree de la piece 03 :
-   chaque piece a sa propre forme, aucune n'est une carte de plus. */
-.piece__tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.2rem; }
-.piece__tag {
-  font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
-  border: 1px solid color-mix(in oklab, var(--tab) 40%, var(--line));
-  color: color-mix(in oklab, var(--tab) 70%, var(--text));
-  padding: 5px 9px;
-}
-.piece__strike { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; gap: 7px; }
-.piece__strike li {
-  font-family: var(--mono); font-size: 13px; color: var(--muted);
-  text-decoration: line-through; text-decoration-color: var(--tab);
-  text-decoration-thickness: 2px;
-}
-.piece__slips { display: grid; gap: 10px; margin-top: 1.2rem; }
-.piece__slip {
-  border-left: 3px solid var(--tab); padding: 6px 0 6px 12px;
-  font-family: var(--mono); font-size: 12.5px; color: var(--muted);
-}
-.piece__slip b { display: block; font-weight: 500; color: var(--text); font-size: 13.5px; }
-.piece--paper .piece__slip b { color: var(--ink); }
-
-/* ---- Le couloir, active par le script ---- */
-@media (prefers-reduced-motion: no-preference) {
-  .hall--3d .hall__scene { height: 780vh; }
-  .hall--3d .hall__frame {
+/* A partir de 700px, la bande se fige et defile horizontalement au rythme du
+   scroll vertical. La translation est appliquee en JS, comme pour la carte.
+   Sous 700px, on retombe sur un defilement horizontal au doigt : les regles
+   par defaut plus haut suffisent. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 700px) {
+  .reveals__stage { height: 300vh; }
+  .reveals__viewport {
     position: sticky; top: 64px;
     height: calc(100dvh - 64px);
+    display: flex; align-items: center;
     overflow: hidden;
-    perspective: 1500px;
-    perspective-origin: 50% 44%;
-  }
-  .hall--3d .hall__cam {
-    position: absolute; inset: 0;
-    display: block; padding: 0;
-    transform-style: preserve-3d;
-    transform: translateZ(var(--cam, 0px));
-    will-change: transform;
-  }
-  /* Sol et plafond : deux plans inclines qui donnent la profondeur. */
-  .hall--3d .hall__plane {
-    position: absolute; left: 50%; width: 300vw; height: 420vh;
-    background:
-      repeating-linear-gradient(to right, color-mix(in oklab, var(--line) 90%, transparent) 0 1px, transparent 1px 90px),
-      repeating-linear-gradient(to bottom, color-mix(in oklab, var(--line) 70%, transparent) 0 1px, transparent 1px 160px);
-    transform-origin: 50% 0;
-    pointer-events: none;
-  }
-  .hall--3d .hall__plane--sol {
-    top: 78%; transform: translateX(-50%) rotateX(84deg);
-  }
-  .hall--3d .hall__plane--toit {
-    top: 8%; transform: translateX(-50%) rotateX(-84deg) translateZ(0);
-  }
-  /* Brume : les pieces lointaines se fondent dans le noir. */
-  .hall--3d .hall__frame::after {
-    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
-    background:
-      radial-gradient(135% 92% at 50% 44%, transparent 48%, var(--bg) 98%),
-      linear-gradient(to bottom, var(--bg) 0%, transparent 12%, transparent 88%, var(--bg) 100%);
-  }
-  .hall--3d .piece {
-    position: absolute; top: 50%; left: 50%;
-    width: min(420px, 74vw);
-    margin: 0;
-    /* Chaque piece est posee un cran plus loin dans le couloir. */
-    --z: calc(var(--i) * -1000px);
-    transform:
-      translate(-50%, -50%)
-      translateX(var(--x))
-      translateZ(var(--z))
-      rotateY(var(--ry));
-    backface-visibility: hidden;
-  }
-  /* Sous 760px le couloir se resserre : les pieces passent au centre. */
-  @media (max-width: 760px) {
-    .hall--3d .piece { width: min(360px, 84vw); }
+    scroll-snap-type: none;
+    padding-bottom: 0;
   }
 }
 
@@ -584,14 +483,18 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
 /* ============================================================
    7. APPEL FINAL
    ============================================================ */
+/* Le seul aplat pleine largeur du site. Une bascule, volontaire, a la fin.
+   C'est ce qui donne son impact a la derniere phrase. */
 .final {
-  border-top: 1px solid var(--line);
-  min-height: 78vh;
+  background: var(--signal);
+  color: var(--ink);
+  min-height: 74vh;
   display: grid;
   place-items: center;
   text-align: center;
 }
-.final .btn { margin-top: 2.4rem; }
+.final .t-xl { color: var(--ink); }
+.final .btn { margin-top: 2.6rem; }
 
 /* ============================================================
    8. PIED DE PAGE
@@ -626,7 +529,7 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
-  .stamp, .card-paper--tilt, .dossier__card { transform: none; }
+  .stamp, .rev--tilt, .dossier__card { transform: none; }
   * { animation: none !important; }
 }
 </style>
@@ -638,7 +541,7 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
     <a class="logo" href="#" aria-label="Exposed, accueil">exp<span class="logo__o" aria-hidden="true"></span>sed.</a>
     <div class="nav__links">
       <a href="#" aria-current="page">Accueil</a>
-      <a href="#salle">Wrapped</a>
+      <a href="#chemin">Wrapped</a>
       <a href="#faq">FAQ</a>
     </div>
     <a class="nav__support" href="#soutenir">Soutenir</a>
@@ -657,25 +560,25 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
         Dépose le ZIP que t'envoie Instagram. Tout est lu dans ton navigateur. Rien ne part.
       </p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="#chemin">Ouvrir mon dossier</a>
-        <a class="btn btn--quiet" href="#confidentialite">Où vont mes données <span aria-hidden="true">&rsaquo;</span></a>
+        <a class="btn btn--signal" href="#chemin">Ouvrir mon dossier <span aria-hidden="true">&rsaquo;</span></a>
       </div>
     </div>
 
     <!-- Vrai composant produit (carte de partage), pas un faux écran. -->
     <div>
-      <div class="card-paper card-paper--tilt" style="--tab:var(--t6)">
-        <span class="tab" aria-hidden="true"></span>
-        <p class="card-paper__meta">Révélation 06 · Records</p>
-        <!-- mock : chiffre d'exemple -->
-        <p class="card-paper__stat num">2 847</p>
-        <p class="card-paper__line">messages échangés avec la personne que tu ne mets jamais en close friends.</p>
-        <hr class="card-paper__rule">
-        <div class="card-paper__foot">
-          <span>exposed.</span>
-          <span>exemple</span>
+      <article class="rev rev--tilt" style="--tab:var(--t6)">
+        <p class="rev__k">Pièce 06 · Records</p>
+        <h2 class="rev__t">Ta journée la plus intense</h2>
+        <div class="rev__arc"></div>
+        <div class="rev__foot">
+          <div>
+            <!-- mock : chiffre d'exemple -->
+            <p class="rev__big num">2 847</p>
+            <p class="rev__n">messages échangés avec la personne que tu ne mets jamais en close friends.</p>
+          </div>
         </div>
-      </div>
+        <p class="rev__mark">exposed. / exemple</p>
+      </article>
     </div>
   </div>
 </header>
@@ -706,84 +609,106 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
 
     <aside class="dossier__aside" aria-hidden="true">
       <div class="dossier__card">
-        <div class="card-paper" style="--tab:var(--t1)">
-          <span class="tab" aria-hidden="true"></span>
-          <p class="card-paper__meta">Révélation 01 · Ton cercle réel</p>
-          <p class="card-paper__stat num">41</p>
-          <p class="card-paper__line">jours de silence avec la personne à qui tu écrivais tous les jours en janvier.</p>
-          <hr class="card-paper__rule">
-          <div class="card-paper__foot">
-            <span>exposed.</span>
-            <span>exemple</span>
+        <article class="rev" style="--tab:var(--t3)">
+          <p class="rev__k">Pièce 01 · Ton cercle réel</p>
+          <h2 class="rev__t">Le plus long silence</h2>
+          <div class="rev__bars"><span class="rev__bar"></span><span class="rev__bar"></span></div>
+          <div class="rev__foot">
+            <div>
+              <p class="rev__big num">41</p>
+              <p class="rev__n">jours sans se parler, avec quelqu'un à qui tu écrivais tous les jours en janvier.</p>
+            </div>
           </div>
-        </div>
+          <p class="rev__mark">exposed. / exemple</p>
+        </article>
       </div>
     </aside>
   </div>
 </section>
 
-<!-- ========================= LA SALLE =========================
-     Un couloir d'exposition : chaque piece du dossier est accrochee le
-     long du trajet. Sans JavaScript, c'est une liste verticale lisible.
+<!-- ======================= RÉVÉLATIONS =======================
+     Unique micro-libellé en capitales de toute la page.
      ============================================================ -->
-<section class="hall" id="salle" aria-labelledby="hall-h">
-  <div class="wrap hall__head">
+<section class="reveals" aria-labelledby="rev-h">
+  <div class="wrap reveals__head">
     <p style="font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Ce que tu vas lire</p>
-    <h2 id="hall-h" class="t-lg reveal">Les huit pièces du dossier.</h2>
+    <h2 id="rev-h" class="t-lg reveal">Les huit pages du dossier.</h2>
   </div>
 
-  <div class="hall__scene">
-    <div class="hall__frame">
-      <div class="hall__cam">
-        <div class="hall__plane hall__plane--sol" aria-hidden="true"></div>
-        <div class="hall__plane hall__plane--toit" aria-hidden="true"></div>
-        <article class="piece piece--paper" style="--tab:var(--t1); --x:-32%; --ry:9deg; --i:0">
-          <p class="piece__k">Pièce 01</p>
-          <h3 class="piece__t">Ton cercle réel</h3>
-          <p class="piece__s">Les gens qui comptent vraiment.</p>
-          <div class="piece__b"><p class="piece__quote">Ton top 10, classé sur le nombre de messages, qui commence, et la fréquence. Ceux qui n'y sont pas en close friends sont signalés.</p></div>
+  <div class="reveals__stage">
+    <div class="reveals__viewport">
+      <div class="reveals__track">
+        <article class="rev" style="--tab:var(--t1)">
+          <p class="rev__k">Pièce 01</p>
+          <h3 class="rev__t">Ton cercle réel</h3>
+          <div class="rev__discs"><span class="rev__disc"></span><span class="rev__disc"></span><span class="rev__disc"></span></div>
+          <div class="rev__foot">
+            <div><p class="rev__big num">10</p><p class="rev__n">personnes classées sur le volume, qui commence, et la fréquence.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
-        <article class="piece" style="--tab:var(--t2); --x:32%; --ry:-9deg; --i:1">
-          <p class="piece__k">Pièce 02</p>
-          <h3 class="piece__t">Tes groupes</h3>
-          <p class="piece__s">Les cercles de ta vie.</p>
-          <div class="piece__b"><p class="piece__big num">3</p><p class="piece__note">groupes où tu n'as pas répondu depuis plus de trente jours.</p><div class="piece__tags"><span class="piece__tag">Moteur</span><span class="piece__tag">Lurker</span><span class="piece__tag">Coordinateur</span><span class="piece__tag">Régulier</span></div></div>
+        <article class="rev" style="--tab:var(--t2)">
+          <p class="rev__k">Pièce 02</p>
+          <h3 class="rev__t">Tes groupes</h3>
+          <div class="rev__bars"><span class="rev__bar"></span><span class="rev__bar"></span><span class="rev__bar"></span></div>
+          <div class="rev__foot">
+            <div><p class="rev__big num">3</p><p class="rev__n">groupes où tu n'as pas répondu depuis plus de trente jours.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
-        <article class="piece" style="--tab:var(--t3); --x:-32%; --ry:9deg; --i:2">
-          <p class="piece__k">Pièce 03</p>
-          <h3 class="piece__t">Qui ne te suit pas en retour</h3>
-          <p class="piece__s">Tu les suis. Eux, non.</p>
-          <div class="piece__b"><ul class="piece__strike"><li>@le.collegue.davant</li><li>@marion_p</li><li>@studio.nuit</li><li>@thomas.b</li></ul><p class="piece__note">Séparés en deux. Ne pas être suivi par un créateur n'a rien à voir avec un ancien collègue.</p></div>
+        <article class="rev" style="--tab:var(--t3)">
+          <p class="rev__k">Pièce 03</p>
+          <h3 class="rev__t">Qui ne te suit pas en retour</h3>
+          <div class="rev__stripes"></div>
+          <div class="rev__foot">
+            <div><p class="rev__n">Ceux à qui tu parles vraiment, séparés des comptes lointains.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
-        <article class="piece piece--paper" style="--tab:var(--t4); --x:32%; --ry:-9deg; --i:3">
-          <p class="piece__k">Pièce 04</p>
-          <h3 class="piece__t">Ce que tu dis vraiment</h3>
-          <p class="piece__s">Ton vocabulaire, sans filtre.</p>
-          <div class="piece__b"><p class="piece__big num">68 %</p><p class="piece__note">de tes mots sont dans le lexique positif. Avec ton top 20 et tes tics de langage.</p></div>
+        <article class="rev" style="--tab:var(--t4)">
+          <p class="rev__k">Pièce 04</p>
+          <h3 class="rev__t">Ce que tu dis vraiment</h3>
+          <div class="rev__bars"><span class="rev__bar"></span><span class="rev__bar"></span><span class="rev__bar"></span></div>
+          <div class="rev__foot">
+            <div><p class="rev__big num">68 %</p><p class="rev__n">de tes mots sont dans le lexique positif.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
-        <article class="piece" style="--tab:var(--t5); --x:-32%; --ry:9deg; --i:4">
-          <p class="piece__k">Pièce 05</p>
-          <h3 class="piece__t">Tes inside jokes</h3>
-          <p class="piece__s">Ce que vous êtes les seuls à comprendre.</p>
-          <div class="piece__b"><div class="piece__slips"><div class="piece__slip"><b>« grumo »</b>41 fois, depuis le 14 mars</div><div class="piece__slip"><b>« la légende »</b>17 fois, depuis le 2 juin</div></div><p class="piece__note">Six filtres éliminent les tics de langage. Il ne reste que les mots qui n'existent que dans cette conversation.</p></div>
+        <article class="rev" style="--tab:var(--t5)">
+          <p class="rev__k">Pièce 05</p>
+          <h3 class="rev__t">Tes inside jokes</h3>
+          <div class="rev__discs"><span class="rev__disc"></span><span class="rev__disc"></span></div>
+          <div class="rev__foot">
+            <div><p class="rev__big">« grumo »</p><p class="rev__n">41 fois, et seulement dans cette conversation.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
-        <article class="piece" style="--tab:var(--t6); --x:32%; --ry:-9deg; --i:5">
-          <p class="piece__k">Pièce 06</p>
-          <h3 class="piece__t">Tes cinq records</h3>
-          <p class="piece__s">Tes moments extrêmes.</p>
-          <div class="piece__b"><p class="piece__big num">4 h 12</p><p class="piece__note">ton message le plus tardif. Avec ta journée la plus intense et ton plus long silence.</p></div>
+        <article class="rev" style="--tab:var(--t6)">
+          <p class="rev__k">Pièce 06</p>
+          <h3 class="rev__t">Tes cinq records</h3>
+          <div class="rev__arc"></div>
+          <div class="rev__foot">
+            <div><p class="rev__big num">4 h 12</p><p class="rev__n">ton message le plus tardif de l'année.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
-        <article class="piece piece--paper" style="--tab:var(--t7); --x:-32%; --ry:9deg; --i:6">
-          <p class="piece__k">Pièce 07</p>
-          <h3 class="piece__t">Premier et dernier</h3>
-          <p class="piece__s">Le début et la fin.</p>
-          <div class="piece__b"><div class="piece__slips"><div class="piece__slip"><b>Premier</b>12 janvier, 8 h 04, à @sofia</div><div class="piece__slip"><b>Dernier</b>29 décembre, 23 h 51, à @marion_p</div></div></div>
+        <article class="rev" style="--tab:var(--t7)">
+          <p class="rev__k">Pièce 07</p>
+          <h3 class="rev__t">Premier et dernier</h3>
+          <div class="rev__bars"><span class="rev__bar"></span><span class="rev__bar"></span></div>
+          <div class="rev__foot">
+            <div><p class="rev__big num">12 jan.</p><p class="rev__n">8 h 04, à @sofia. Et le dernier, le 29 décembre.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
-        <article class="piece" style="--tab:var(--t8); --x:32%; --ry:-9deg; --i:7">
-          <p class="piece__k">Pièce 08</p>
-          <h3 class="piece__t">Ton profil relationnel</h3>
-          <p class="piece__s">Qui tu es dans tes relations.</p>
-          <div class="piece__b"><p class="piece__quote">Quatre axes, un type en une phrase. C'est la conclusion du dossier.</p><div class="piece__tags"><span class="piece__tag">Initiateur</span><span class="piece__tag">Concentré</span><span class="piece__tag">Rapide</span><span class="piece__tag">Vocal</span></div></div>
+        <article class="rev" style="--tab:var(--t8)">
+          <p class="rev__k">Pièce 08</p>
+          <h3 class="rev__t">Ton profil relationnel</h3>
+          <div class="rev__stripes"></div>
+          <div class="rev__foot">
+            <div><p class="rev__big">Le Pilier</p><p class="rev__n">Quatre axes, un type. La conclusion du dossier.</p></div>
+          </div>
+          <p class="rev__mark">exposed. / exemple</p>
         </article>
       </div>
     </div>
@@ -797,19 +722,19 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
       Tes messages ne quittent <em>jamais</em> ton téléphone.
     </p>
     <p class="lede reveal" style="--d:80ms;margin-top:1.8rem">
-      Ton fichier est ouvert directement dans ton navigateur, comme une photo que tu
-      regardes sans la publier. Rien n'est envoyé, rien n'est gardé. Tu fermes l'onglet et
-      tout a disparu. On ne peut pas lire tes conversations, même en le voulant.
+      Ton fichier est ouvert directement par ton navigateur, comme une photo que tu regardes
+      sans la publier. Rien n'est envoyé, rien n'est gardé. Tu fermes l'onglet et tout a
+      disparu.
     </p>
 
     <div class="privacy__cols">
       <div class="reveal">
         <p class="privacy__k num">0</p>
-        <p class="privacy__v">compte à créer. Pas de mot de passe, pas d'adresse e-mail.</p>
+        <p class="privacy__v">message envoyé sur internet. Tout se passe sur ta machine.</p>
       </div>
       <div class="reveal" style="--d:90ms">
         <p class="privacy__k num">0</p>
-        <p class="privacy__v">message envoyé sur internet. Tout se passe sur ta machine.</p>
+        <p class="privacy__v">compte à créer. Pas de mot de passe, pas d'adresse e-mail.</p>
       </div>
       <div class="reveal" style="--d:180ms">
         <p class="privacy__k num">1</p>
@@ -852,7 +777,7 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
             oublient de revenir.
           </p>
           <p class="path__remind">
-            <button class="btn btn--quiet" id="ics">Me le rappeler demain <span aria-hidden="true">&rsaquo;</span></button>
+            <button class="btn btn--paper" id="ics">Me le rappeler demain <span aria-hidden="true">&rsaquo;</span></button>
           </p>
         </div>
       </div>
@@ -897,7 +822,7 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
 <section class="final">
   <div class="wrap">
     <h2 class="t-xl reveal">Tout est déjà<br>dans tes messages.</h2>
-    <a class="btn btn--primary reveal" style="--d:100ms" href="#chemin">Ouvrir mon dossier</a>
+    <a class="btn btn--paper reveal" style="--d:100ms" href="#chemin">Ouvrir mon dossier <span aria-hidden="true">&rsaquo;</span></a>
   </div>
 </section>
 
@@ -997,10 +922,9 @@ const progression = (el) => {
 const scrubs = [];
 const carte = document.querySelector('.dossier__card');
 const scene = document.querySelector('.dossier__stage');
-const salle = document.querySelector('.hall');
-const salleScene = document.querySelector('.hall__scene');
-const camera = document.querySelector('.hall__cam');
-const PAS = 1000;  /* distance entre deux pieces, en px de profondeur */
+const rail = document.querySelector('.reveals__track');
+const railScene = document.querySelector('.reveals__stage');
+const railVue = document.querySelector('.reveals__viewport');
 
 function installerScrub() {
   if (reduce || scrubs.length) return;
@@ -1014,25 +938,13 @@ function installerScrub() {
     });
   }
 
-  /* Le couloir n'existe que si le script tourne : sans lui, la salle reste
-     une liste verticale parfaitement lisible. On l'active donc ici, pas en CSS. */
-  if (salle && salleScene && camera) {
-    salle.classList.add('hall--3d');
-    const pieces = Array.from(salle.querySelectorAll('.piece'));
-    /* Le trajet s'arrete quand la derniere piece arrive a distance de lecture.
-       Aller au-dela ferait passer les pieces derriere le plan de la camera :
-       elles gonflent jusqu'a remplir l'ecran avant de disparaitre. */
-    const trajet = (pieces.length - 1) * PAS;
+  if (rail && railScene && railVue
+      && getComputedStyle(railVue).position === 'sticky') {
+    rail.style.animation = 'none';
     scrubs.push(() => {
-      const p = progression(salleScene);
-      const cam = p * trajet;
-      camera.style.setProperty('--cam', `${cam.toFixed(0)}px`);
-      /* Une piece depassee s'efface, sinon elle grossit dans le dos du visiteur. */
-      for (let i = 0; i < pieces.length; i++) {
-        const z = cam - i * PAS;
-        const o = z > 0 ? Math.max(0, 1 - z / 420) : 1;
-        pieces[i].style.opacity = o.toFixed(2);
-      }
+      const p = progression(railScene);
+      const course = Math.max(0, rail.scrollWidth - window.innerWidth);
+      rail.style.transform = `translateX(${(-course * p).toFixed(1)}px)`;
     });
   }
 

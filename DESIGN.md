@@ -34,31 +34,49 @@ page à l'autre. Aucune section ne s'inverse.
 Le papier n'est jamais un fond de page : une carte claire employée trois fois frappe plus
 fort qu'une page entière.
 
-### Les onglets d'index
+### Les affiches
 
-Un dossier d'archive a des onglets de couleur. Chaque révélation porte le sien, du sommaire
-jusqu'à sa carte de partage : un filet de 4 px en haut de la pièce, le chiffre clé dans la
-même teinte, et un fond teinté à 8 %. Sur papier, la teinte est foncée à 78 % vers l'encre
-pour rester lisible.
+Chaque révélation est une **affiche en aplat**, pas une carte sombre. Fond de couleur
+pleine, encre noire par-dessus, titre énorme, une forme plate, et le wordmark en bas.
+C'est la seule forme de carte du site : il n'y a plus de fiche papier, plus de carte
+teintée à 8 %, plus de filet de couleur sur fond noir.
+
+Les huit teintes sont choisies pour passer **4.5:1 avec l'encre `#141414`**, donc le
+texte d'une affiche est toujours noir. Aucune exception, aucun texte clair sur couleur.
 
 | Jeton | Valeur | Révélation |
 |---|---|---|
 | `--t1` | `#E8442A` | Ton cercle réel |
 | `--t2` | `#F0803C` | Tes groupes |
-| `--t3` | `#4477D4` | Qui ne te suit pas en retour |
+| `--t3` | `#5C8CEA` | Qui ne te suit pas en retour |
 | `--t4` | `#5FA85C` | Ce que tu dis vraiment |
-| `--t5` | `#A45FB0` | Tes inside jokes |
+| `--t5` | `#BE7ACD` | Tes inside jokes |
 | `--t6` | `#E9BE3C` | Tes cinq records |
 | `--t7` | `#2F9AA8` | Premier et dernier |
 | `--t8` | `#C4703A` | Ton profil relationnel |
-| `--t9` `--t10` | `#D9538C` `#8FA33C` | Réservés à l'index des types |
+| `--t9` `--t10` | `#E86FA0` `#A8BE49` | Index des types |
 
-Deux couleurs de service complètent le jeu : `--orange #F0803C` pour l'action de soutien,
-et `--vert #5FA85C` pour les chiffres de confidentialité, où le vert dit « sain ».
+Deux couleurs de service : `--orange #F0803C` pour l'action de soutien, `--vert #5FA85C`
+pour les chiffres de confidentialité, où le vert dit « sain ».
 
-C'est un arc-en-ciel, et c'est voulu : un système d'onglets se lit comme un jeu, pas comme
-une accumulation. La retenue vient de l'emploi, jamais du nombre de teintes. La teinte ne
-touche que le filet, le chiffre et un fond à 8 %. Tout le reste de la carte reste neutre.
+### Le vocabulaire de formes
+
+Des formes **plates et géométriques**, en encre noire sur l'aplat, empruntées au monde du
+dossier : barres de censure, pastilles, stries diagonales, arc. Une seule par affiche,
+jamais deux. Elles sont faites en CSS, jamais en SVG dessiné à la main.
+
+### Un aplat pleine largeur, un seul
+
+La dernière section bascule en rouge plein sur toute la largeur. C'est la seule bascule
+de fond du site, et c'est ce qui lui donne son impact. Ailleurs, le fond ne change jamais.
+
+### Les boutons
+
+Un **bloc plein** en display gras, jamais une boîte à bord fin. Deux variantes seulement :
+`--signal` sur fond sombre, `--paper` sur fond de couleur. Texte à l'encre dans les deux cas.
+
+**Un seul bouton par écran.** Deux rectangles jumeaux côte à côte sont la signature la
+plus reconnaissable d'une page générée : le hero n'en porte qu'un.
 
 ## Typographie
 
