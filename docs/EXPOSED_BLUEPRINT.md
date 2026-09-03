@@ -976,3 +976,49 @@ Interdits: dégradés, glow, pills, emojis dans l'UI, Inter, italique serif, car
 Mobile: sous 768px aucune rotation ni chevauchement, une colonne. Sections py-24 minimum. min-h-100dvh, jamais h-screen (saut de viewport iOS).
 Signature obligatoire par écran: tampon rouge rotaté, ou le "o" rouge, ou la carte papier.
 ```
+
+## Addendum du 3 septembre 2026, contenu des chapitres
+
+Decisions prises pendant la mise en place de l'accueil, a reprendre quand on
+codera l'analyse.
+
+### Chapitre 01, ton cercle reel
+
+On montre les dix personnes a qui tu parles le plus. **Les photos de profil ne
+sont pas dans l'export Instagram** : l'archive contient tes medias a toi, pas
+les avatars de tes contacts, et aller les chercher voudrait dire appeler
+Instagram depuis la page, donc envoyer les identifiants de tes contacts a un
+tiers. C'est exclu. On affiche le pseudo, et au besoin une pastille aux
+initiales, coloree par le jeton de la revelation.
+
+### Chapitre 02, tes groupes
+
+Le comptage seul ne dit rien. Ce qu'on veut sortir d'une conversation de
+groupe :
+
+- **La nature du groupe**, devinee par le vocabulaire et le rythme : classe,
+  soiree, vacances, famille.
+- **Le climat** : proportion de rires (mdr, ptdr, emoji de rire), de disputes
+  (majuscules, ponctuation multiple, silences longs apres un pic).
+- **Ton role dedans** : bavard, discret, celui qui lance, celui qui repond
+  toujours en dernier, celui qui ne repond jamais.
+
+Tout se calcule sur des comptages et des seuils, comme le reste. A calibrer
+avec le mode `?diag=1` quand un vrai export sera disponible.
+
+### Chapitre 04, ce que tu dis vraiment
+
+Pas de pourcentage. Un pourcentage de lexique positif ne veut rien dire pour
+personne. On sort **des mots** : le mot qui te distingue, celui que tu ecris
+plus qu'un mot courant, et la formule que tu es seul a employer.
+
+### Chapitre 06, tes cinq records
+
+Les cinq sont nommes sur l'affiche : le plus tardif, le plus long, le plus
+rapide, le plus bavard, et le plus attendu.
+
+### Chapitre 07, premier et dernier
+
+Deux valeurs de meme poids, jamais un chiffre geant et une phrase en petit :
+l'oeil devait lire deux informations dans deux typographies differentes. Le
+composant `Affiche` a une variante `paire` pour ca.
