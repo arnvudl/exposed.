@@ -756,6 +756,13 @@ Les questions à couvrir : *Est-ce que vous voyez mes messages ? · Où vont mes
 
 Cette dernière question, réponds-y franchement. Un produit qui explique son modèle économique inspire davantage confiance qu'un produit qui prétend n'en avoir aucun.
 
+**La preuve technique vit ici, pas sur l'accueil.** « Ouvre l'onglet Réseau de ton navigateur » ne parle qu'aux développeurs, et sur la page d'accueil ça inquiète plus que ça ne rassure. L'accueil dit simplement que les messages ne quittent pas la machine. La FAQ, elle, peut détailler, en commençant par l'image avant la manipulation :
+
+> **Comment je peux en être sûr ?**
+> Ton fichier est ouvert directement par ton navigateur, comme une photo que tu regardes sans la publier. Il n'y a pas de site à qui l'envoyer : Exposed n'a aucun serveur qui stocke quoi que ce soit.
+>
+> Si tu veux le vérifier toi-même : appuie sur F12 pendant l'analyse et ouvre l'onglet « Réseau ». Il liste tout ce que la page envoie ou reçoit. Pendant que ton rapport se calcule, il reste vide.
+
 ### 6.6 Pages légales
 
 - **`/confidentialite`** — écris-la comme un argument, pas comme un contrat. Une première partie en français simple : *ce que nous ne collectons pas*. Une seconde partie technique qui explique le traitement local, pour les sceptiques. Une troisième, honnête, sur ce que tu traites réellement : dons, consentement publicitaire, mesure d'audience éventuelle.
