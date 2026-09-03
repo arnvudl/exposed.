@@ -25,3 +25,10 @@ Thumbs.db
 # Données personnelles — ne JAMAIS committer un export Instagram
 *.zip
 fixtures/real/
+
+# Next
+/.next/
+/out/
+next-env.d.ts
+/node_modules/
+tsconfig.tsbuildinfo

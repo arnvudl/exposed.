@@ -1,0 +1,201 @@
+/* ============================================================
+   1. HERO  /  split asymetrique, jamais centre
+   ============================================================ */
+.hero {
+  min-height: calc(100dvh - var(--nav));
+  display: flex;
+  align-items: center;
+  padding-top: clamp(2rem, 6vh, 6rem);
+  padding-bottom: clamp(3rem, 8vh, 7rem);
+}
+.heroGrid {
+  width: 100%;
+  max-width: var(--col);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+.heroSub { margin-top: 1.5rem; }
+.heroCta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 2.5rem; }
+.heroAffiche { max-width: 360px; margin-inline: auto; width: 100%; }
+
+@media (max-width: 900px) {
+  .heroGrid { grid-template-columns: 1fr; gap: 3rem; }
+  .hero { min-height: 0; }
+  .heroAffiche { max-width: 320px; margin-inline: 0; }
+}
+
+/* ============================================================
+   2. DOSSIER  /  affiche epinglee qui se redresse au scroll
+   ============================================================ */
+.dossier { padding-block: 0; }
+.dossierStage {
+  max-width: var(--col);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+  display: grid;
+  grid-template-columns: 1fr .78fr;
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: start;
+}
+.dossierAside { position: sticky; top: calc(var(--nav) + 14vh); }
+.dossierCarte { transform: rotate(-3deg) scale(.94); transform-origin: 50% 60%; }
+.dossierStep { min-height: 82vh; display: flex; align-items: center; }
+.dossierStep p { max-width: 26ch; }
+
+/* Sous 700px : une colonne, affiche au-dessus, etapes a hauteur naturelle.
+   Attention, les etapes hautes sont ce qui donne sa longueur de scrub a la
+   section : les reduire ici et garder l'epinglage ailleurs supprime toute
+   plage d'animation sans prevenir. */
+@media (max-width: 699px) {
+  .dossierStage { grid-template-columns: 1fr; gap: 2rem; }
+  .dossierAside {
+    position: static;
+    order: -1;
+    padding-top: clamp(4rem, 10vh, 7rem);
+    max-width: 340px;
+  }
+  .dossierStep { min-height: 0; padding-block: 2.2rem; }
+}
+
+/* ============================================================
+   3. RÉVÉLATIONS  /  panoramique horizontal pilote au scroll
+   ============================================================ */
+.reveals { padding-block: 0; }
+.revealsHead { padding-block: clamp(5rem, 12vh, 8rem) 2.5rem; }
+.revealsStage { position: relative; }
+.revealsViewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1.5rem;
+}
+.revealsTrack {
+  display: flex;
+  gap: 20px;
+  padding-inline: var(--gut);
+  width: max-content;
+}
+.revealsAffiche {
+  scroll-snap-align: center;
+  width: clamp(292px, 84vw, 360px);
+}
+
+/* A partir de 700px, la bande se fige et defile horizontalement au rythme du
+   scroll vertical. La translation est appliquee en JS, comme l'affiche epinglee.
+   Sous 700px, on retombe sur un defilement au doigt. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 700px) {
+  .revealsStage { height: 300vh; }
+  .revealsViewport {
+    position: sticky;
+    top: var(--nav);
+    height: calc(100dvh - var(--nav));
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    scroll-snap-type: none;
+    padding-bottom: 0;
+  }
+}
+
+/* ============================================================
+   4. CONFIDENTIALITÉ  /  manifeste pleine largeur, sans carte
+   ============================================================ */
+.privacy { border-top: 1px solid var(--line); }
+.privacyClaim {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.9rem, 5.2vw, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: -.035em;
+  max-width: 24ch;
+}
+.privacyClaim em { font-style: normal; color: var(--signal); }
+.privacyCols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin-top: clamp(3rem, 7vh, 5rem);
+  border-top: 1px solid var(--line);
+  padding-top: 2.2rem;
+}
+.privacyK {
+  color: var(--vert);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+.privacyV { font-size: 14px; color: var(--muted); margin-top: .5rem; line-height: 1.45; }
+@media (max-width: 720px) { .privacyCols { grid-template-columns: 1fr; gap: 1.8rem; } }
+
+/* ============================================================
+   5. LE CHEMIN  /  pile verticale, filets rares
+   ============================================================ */
+.path { border-top: 1px solid var(--line); }
+.pathSteps { margin-top: clamp(2.5rem, 6vh, 4rem); }
+.pathStep {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding-block: 2rem;
+  border-top: 1px solid var(--line);
+}
+.pathStep:last-child { border-bottom: 1px solid var(--line); }
+.pathI { font-family: var(--mono); font-size: 13px; color: var(--signal); padding-top: .35rem; }
+.pathH { font-size: 1.4rem; letter-spacing: -.02em; }
+.pathD { font-size: 14px; color: var(--muted); margin-top: .5rem; max-width: 52ch; line-height: 1.6; }
+.pathD strong { color: var(--text); font-weight: 400; }
+.pathRemind { margin-top: 1.1rem; }
+.pathShot {
+  margin-top: 1.2rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--r);
+  padding: 1.1rem;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface);
+}
+@media (max-width: 640px) {
+  .pathStep { grid-template-columns: 1fr; gap: .5rem; }
+  .pathI { padding-top: 0; }
+}
+
+/* ============================================================
+   6. LES TYPES  /  index typographique
+   ============================================================ */
+.types { border-top: 1px solid var(--line); }
+.typesFlow {
+  list-style: none;
+  margin: clamp(2rem, 5vh, 3.5rem) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35em 1.1em;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 4.2vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -.03em;
+}
+/* Les types ne sont pas cliquables tant que la page qui les decrit n'existe
+   pas : un lien qui ne mene nulle part est pire qu'un mot pose. */
+.typesFlow li { color: color-mix(in oklab, var(--tab) 52%, var(--bg)); }
+.typeMoi { color: var(--tab); }
+
+/* ============================================================
+   7. APPEL FINAL  /  le seul aplat pleine largeur du site
+   ============================================================ */
+.final {
+  background: var(--signal);
+  color: var(--ink);
+  min-height: 74vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}

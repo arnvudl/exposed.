@@ -93,6 +93,11 @@ large et ne fait que grandir ensuite. Elle n'est jamais recomposée pour le bure
 5. **Le texte passe toujours au-dessus** et garde ses 4.5:1 avec l'aplat. Une forme sous
    du texte descend à `opacity: .25` maximum, ou s'écarte.
 
+**La bande libre est mesuree, pas devinee.** Sur une affiche montee, le titre
+s'arrete vers 27 % de la hauteur et le chiffre commence vers 60 %. La grande forme
+vit dans cette bande. Une forme qui la deborde passe sous du texte, et l'encre a
+55 % sous une encre pleine ne tient pas les 4.5:1.
+
 **Trois niveaux de profondeur, pas plus** : l'aplat, les formes, le texte.
 
 **Deuxième ton autorisé.** L'encre à `.55` et `.25` compte comme un ton. Une seconde

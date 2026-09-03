@@ -1,0 +1,50 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--nav);
+  display: flex;
+  align-items: center;
+  background: rgb(13 11 10 / .74);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  /* Fondu en bas plutot qu'un filet. */
+  mask-image: linear-gradient(to bottom, #000 72%, transparent);
+}
+.in {
+  width: 100%;
+  max-width: var(--col);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 4vw, 48px);
+}
+.links { display: flex; gap: clamp(14px, 2.4vw, 28px); margin-left: auto; }
+.links a {
+  font-size: 13px;
+  text-decoration: none;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 150ms ease;
+}
+.links a[aria-current] { color: var(--text); }
+@media (hover: hover) and (pointer: fine) { .links a:hover { color: var(--text); } }
+
+.support {
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--orange);
+  border: 1px solid color-mix(in oklab, var(--orange) 45%, transparent);
+  border-radius: var(--r);
+  padding: 6px 13px;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .support:hover {
+    border-color: var(--orange);
+    background: color-mix(in oklab, var(--orange) 12%, transparent);
+  }
+}
+@media (max-width: 560px) { .support { display: none; } }

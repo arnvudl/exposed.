@@ -1,0 +1,144 @@
+/* ============================================================
+   TOKENS  (source unique : DESIGN.md)
+   ============================================================ */
+:root {
+  --bg:         #0D0B0A;
+  --surface:    #171412;
+  --text:       #F4F1EC;
+  --muted:      #8E8781;
+  --line:       #2C2724;
+  --paper:      #F3EFE6;
+  --ink:        #141414;
+  --line-paper: #D9D3C6;
+  --signal:     #E8442A;
+  --orange:     #F0803C;
+  --vert:       #5FA85C;
+
+  /* Onglets d'index. Un dossier d'archive a des onglets de couleur : chaque
+     revelation porte le sien, du sommaire jusqu'a son affiche. Les huit
+     teintes passent 4.5:1 avec l'encre. */
+  --t1: #E8442A;  --t2: #F0803C;  --t3: #5C8CEA;  --t4: #5FA85C;  --t5: #BE7ACD;
+  --t6: #E9BE3C;  --t7: #2F9AA8;  --t8: #C4703A;  --t9: #E86FA0;  --t10: #A8BE49;
+
+  --ease-out:    cubic-bezier(.23, 1, .32, 1);
+  --ease-drawer: cubic-bezier(.32, .72, 0, 1);
+
+  --r: 3px;
+  --gut: clamp(20px, 5vw, 80px);
+  --col: 1200px;
+  --measure: 62ch;
+  --nav: 64px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  /* Prose en display 400. La mono est reservee aux metadonnees, tampons,
+     libelles et chiffres : cf. DESIGN.md. */
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  /* clip, pas hidden : `overflow-x: hidden` force overflow-y a `auto` et fait
+     du body un conteneur de defilement, ce qui casse sticky. */
+  overflow-x: clip;
+}
+
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 800; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+
+/* Tracking fonction de la taille, jamais une valeur unique. */
+.t-xl { font-size: clamp(2.6rem, 7vw, 5rem);   line-height: 1.02; letter-spacing: -.04em; }
+.t-lg { font-size: clamp(2rem, 4.6vw, 3.2rem); line-height: 1.06; letter-spacing: -.03em; }
+.t-md { font-size: clamp(1.5rem, 3vw, 2rem);   line-height: 1.15; letter-spacing: -.025em; }
+
+.wrap {
+  width: 100%;
+  max-width: var(--col);
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+
+.lede {
+  font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: var(--measure);
+}
+
+section { padding-block: clamp(6rem, 14vh, 9.5rem); }
+
+.num { font-variant-numeric: tabular-nums; }
+
+/* Micro-libelle en capitales espacees. Un maximum pour trois sections. */
+.kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Tampon : la signature de l'ecran. */
+.stamp {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--signal);
+  border: 1px solid var(--signal);
+  border-radius: var(--r);
+  padding: 5px 10px;
+  transform: rotate(-3deg);
+}
+@media (max-width: 768px) { .stamp { transform: none; } }
+
+/* Wordmark : le "o" est un disque plein rouge. */
+.logo {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -.02em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+}
+.logo__o {
+  width: .52em; height: .52em;
+  border-radius: 50%;
+  background: var(--signal);
+  display: inline-block;
+  transform: translateY(-.02em);
+}
+
+/* ============================================================
+   REVEAL  /  entree unique, jamais en sortie.
+   Reserve aux sections sous la ligne de flottaison : le hero est lisible
+   des le premier rendu, sans attendre l'observateur.
+   La page rendue sans JS est complete : le style d'attente n'est pose que
+   par la classe `js`, ajoutee au montage.
+   ============================================================ */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 520ms var(--ease-out), transform 520ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+.js .reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .stamp { transform: none; }
+  * { animation: none !important; }
+}

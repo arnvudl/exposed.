@@ -1,0 +1,25 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 19px 28px;
+  border: 0;
+  border-radius: var(--r);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -.015em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 140ms var(--ease-out), filter 160ms ease;
+}
+.btn span { font-size: 22px; line-height: 0; transition: transform 220ms var(--ease-out); }
+.signal { background: var(--signal); color: var(--ink); }
+.paper  { background: var(--paper);  color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { filter: brightness(1.07); }
+  .btn:hover span { transform: translateX(5px); }
+}
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
