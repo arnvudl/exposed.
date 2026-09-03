@@ -18,16 +18,43 @@
 .incline { transform: rotate(2deg); }
 @media (max-width: 768px) { .incline { transform: none; } }
 
-/* ---------- la couche des formes, sous le texte ---------- */
-.formes { position: absolute; inset: 0; }
-.forme  { position: absolute; }
+/* Trois rangees : la tete, la bande libre, le bas. La bande prend ce qui
+   reste, donc elle suit le texte au lieu d'etre posee a une hauteur devinee. */
+.corps {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  padding: 6cqw 6cqw 4.5cqw;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* ---------- les formes ---------- */
+.forme { position: relative; }
+
+.bande {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5%;
+  min-height: 0;
+  padding-block: 3cqw;
+}
+/* Bornee par la rangee : une forme trop grande retrecit au lieu de passer
+   sous un chiffre. Ce qui deborde deborde a l'horizontale, jamais en hauteur. */
+.grande { flex: none; max-height: 100%; overflow: hidden; }
+
+/* Accents en absolu, reserves aux deux bords a droite (cf. le commentaire du
+   composant). Ils sont sous le texte, dans une couche a part. */
+.coins { position: absolute; inset: 0; z-index: 0; }
+.coin { position: absolute; }
 
 .plein  { opacity: 1; }
 .moyen  { opacity: .55; }
 .faible { opacity: .25; }
 
 /* Barre de censure, en pile de trois, largeurs inegales. */
-.barres { display: grid; gap: 2.6cqw; }
+.barres { display: grid; gap: 2.6cqw; align-content: center; }
 .barres > i { display: block; height: 4.6cqw; background: var(--ink); border-radius: 1px; }
 .barres > i:nth-child(2) { width: 68%; }
 .barres > i:nth-child(3) { width: 41%; }
@@ -51,11 +78,14 @@
 /* Cadre de piece a conviction. */
 .cadre { aspect-ratio: 1.28; border: 1.2cqw solid var(--ink); border-radius: 2px; }
 
-/* Faisceau de photocopieuse : des triangles depuis le bord haut. */
+/* Faisceau de photocopieuse : des triangles depuis le bord gauche.
+   L'origine est dans le degrade, pas dans une rotation : un `transform` sur une
+   forme de la bande fait sortir sa boite de la rangee et la renvoie sous le
+   texte. Aucune forme de bande ne tourne. */
 .faisceau {
   aspect-ratio: 1;
   background: repeating-conic-gradient(
-    from -32deg at 50% 0%,
+    from 58deg at 0% 50%,
     var(--ink) 0 7deg, transparent 7deg 17deg
   );
 }
@@ -70,17 +100,9 @@
 /* Languette de chemise cartonnee. */
 .onglet { aspect-ratio: 3.4; background: var(--ink); border-radius: 2px 2px 0 0; }
 
-/* ---------- la couche du texte, toujours au-dessus ---------- */
-.corps {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  padding: 6.5cqw 6cqw 5cqw;
-  display: flex;
-  flex-direction: column;
-}
-
+/* ---------- le texte, toujours au-dessus ---------- */
 .piece {
+  margin: 0;
   font-family: var(--mono);
   font-size: 4.1cqw;
   letter-spacing: .14em;
@@ -97,21 +119,25 @@
   max-width: 15ch;
 }
 
-.bas { margin-top: auto; padding-top: 4cqw; }
+.bas { align-self: end; }
 
-/* Le chiffre est l'element le plus grand de la composition. */
+/* Le chiffre est l'element le plus grand de la composition. La marge est
+   remise a zero ici : la marge par defaut d'un paragraphe vaut 1em, soit 22cqw
+   sur ce chiffre, et elle mangeait la moitie de la bande libre. */
 .chiffre {
+  margin: 0;
   font-size: 22cqw;
   font-weight: 800;
   line-height: .82;
   letter-spacing: -.055em;
 }
+.chiffreLong { font-size: 13cqw; line-height: .95; letter-spacing: -.04em; }
 
 .note {
-  font-size: 4.3cqw;
-  line-height: 1.35;
-  margin-top: 2.4cqw;
-  max-width: 24ch;
+  font-size: 4.2cqw;
+  line-height: 1.32;
+  margin: 2.2cqw 0 0;
+  max-width: 26ch;
 }
 
 .marque {
@@ -119,7 +145,23 @@
   font-size: 3.9cqw;
   letter-spacing: .1em;
   opacity: .62;
-  margin-top: 4.5cqw;
+  margin: 3.2cqw 0 0;
 }
 
-.chiffreLong { font-size: 13cqw; line-height: .95; letter-spacing: -.04em; }
+/* Une paire de valeurs, quand l'affiche n'a pas un record mais deux bouts
+   d'une meme histoire. Meme graisse, meme taille : ca se lit d'un trait. */
+.paire { display: grid; gap: 3.6cqw; margin: 0; }
+.paireK {
+  font-family: var(--mono);
+  font-size: 3.9cqw;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .72;
+}
+.paireV {
+  margin: 1cqw 0 0;
+  font-size: 8.6cqw;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1;
+}

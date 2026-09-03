@@ -23,7 +23,7 @@ export default function Accueil() {
           <div>
             <h1 className="t-xl">Ce que tes DMs<br />disent de toi.</h1>
             <p className={`lede ${s.heroSub}`}>
-              Dépose le ZIP que t’envoie Instagram. Tout est lu dans ton navigateur. Rien ne part.
+              Dépose le ZIP que t’envoie Instagram. Ton navigateur les lira.
             </p>
             <div className={s.heroCta}>
               <BoutonLien href="/#chemin">Ouvrir mon dossier</BoutonLien>
@@ -44,9 +44,9 @@ export default function Accueil() {
           <div>
             <div className={s.dossierStep}>
               <div>
-                <h2 className="t-lg reveal">Huit révélations.</h2>
+                <h2 className="t-lg reveal">Huit chapitres.</h2>
                 <p className="lede reveal" style={{ '--d': '80ms', marginTop: '1rem' } as Style}>
-                  Une par écran. Tu peux refaire chaque calcul à la main.
+                  Tes dix personnes, tes groupes, tes mots, tes records. Et ton type à la fin.
                 </p>
               </div>
             </div>
@@ -54,8 +54,8 @@ export default function Accueil() {
               <div>
                 <h2 className="t-lg reveal">Rien d’inventé.</h2>
                 <p className="lede reveal" style={{ '--d': '80ms', marginTop: '1rem' } as Style}>
-                  On compte tes messages et on croise tes listes d’abonnés. C’est de
-                  l’arithmétique, rien de plus.
+                  Tout vient de tes conversations : qui t’écrit, à quelle heure, combien de
+                  fois, et avec quels mots.
                 </p>
               </div>
             </div>
@@ -63,7 +63,7 @@ export default function Accueil() {
               <div>
                 <span className="stamp reveal">Confidentiel</span>
                 <h2 className="t-lg reveal" style={{ '--d': '80ms', marginTop: '1.2rem' } as Style}>
-                  Et personne d’autre<br />ne le lit.
+                  Et tu pourras<br />le partager.
                 </h2>
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function Accueil() {
         <div className={`wrap ${s.revealsHead}`}>
           <p className="kicker">Ce que tu vas lire</p>
           <h2 id="rev-h" className="t-lg reveal" style={{ marginTop: '1rem' }}>
-            Les huit pages du dossier.
+            Les huit chapitres.
           </h2>
         </div>
 

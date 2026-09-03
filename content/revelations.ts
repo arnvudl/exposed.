@@ -1,129 +1,139 @@
 import type { DonneesAffiche } from '@/components/Affiche';
 
-/* Les huit affiches du sommaire. Les chiffres sont des exemples, marques comme
-   tels sur chaque affiche : aucune preuve sociale inventee (cf. DESIGN.md).
+/* Les huit chapitres du dossier.
 
-   Chaque composition suit les cinq regles : deux ou trois formes, au moins une
-   qui deborde du cadre, un ecart d'echelle net, aucune bande vide, et rien
-   d'appuye sous le chiffre. Les formes posees sous du texte restent a `faible`. */
+   Deux decisions de contenu, prises ensemble :
+
+   1. Toutes les affiches donnent un exemple, aucune n'explique. Un sommaire ou
+      la moitie des cartes montre un resultat et l'autre decrit une methode se
+      lit comme deux sommaires colles.
+   2. Les valeurs sont fausses et marquees « exemple » sur chaque affiche.
+      Aucune preuve sociale inventee : rien ici ne se fait passer pour un vrai
+      resultat d'utilisateur.
+
+   Une note depasse rarement 62 caracteres : au-dela elle prend quatre lignes,
+   la bande libre tombe sous 10 % et la forme n'a plus la place d'exister.
+
+   Chaque composition suit les cinq regles de DESIGN.md : deux ou trois formes,
+   au moins une qui deborde, un ecart d'echelle net, aucune bande vide, et
+   aucune forme au-dessus de 30 % d'opacite sous du texte. */
 export const revelations: DonneesAffiche[] = [
   {
-    piece: 'Pièce 01',
+    piece: 'Chapitre 01',
     titre: 'Ton cercle réel',
     chiffre: '10',
-    note: 'personnes classées sur le volume, qui commence, et la fréquence.',
+    note: 'Les 10 personnes à qui tu parles le plus.',
     ton: 1,
     formes: [
-      { nom: 'disques', x: 34, y: 33, w: 84 },
-      { nom: 'onglet', x: 62, y: -3, w: 46, ton: 'moyen' },
+      { nom: 'disques', w: 98, dx: 34 },
+      { nom: 'onglet', place: 'coin', x: 62, y: -3, w: 46, ton: 'moyen' },
     ],
   },
   {
-    piece: 'Pièce 02',
+    piece: 'Chapitre 02',
     titre: 'Tes groupes',
-    chiffre: '3',
-    note: "groupes où tu n'as pas répondu depuis plus de trente jours.",
+    chiffre: 'Le groupe soirée',
+    note: 'celui où tu ris le plus, et où tu réponds le plus vite.',
     ton: 2,
     formes: [
-      { nom: 'barres', x: 8, y: 33, w: 104 },
-      { nom: 'trame', x: 60, y: 52, w: 56, ton: 'faible' },
+      { nom: 'barres', w: 74 },
+      { nom: 'trame', w: 52, ton: 'faible' },
     ],
   },
   {
-    piece: 'Pièce 03',
+    piece: 'Chapitre 03',
     titre: 'Qui ne te suit pas en retour',
-    note: 'Ceux à qui tu parles vraiment, séparés des comptes lointains.',
+    chiffre: '17',
+    note: 'qui font les stars avec toi.',
     ton: 3,
     formes: [
-      { nom: 'stries', x: -20, y: 40, w: 76 },
-      { nom: 'cadre', x: 56, y: 40, w: 54, ton: 'moyen' },
+      { nom: 'stries', w: 86, dx: -26 },
+      { nom: 'cadre', w: 58, ton: 'moyen' },
     ],
   },
   {
-    piece: 'Pièce 04',
+    piece: 'Chapitre 04',
     titre: 'Ce que tu dis vraiment',
-    chiffre: '68 %',
-    note: 'de tes mots sont dans le lexique positif.',
+    chiffre: '« mdrrr »',
+    note: 'ton mot à toi. Tu l’écris plus souvent que « oui ».',
     ton: 4,
     formes: [
-      { nom: 'barres', x: 6, y: 34, w: 98 },
-      { nom: 'arc', x: 66, y: 56, w: 52, ton: 'moyen' },
+      { nom: 'barres', w: 70 },
+      { nom: 'arc', w: 54, ton: 'moyen' },
     ],
   },
   {
-    piece: 'Pièce 05',
+    piece: 'Chapitre 05',
     titre: 'Tes inside jokes',
-    chiffre: '« grumo »',
+    chiffre: '#CTJMFTDH',
     note: '41 fois, et seulement dans cette conversation.',
     ton: 5,
     formes: [
-      { nom: 'stries', x: 46, y: 30, w: 78 },
-      { nom: 'disques', x: -14, y: 40, w: 44, ton: 'moyen' },
+      { nom: 'disques', w: 50, dx: -18, ton: 'moyen' },
+      { nom: 'stries', w: 84 },
     ],
   },
   {
-    piece: 'Pièce 06',
+    piece: 'Chapitre 06',
     titre: 'Tes cinq records',
     chiffre: '4 h 12',
-    note: 'ton message le plus tardif de l’année.',
+    note: 'le plus tardif. Puis le plus long, le plus rapide, le plus bavard.',
     ton: 6,
     formes: [
-      { nom: 'arc', x: 22, y: 28, w: 96 },
-      { nom: 'cadre', x: 66, y: 62, w: 44, ton: 'moyen' },
+      { nom: 'arc', w: 76, dx: -14 },
+      { nom: 'cadre', w: 52, ton: 'moyen' },
     ],
   },
   {
-    piece: 'Pièce 07',
+    piece: 'Chapitre 07',
     titre: 'Premier et dernier',
-    chiffre: '12 jan.',
-    note: '8 h 04, à @sofia. Et le dernier, le 29 décembre.',
+    paire: [
+      { k: 'Premier', v: '12 janvier, 8 h 04' },
+      { k: 'Dernier', v: '29 décembre, 23 h 51' },
+    ],
+    note: 'les deux à @sofia.mrt.',
     ton: 7,
     formes: [
-      { nom: 'cadre', x: -16, y: 28, w: 66 },
-      { nom: 'disques', x: 64, y: 52, w: 56, ton: 'moyen' },
+      { nom: 'stries', w: 56, dx: -26, ton: 'moyen' },
+      { nom: 'onglet', place: 'coin', x: 58, y: -4, w: 52 },
     ],
   },
   {
-    piece: 'Pièce 08',
+    piece: 'Chapitre 08',
     titre: 'Ton profil relationnel',
     chiffre: 'Le Pilier',
-    note: 'Quatre axes, un type. La conclusion du dossier.',
+    note: 'Quatre axes, un type. La dernière page du dossier.',
     ton: 8,
     formes: [
-      // Le faisceau deborde a droite : a gauche il passait sous la deuxieme
-      // ligne du titre, et l'encre a 55 % sous une encre pleine ne tient pas
-      // les 4.5:1.
-      { nom: 'faisceau', x: 74, y: 18, w: 64, rot: 90, ton: 'moyen' },
-      { nom: 'barres', x: 6, y: 40, w: 36 },
+      { nom: 'barres', w: 42 },
+      { nom: 'faisceau', w: 78, ton: 'moyen' },
     ],
   },
 ];
 
 /** L'affiche du hero. Un vrai composant produit, pas un faux ecran. */
 export const afficheHero: DonneesAffiche = {
-  piece: 'Pièce 06 · Records',
+  piece: 'Chapitre 06 · Records',
   titre: 'Ta journée la plus intense',
   chiffre: '2 847',
-  note: 'messages échangés avec la personne que tu ne mets jamais en close friends.',
+  note: 'avec @lena.mrt, qui n’est pas dans tes close friends.',
   ton: 6,
   formes: [
-    // Mesure faite sur l'affiche : le titre finit a 27 %, le chiffre commence a
-    // 60 %. La grande forme vit dans cette bande, et nulle part ailleurs.
-    { nom: 'arc', x: 26, y: 29, w: 84 },
-    { nom: 'onglet', x: 68, y: -4, w: 46, ton: 'moyen' },
+    { nom: 'arc', w: 88, dx: 34 },
+    { nom: 'onglet', place: 'coin', x: 68, y: -4, w: 46, ton: 'moyen' },
   ],
 };
 
 /** L'affiche epinglee de la section dossier. */
 export const afficheDossier: DonneesAffiche = {
-  piece: 'Pièce 01 · Ton cercle réel',
-  titre: 'Le plus long silence',
+  piece: 'Chapitre 01 · Ton cercle réel',
+  titre: 'Le plus long remis',
   chiffre: '41',
-  note: 'jours sans se parler, avec quelqu’un à qui tu écrivais tous les jours en janvier.',
+  note: 'jours entre son message et ta réponse. Tu l’avais lu le jour même.',
   ton: 3,
   formes: [
-    { nom: 'barres', x: 6, y: 34, w: 100 },
-    { nom: 'trame', x: 62, y: 54, w: 52, ton: 'faible' },
+    { nom: 'barres', w: 76 },
+    { nom: 'trame', w: 48, ton: 'faible' },
   ],
 };
 

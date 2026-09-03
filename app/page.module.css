@@ -184,8 +184,15 @@
   letter-spacing: -.03em;
 }
 /* Les types ne sont pas cliquables tant que la page qui les decrit n'existe
-   pas : un lien qui ne mene nulle part est pire qu'un mot pose. */
-.typesFlow li { color: color-mix(in oklab, var(--tab) 52%, var(--bg)); }
+   pas : un lien qui ne mene nulle part est pire qu'un mot pose. Le survol
+   allume quand meme la teinte de l'onglet, sinon l'index parait mort. */
+.typesFlow li {
+  color: color-mix(in oklab, var(--tab) 52%, var(--bg));
+  transition: color 170ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .typesFlow li:hover { color: var(--tab); }
+}
 .typeMoi { color: var(--tab); }
 
 /* ============================================================
