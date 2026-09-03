@@ -1,0 +1,71 @@
+Nom de l'application : Exposed
+
+You might see somethings, but we show them
+
+==============================
+
+Modèle technique : Data RGPD
+
+==============================
+
+Intro — Couverture
+Sous-titre : "Ce que tes DMs disent de toi."
+L'utilisateur choisit sa période (1 mois → tout), entre son handle, et la couverture se génère. Ambiance dossier secret qu'on t'ouvre. Une animation de "déchiffrement" avant que les révélations commencent.
+
+Révélation #1 — Ton cercle réel
+Sous-titre : "Les gens qui comptent vraiment."
+On calcule un score de proximité par personne basé sur : nombre de messages échangés, qui initie les conversations, fréquence des échanges dans la période. Top 10 affiché avec photo de profil si disponible dans l'export, sinon initiales. Le twist : on signale les gens qui sont dans ton top 5 des échanges mais qui ne sont PAS dans ta liste close friends Instagram — "Tu lui parles plus qu'à tes close friends, mais il n'y est pas."
+
+Révélation #2 — Tes groupes
+Sous-titre : "Les cercles de ta vie."
+On liste tous les groupes détectés (conversations avec 3+ participants). Pour chaque groupe : nombre de messages sur la période, ton ratio de participation (tu parles combien % du total), et ton statut — Moteur si tu parles beaucoup, Lurker si tu lis sans répondre, Coordinateur si tu envoies beaucoup de messages courts type organisation. Pas de catégorisation par nom de groupe — trop hasardeuse comme tu dis. À la place on joue sur les dynamiques : "Dans 3 groupes tu n'as pas répondu depuis plus de 30 jours", "Tu es le plus actif dans X".
+
+Révélation #3 — Qui ne te follow pas back
+Sous-titre : "Tu les suis. Eux, non."
+Croisement entre ta liste "abonnements" et ta liste "abonnés". On sort la liste de comptes que tu suis qui ne te suivent pas en retour. Affiché avec le username. Petite nuance : on sépare les comptes publics (créateurs, célébrités) des comptes privés — parce que ne pas être suivi par Beyoncé c'est normal, ne pas être suivi par ton ex-collègue c'est autre chose.
+
+Révélation #4 — Ce que tu dis vraiment
+Sous-titre : "Ton vocabulaire, sans filtre."
+Top 20 des mots les plus utilisés sur la période, après suppression des stopwords (le, la, de, que, je, tu, et, en, un, une...). Affiché en nuage de mots ou en liste avec fréquence. Ensuite les expressions de 2-3 mots les plus fréquentes (bigrammes et trigrammes). Et un angle émotionnel simple : ratio de mots positifs vs négatifs basé sur un lexique hardcodé FR/EN de quelques centaines de mots — pas pour faire de la psychologie mais pour sortir une stat fun type "67% de tes messages sont positifs".
+
+Révélation #5 — Tes inside jokes
+Sous-titre : "Ce que vous êtes les seuls à comprendre."
+Voilà la stratégie affinée après ta remarque — on élimine "tu sais" et "lmaooo" en ajoutant des couches de filtrage :
+
+Stopwords étendus : une liste hardcodée de ~500 expressions courantes FR/EN à exclure absolument ("tu sais", "lmao", "mdr", "ptdr", "jsp", "jpp", "wsh", "ouais", "nan", "bah", "genre"...)
+Longueur minimale : on ignore les mots de moins de 4 caractères
+Exclusivité inter-conversations : un mot ne compte comme inside joke que s'il apparaît dans maximum 2 conversations différentes — s'il est partout, c'est un tic de langage, pas un inside joke
+Répétition miroir : les deux personnes doivent l'avoir utilisé, pas juste toi
+Seuil de fréquence : minimum 5 occurrences dans la conversation sur la période
+Détection de mots inventés : chaînes qui ne matchent aucun mot d'un dictionnaire FR/EN basique (donc probablement un surnom, une blague interne, un mot déformé)
+
+Le résultat : par conversation, 1 à 3 expressions qui ressortent vraiment comme spécifiques à cette relation. Affiché avec le nombre d'utilisations et la première fois que c'est apparu dans la période.
+
+Révélation #6 — Tes 5 records
+Sous-titre : "Tes moments extrêmes."
+Cinq stats marquantes affichées une par une, chacune avec le contexte :
+
+Conversation la plus intense en une journée — X messages en 24h avec @pseudo, le JJ/MM/AAAA
+Message le plus long — X caractères envoyés à @pseudo, avec les 2-3 premiers mots pour rappeler le contexte
+Silence le plus long — X jours sans parler avec @pseudo, du JJ/MM au JJ/MM. Et la question : est-ce que vous avez repris depuis ?
+Réponse la plus rapide en moyenne — @pseudo, tu réponds en X minutes en moyenne. Le plus petit délai de toutes tes conversations.
+Message le plus tardif — envoyé à XhYY, à @pseudo, le JJ/MM. Affiche les 2-3 premiers mots du message.
+
+Révélation #7 — Premier et dernier message
+Sous-titre : "Le début et la fin."
+Pour la période choisie : le tout premier message envoyé (date, destinataire, contenu) et le tout dernier. Simple, épuré, émotionnel. Si la période c'est "tout", ça peut remonter au premier DM Instagram de toute ta vie — ça c'est fort.
+
+Révélation #8 — Ton profil relationnel
+Sous-titre : "Qui tu es dans tes relations."
+On calcule 4 dimensions à partir de l'ensemble des données :
+
+Initiateur vs Répondeur — qui lance les conversations en premier, en %
+Expansif vs Concentré — tu parles à beaucoup de monde un peu, ou à peu de monde beaucoup
+Rapide vs Posé — ton délai de réponse moyen toutes conversations confondues
+Vocal vs Sobre — longueur moyenne de tes messages
+
+Ces 4 dimensions génèrent un "type" en une phrase : "Tu es un Initiateur Concentré — tu lances les conversations et tu les entretiens avec une poignée de personnes proches." Une dizaine de types possibles hardcodés. C'est la conclusion émotionnelle du rapport.
+
+Outro — Ta carte
+Sous-titre : "Partage ce que tu veux."
+L'utilisateur choisit quelle révélation il veut partager (pas forcément tout). Chaque révélation génère une carte screenshot-friendly aux dimensions story Instagram (1080×1920 en ratio). Watermark Exposed en bas. Bouton de téléchargement direct en PNG.

@@ -1,0 +1,296 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .root {
+    font-family: 'Inter', sans-serif;
+    background: #0A0A0A;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    color: #fff;
+  }
+
+  .label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 1rem;
+  }
+
+  .divider { border: none; border-top: 0.5px solid #1E1E1E; margin: 2rem 0; }
+
+  .ig-gradient { background: linear-gradient(45deg, #833AB4, #E1306C, #F77737, #FCCC63); }
+  .ig-gradient-h { background: linear-gradient(90deg, #833AB4, #C13584, #E1306C, #F77737, #FCCC63); }
+
+  .gradient-bar { height: 3px; border-radius: 100px; margin-bottom: 2.5rem; }
+
+  .logo-row { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 0; }
+
+  .logo-dark {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-radius: 100px; background: #fff;
+  }
+  .logo-dark .word { font-size: 20px; font-weight: 800; color: #000; letter-spacing: -0.03em; }
+  .logo-dark .word span {
+    background: linear-gradient(90deg, #833AB4, #E1306C);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .logo-ghost {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-radius: 100px; border: 0.5px solid #2A2A2A;
+  }
+  .logo-ghost .word { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.03em; }
+  .logo-ghost .word span {
+    background: linear-gradient(90deg, #E1306C, #F77737);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .logo-icon {
+    width: 26px; height: 26px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-icon svg { width: 15px; height: 15px; }
+
+  .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .swatch { height: 60px; border-radius: 10px; }
+  .swatch-name { font-size: 11px; font-weight: 500; color: #aaa; margin-top: 6px; }
+  .swatch-hex { font-size: 10px; color: #555; font-family: monospace; }
+
+  .type-stack { display: flex; flex-direction: column; gap: 20px; }
+  .type-row { display: flex; align-items: baseline; gap: 1rem; }
+  .type-meta { font-size: 10px; color: #444; min-width: 140px; flex-shrink: 0; font-family: monospace; }
+
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .dark-card {
+    background: #111; border: 0.5px solid #1E1E1E; border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .reveal-card {
+    background: #0D0D0D; border: 0.5px solid #222; border-radius: 16px;
+    padding: 1.5rem; display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .reveal-num {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #E1306C, #F77737);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .reveal-title { font-size: 15px; font-weight: 700; color: #fff; }
+  .reveal-sub { font-size: 12px; color: #555; }
+
+  .cover {
+    background: #000; border-radius: 18px; padding: 2rem; min-height: 200px;
+    display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;
+  }
+
+  .cover-glow {
+    position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(131,58,180,0.35) 0%, rgba(225,48,108,0.2) 50%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cover-glow2 {
+    position: absolute; bottom: -30px; left: 20px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(247,119,55,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cover-top { position: relative; z-index: 1; }
+  .cover-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #444; margin-bottom: 10px; }
+  .cover-title { font-size: 56px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; color: #fff; }
+
+  .cover-bottom {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cover-handle { font-size: 12px; color: #444; }
+  .cover-pill {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 100px; border: 0.5px solid #222; color: #777;
+  }
+
+  .share-card {
+    background: #111; border: 0.5px solid #1E1E1E; border-radius: 16px; padding: 1.5rem;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .share-avatar {
+    width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: #fff;
+  }
+  .share-stat { font-size: 28px; font-weight: 900; color: #fff; letter-spacing: -0.03em; line-height: 1; }
+  .share-label { font-size: 12px; color: #555; margin-top: 4px; }
+  .share-watermark {
+    margin-top: 16px; padding-top: 12px; border-top: 0.5px solid #1E1E1E;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #333;
+    text-align: right;
+  }
+</style>
+
+<div class="root">
+  <h2 class="sr-only">Exposed — Identité visuelle dark mode complète</h2>
+
+  <div class="gradient-bar ig-gradient-h"></div>
+
+  <p class="label">Logo — variantes dark</p>
+  <div class="logo-row">
+    <div class="logo-dark">
+      <div class="logo-icon ig-gradient">
+        <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C9.26 2 8.93 2.01 7.87 2.06 6.81 2.1 6.09 2.27 5.45 2.52c-.66.26-1.22.6-1.78 1.16C3.11 4.24 2.77 4.8 2.52 5.45 2.27 6.09 2.1 6.81 2.06 7.87 2.01 8.93 2 9.26 2 12s.01 3.07.06 4.13c.04 1.06.21 1.78.46 2.42.26.66.6 1.22 1.16 1.78.56.56 1.12.9 1.78 1.16.64.25 1.36.42 2.42.46C8.93 21.99 9.26 22 12 22s3.07-.01 4.13-.06c1.06-.04 1.78-.21 2.42-.46.66-.26 1.22-.6 1.78-1.16.56-.56.9-1.12 1.16-1.78.25-.64.42-1.36.46-2.42.05-1.06.06-1.4.06-4.13s-.01-3.07-.06-4.13c-.04-1.06-.21-1.78-.46-2.42-.26-.66-.6-1.22-1.16-1.78-.56-.56-1.12-.9-1.78-1.16-.64-.25-1.36-.42-2.42-.46C15.07 2.01 14.74 2 12 2zm0 1.8c2.67 0 2.99.01 4.04.06.97.04 1.5.2 1.85.33.46.18.8.4 1.14.74.34.34.56.68.74 1.14.13.35.29.88.33 1.85.05 1.05.06 1.37.06 4.04s-.01 2.99-.06 4.04c-.04.97-.2 1.5-.33 1.85-.18.46-.4.8-.74 1.14-.34.34-.68.56-1.14.74-.35.13-.88.29-1.85.33-1.05.05-1.37.06-4.04.06s-2.99-.01-4.04-.06c-.97-.04-1.5-.2-1.85-.33-.46-.18-.8-.4-1.14-.74-.34-.34-.56-.68-.74-1.14-.13-.35-.29-.88-.33-1.85C3.81 14.99 3.8 14.67 3.8 12s.01-2.99.06-4.04c.04-.97.2-1.5.33-1.85.18-.46.4-.8.74-1.14.34-.34.68-.56 1.14-.74.35-.13.88-.29 1.85-.33C9.01 3.81 9.33 3.8 12 3.8zM12 7a5 5 0 100 10A5 5 0 0012 7zm0 8.25a3.25 3.25 0 110-6.5 3.25 3.25 0 010 6.5zm5.25-8.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5z"/></svg>
+      </div>
+      <span class="word">ex<span>posed</span></span>
+    </div>
+
+    <div class="logo-ghost">
+      <div class="logo-icon ig-gradient">
+        <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C9.26 2 8.93 2.01 7.87 2.06 6.81 2.1 6.09 2.27 5.45 2.52c-.66.26-1.22.6-1.78 1.16C3.11 4.24 2.77 4.8 2.52 5.45 2.27 6.09 2.1 6.81 2.06 7.87 2.01 8.93 2 9.26 2 12s.01 3.07.06 4.13c.04 1.06.21 1.78.46 2.42.26.66.6 1.22 1.16 1.78.56.56 1.12.9 1.78 1.16.64.25 1.36.42 2.42.46C8.93 21.99 9.26 22 12 22s3.07-.01 4.13-.06c1.06-.04 1.78-.21 2.42-.46.66-.26 1.22-.6 1.78-1.16.56-.56.9-1.12 1.16-1.78.25-.64.42-1.36.46-2.42.05-1.06.06-1.4.06-4.13s-.01-3.07-.06-4.13c-.04-1.06-.21-1.78-.46-2.42-.26-.66-.6-1.22-1.16-1.78-.56-.56-1.12-.9-1.78-1.16-.64-.25-1.36-.42-2.42-.46C15.07 2.01 14.74 2 12 2zm0 1.8c2.67 0 2.99.01 4.04.06.97.04 1.5.2 1.85.33.46.18.8.4 1.14.74.34.34.56.68.74 1.14.13.35.29.88.33 1.85.05 1.05.06 1.37.06 4.04s-.01 2.99-.06 4.04c-.04.97-.2 1.5-.33 1.85-.18.46-.4.8-.74 1.14-.34.34-.68.56-1.14.74-.35.13-.88.29-1.85.33-1.05.05-1.37.06-4.04.06s-2.99-.01-4.04-.06c-.97-.04-1.5-.2-1.85-.33-.46-.18-.8-.4-1.14-.74-.34-.34-.56-.68-.74-1.14-.13-.35-.29-.88-.33-1.85C3.81 14.99 3.8 14.67 3.8 12s.01-2.99.06-4.04c.04-.97.2-1.5.33-1.85.18-.46.4-.8.74-1.14.34-.34.68-.56 1.14-.74.35-.13.88-.29 1.85-.33C9.01 3.81 9.33 3.8 12 3.8zM12 7a5 5 0 100 10A5 5 0 0012 7zm0 8.25a3.25 3.25 0 110-6.5 3.25 3.25 0 010 6.5zm5.25-8.5a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5z"/></svg>
+      </div>
+      <span class="word">ex<span>posed</span></span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="label">Palette</p>
+  <div class="color-grid">
+    <div>
+      <div class="swatch ig-gradient"></div>
+      <p class="swatch-name">Gradient</p>
+      <p class="swatch-hex">Signature</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#833AB4;"></div>
+      <p class="swatch-name">Purple</p>
+      <p class="swatch-hex">#833AB4</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#E1306C;"></div>
+      <p class="swatch-name">Pink</p>
+      <p class="swatch-hex">#E1306C</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#F77737;"></div>
+      <p class="swatch-name">Orange</p>
+      <p class="swatch-hex">#F77737</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#FCCC63;"></div>
+      <p class="swatch-name">Yellow</p>
+      <p class="swatch-hex">#FCCC63</p>
+    </div>
+  </div>
+  <div class="color-grid" style="margin-top:10px;">
+    <div>
+      <div class="swatch" style="background:#0A0A0A; border: 0.5px solid #1E1E1E;"></div>
+      <p class="swatch-name">Page bg</p>
+      <p class="swatch-hex">#0A0A0A</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#111111; border: 0.5px solid #1E1E1E;"></div>
+      <p class="swatch-name">Card</p>
+      <p class="swatch-hex">#111111</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#1E1E1E;"></div>
+      <p class="swatch-name">Border</p>
+      <p class="swatch-hex">#1E1E1E</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#555555;"></div>
+      <p class="swatch-name">Muted</p>
+      <p class="swatch-hex">#555555</p>
+    </div>
+    <div>
+      <div class="swatch" style="background:#FFFFFF;"></div>
+      <p class="swatch-name">White</p>
+      <p class="swatch-hex">#FFFFFF</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="label">Typographie</p>
+  <div class="type-stack">
+    <div class="type-row">
+      <span class="type-meta">900 · 56px · −0.05em</span>
+      <span style="font-size:42px;font-weight:900;letter-spacing:-0.04em;color:#fff;line-height:1;">Exposed</span>
+    </div>
+    <div class="type-row">
+      <span class="type-meta">700 · 22px · −0.02em</span>
+      <span style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:#fff;">Révélation #1</span>
+    </div>
+    <div class="type-row">
+      <span class="type-meta">400 · 15px · normal</span>
+      <span style="font-size:15px;color:#aaa;line-height:1.6;">Ce que tes DMs disent de toi.</span>
+    </div>
+    <div class="type-row">
+      <span class="type-meta">600 · 10px · +0.14em</span>
+      <span style="font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#444;">@tonhandle · 2024</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="label">Cartes révélation</p>
+  <div class="card-grid">
+    <div class="reveal-card">
+      <span class="reveal-num">Révélation #1</span>
+      <span class="reveal-title">Ton cercle réel</span>
+      <span class="reveal-sub">Top 10 contacts</span>
+    </div>
+    <div class="reveal-card">
+      <span class="reveal-num">Révélation #2</span>
+      <span class="reveal-title">Ce que tu dis</span>
+      <span class="reveal-sub">Mots et expressions</span>
+    </div>
+    <div class="reveal-card">
+      <span class="reveal-num">Révélation #3</span>
+      <span class="reveal-title">Tes inside jokes</span>
+      <span class="reveal-sub">Expressions récurrentes</span>
+    </div>
+    <div class="reveal-card">
+      <span class="reveal-num">Révélation #4</span>
+      <span class="reveal-title">Ton profil</span>
+      <span class="reveal-sub">Qui tu es dans tes DMs</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="label">Couverture magazine web</p>
+  <div class="cover">
+    <div class="cover-glow"></div>
+    <div class="cover-glow2"></div>
+    <div class="cover-top">
+      <p class="cover-eyebrow">Ton rapport · Instagram · 2024</p>
+      <p class="cover-title">Exposed</p>
+    </div>
+    <div class="cover-bottom">
+      <span class="cover-handle">@tonhandle</span>
+      <span class="cover-pill">6 révélations</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="label">Carte de partage (screenshot-friendly)</p>
+  <div class="share-card">
+    <div class="share-avatar ig-gradient">MK</div>
+    <div style="flex:1;">
+      <p class="share-stat">2 847</p>
+      <p class="share-label">messages envoyés à @marie en 2024</p>
+      <p class="share-watermark">exposed · by @tonhandle</p>
+    </div>
+  </div>
+
+</div>

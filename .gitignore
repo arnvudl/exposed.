@@ -1,0 +1,27 @@
+# Dépendances
+node_modules/
+
+# Build Next.js
+.next/
+out/
+dist/
+
+# Skills tierces : réinstallables via skills-lock.json
+# npx skills add Leonxlnx/taste-skill
+# npx skills add emilkowalski/skill
+.agents/skills/
+.claude/skills/
+
+# Environnement
+.env
+.env.local
+.env*.local
+
+# Divers
+*.log
+.DS_Store
+Thumbs.db
+
+# Données personnelles — ne JAMAIS committer un export Instagram
+*.zip
+fixtures/real/
