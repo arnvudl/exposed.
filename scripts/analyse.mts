@@ -278,10 +278,7 @@ function chapitre02(conversations: Conversation[], soi: string) {
     const facteurRecence = Math.max(0.15, Math.min(1, 1 - joursDepuis / SEUIL_JOURS_RECENCE));
 
     groupes.push({
-      // Le nombre de membres desambiguise : deux groupes peuvent porter
-      // exactement le meme nom (« RP MADA » existe deux fois dans les
-      // donnees de test, avec des membres et une activite tres differents).
-      titre: `${c.titre || 'Groupe sans nom'} (${c.participants.length} membres)`,
+      titre: c.titre || 'Groupe sans nom',
       membres: c.participants.length,
       totalMessages: c.messages.length,
       toiEnvoyes,
@@ -359,7 +356,6 @@ function chapitre03() {
 
   return {
     neSuiventPas: [...following].filter((n) => !followers.has(n)).sort(),
-    tuNeSuisPas: [...followers].filter((n) => !following.has(n)).sort(),
     followers: followers.size,
     following: following.size,
   };
@@ -419,7 +415,7 @@ function chapitre04(conversations: Conversation[], soi: string) {
       }
     }
   }
-  return [...compte.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15);
+  return [...compte.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
 }
 
 /* ============================================================
@@ -627,7 +623,7 @@ function main() {
     console.log(`${c02.actifs.length} groupe(s) actif(s) sur ${c02.totalGroupes} au total.\n`);
     const cat = c02.categories!;
     console.log('QG (le plus vivant)      :', cat.qg?.titre, `— ${cat.qg?.totalMessages} messages`);
-    console.log('Le plus bondé             :', cat.leBondé?.titre);
+    console.log('Le plus bondé             :', cat.leBondé?.titre, `(${cat.leBondé?.membres} membres)`);
     console.log('Tu débites ici            :', cat.tuDebites?.titre, `— toi: ${cat.tuDebites?.toiEnvoyes} messages`);
     console.log('Ton groupe inutile        :', cat.inutile?.titre, `— toi: ${((cat.inutile?.toiPart ?? 0) * 100).toFixed(1)}% des messages (${cat.inutile?.toiEnvoyes}/${cat.inutile?.totalMessages})`);
     console.log('Le ring                   :', cat.leRing ? `${cat.leRing.titre} — ${cat.leRing.insultes} vannes/insultes (${(cat.leRing.tauxInsultes * 100).toFixed(1)}% des messages)` : '(aucune insulte détectée, catégorie vide)');
@@ -640,11 +636,9 @@ function main() {
   console.log(`${c03.following} abonnements, ${c03.followers} abonnés.\n`);
   console.log(`Tu les suis, ils ne te suivent pas : ${c03.neSuiventPas.length} comptes`);
   console.log('  ' + c03.neSuiventPas.slice(0, 25).join(', ') + (c03.neSuiventPas.length > 25 ? `, … (+${c03.neSuiventPas.length - 25})` : ''));
-  console.log(`\nIls te suivent, tu ne les suis pas : ${c03.tuNeSuisPas.length} comptes`);
-  console.log('  ' + c03.tuNeSuisPas.slice(0, 25).join(', ') + (c03.tuNeSuisPas.length > 25 ? `, … (+${c03.tuNeSuisPas.length - 25})` : ''));
 
   console.log('\n' + '='.repeat(60));
-  console.log('04 — TES MOTS (top 15, hors mots vides)');
+  console.log('04 — TES MOTS (top 10, hors mots vides)');
   console.log('='.repeat(60));
   const c04 = chrono('calcul 04', () => chapitre04(conversations, soi));
   console.table(c04.map(([mot, n]) => ({ mot, occurrences: n })));
