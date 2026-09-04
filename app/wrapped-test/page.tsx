@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { EvenementAnalyse } from '@/lib/wrapped/analyser';
 import type { chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07 } from '@/lib/wrapped/chapitres';
 import { formatDate, formatDureeDecoupee, formatDureeCourte } from '@/lib/wrapped/format';
-import type { ZipEnMemoire } from '@/lib/wrapped/zip';
+import { lireFichierEnMemoire, type ZipEnMemoire } from '@/lib/wrapped/zip';
 import s from './wrapped-test.module.css';
 
 /* Page de test, jamais liee depuis la navigation : valide le flux complet
@@ -112,7 +112,7 @@ export default function WrappedTest() {
       let donnees: ArrayBuffer | null = null;
       for (let tentative = 1; tentative <= 4 && !donnees; tentative++) {
         try {
-          donnees = await f.arrayBuffer();
+          donnees = await lireFichierEnMemoire(f);
         } catch {
           if (tentative === 4) break;
           setLabelEtape(`« ${f.name} » n’a pas répondu, nouvel essai (${tentative}/3)…`);

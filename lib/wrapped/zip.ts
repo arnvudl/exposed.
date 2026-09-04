@@ -23,6 +23,32 @@ function normaliserChemin(chemin: string): string {
 
 export type ZipEnMemoire = { nom: string; donnees: ArrayBuffer };
 
+// Les exports Instagram complets (avec les photos/videos) depassent souvent
+// 2 Go. Au-dela de cette taille, `Blob.arrayBuffer()` en un seul appel echoue
+// dans Chrome avec « The requested file could not be read... » — une limite
+// du navigateur sur la lecture d'un Blob d'un coup, pas un fichier corrompu
+// ni un antivirus. La parade : decouper la lecture en tranches, chacune bien
+// en dessous du plafond, puis les recoller en un seul buffer en memoire (ca,
+// V8 le supporte sans probleme sur un navigateur 64 bits).
+const TAILLE_TRANCHE = 512 * 1024 * 1024; // 512 Mo
+
+/** Lit un fichier en memoire, par tranches si besoin. Ne fait rien de
+    particulier pour les petits fichiers : `f.slice()` sur l'ensemble du
+    fichier revient a le lire d'un coup. */
+export async function lireFichierEnMemoire(f: File): Promise<ArrayBuffer> {
+  if (f.size <= TAILLE_TRANCHE) return f.arrayBuffer();
+
+  const resultat = new Uint8Array(f.size);
+  let position = 0;
+  while (position < f.size) {
+    const fin = Math.min(position + TAILLE_TRANCHE, f.size);
+    const tranche = await f.slice(position, fin).arrayBuffer();
+    resultat.set(new Uint8Array(tranche), position);
+    position = fin;
+  }
+  return resultat.buffer;
+}
+
 /** Une erreur de lecture nomme le fichier fautif : sans ca, un des trois ZIP
     d'Instagram qui coince (fichier OneDrive pas encore telecharge en local,
     verrouille par un antivirus...) ne se distingue pas des deux autres. */
