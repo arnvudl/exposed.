@@ -128,6 +128,8 @@ const MOTS_SYSTEME = [
   /is no longer in the call/i, /joined the call/i, /left the call/i,
   /created a poll/i, /voted (for|on)/i, /poll is no longer available/i,
   /sent an attachment/i, /You are now connected on Messenger/i,
+  /Not everyone can message this profile/i, /This person is unable to receive messages/i,
+  /Your message request has been (accepted|declined)/i, /You can't reply to this conversation/i,
   /unsent a message/i, /set the disappearing message/i,
 ];
 function estContenuSysteme(c: string): boolean {
@@ -159,11 +161,16 @@ function chargerConversations(): Conversation[] {
       participants = (data.participants ?? []).map((p: any) => decodeMojibake(p.name));
       for (const m of data.messages ?? []) {
         const contenuBrut = typeof m.content === 'string' ? decodeMojibake(m.content) : undefined;
+        // Un texte systeme (« Not everyone can message this profile. »,
+        // notification d'appel...) n'est pas un tour de conversation : le
+        // garder faussait les records (une notification automatique
+        // affichee comme si c'etait ta reponse la plus lente).
+        if (contenuBrut && estContenuSysteme(contenuBrut)) continue;
         const aDesMedias = !!(m.photos?.length || m.videos?.length || m.audio_files?.length || m.share || m.call_duration != null);
         messages.push({
           sender: decodeMojibake(m.sender_name ?? ''),
           ts: m.timestamp_ms,
-          content: contenuBrut && !estContenuSysteme(contenuBrut) ? contenuBrut : undefined,
+          content: contenuBrut,
           aDesMedias,
           estSupprime: !!m.is_unsent,
         });
@@ -271,7 +278,10 @@ function chapitre02(conversations: Conversation[], soi: string) {
     const facteurRecence = Math.max(0.15, Math.min(1, 1 - joursDepuis / SEUIL_JOURS_RECENCE));
 
     groupes.push({
-      titre: c.titre || `Groupe (${c.participants.length} membres)`,
+      // Le nombre de membres desambiguise : deux groupes peuvent porter
+      // exactement le meme nom (« RP MADA » existe deux fois dans les
+      // donnees de test, avec des membres et une activite tres differents).
+      titre: `${c.titre || 'Groupe sans nom'} (${c.participants.length} membres)`,
       membres: c.participants.length,
       totalMessages: c.messages.length,
       toiEnvoyes,
@@ -333,7 +343,13 @@ function nomsDepuisRelations(cheminFichier: string, cle: string): Set<string> {
   return noms;
 }
 
-function chapitre03() {
+/* La liste brute contient forcement des comptes publics/marques qui n'ont
+   aucune raison de suivre en retour (un artiste, une marque de sport...) :
+   les compter comme une « deception » n'a pas de sens. On la separe donc en
+   deux, uniquement a partir de donnees deja disponibles en local (aucun
+   appel reseau, aucun site tiers) : les comptes avec qui tu as vraiment
+   echange des DM sont ceux qui comptent vraiment ici. */
+function chapitre03(conversations: Conversation[], soi: string) {
   // followers_1.json, followers_2.json... s'il y en a plusieurs.
   const fichiersFollowers = fs.readdirSync(CONNECTIONS).filter((f) => /^followers_\d+\.json$/.test(f));
   const followers = new Set<string>();
@@ -341,9 +357,21 @@ function chapitre03() {
     for (const n of nomsDepuisRelations(path.join(CONNECTIONS, f), 'relationships_followers')) followers.add(n);
   }
   const following = nomsDepuisRelations(path.join(CONNECTIONS, 'following.json'), 'relationships_following');
-
   const neSuiventPas = [...following].filter((n) => !followers.has(n)).sort();
-  return neSuiventPas;
+
+  const contactsDM = new Set<string>();
+  for (const c of conversations) {
+    const autres = c.participants.filter((p) => p !== soi);
+    if (c.participants.length !== 2 || autres.length !== 1) continue;
+    const id = identifiantAffichable(c, autres[0]);
+    if (id.startsWith('@')) contactsDM.add(id.slice(1).toLowerCase());
+  }
+
+  return {
+    total: neSuiventPas,
+    avecDM: neSuiventPas.filter((n) => contactsDM.has(n)),
+    sansDM: neSuiventPas.filter((n) => !contactsDM.has(n)),
+  };
 }
 
 /* ============================================================
@@ -362,14 +390,31 @@ const MOTS_VIDES = new Set([
   'avoir', 'ai', 'as', 'avons', 'avez', 'ont', 'va', 'vas', 'vont', 'fait',
   'faire', 'dit', 'dire', 'ya', 'y', 'a', 'me', 'te', 'se', 'qu', 'j', 'c', 'l',
   'd', 'n', 's', 't', 'm', 'jsp', 'jsuis', 'osef', 'tkt', 'stp', 'dsl',
+  // Mots frequents chez n'importe qui, pas des tics personnels : « rien du
+  // tout » ou « il faut » se disent partout, ce n'est pas ta signature.
+  'tout', 'tous', 'toute', 'toutes', 'même', 'meme', 'rien', 'là', 'la',
+  'faut', 'fallait', 'faudrait', 'quand',
+  // Contractions courantes : le tokeniseur les garde entieres maintenant
+  // (« j'ai » plutot que « j » + « ai »), donc elles ont besoin de leur
+  // propre entree ici.
+  "j'ai", "j'suis", "c'est", "c'était", "c'etait", "n'est", "n'ai", "n'a",
+  "qu'il", "qu'elle", "qu'on", "t'as", "y'a", "s'il", "s'en", "d'accord",
 ]);
 
+// Une seule lettre etiree ("eeeeeeeeee", "aaaaah" version pure) n'est pas un
+// mot : c'est un cri ou un rire clavier, pas un token comparable aux autres.
+const LETTRE_ETIREE = /^(.)\1{3,}$/;
+
 function tokeniser(texte: string): string[] {
-  return texte
+  return (texte
     .toLowerCase()
     .replace(/[’]/g, "'")
-    .match(/[a-zàâäéèêëïîôöùûüÿçœæ]+/gi)
-    ?.map((t) => t.toLowerCase()) ?? [];
+    // L'apostrophe reste attachee au mot : « l'inutilité » est un seul token,
+    // pas « l » puis « inutilité » separement (ce qui cassait les inside
+    // jokes en fragments illisibles).
+    .match(/[a-zàâäéèêëïîôöùûüÿçœæ]+(?:'[a-zàâäéèêëïîôöùûüÿçœæ]+)*/gi) ?? [])
+    .map((t) => t.toLowerCase())
+    .filter((t) => !LETTRE_ETIREE.test(t));
 }
 
 function chapitre04(conversations: Conversation[], soi: string) {
@@ -409,9 +454,17 @@ function chapitre05(conversations: Conversation[], soi: string, top10Dossiers: S
     for (const m of c.messages) {
       if (!m.content) continue;
       const tokens = tokeniser(m.content);
-      for (const n of [2, 3, 4]) {
+      // Les bigrammes (2 mots) sont trop courts pour distinguer une vraie
+      // blague recurrente d'une coincidence ou d'un nom de marque repete
+      // (« go pro »). A partir de 3 mots, une phrase qui revient devient
+      // beaucoup plus specifique.
+      for (const n of [3, 4]) {
         for (const g of ngrammes(tokens, n)) {
-          if (g.split(' ').every((mot) => MOTS_VIDES.has(mot))) continue;
+          const mots = g.split(' ');
+          if (mots.every((mot) => MOTS_VIDES.has(mot))) continue;
+          // « eeeee eeeee eeeee » n'est pas une phrase, c'est le meme mot
+          // tape plusieurs fois de suite.
+          if (new Set(mots).size === 1) continue;
           local.set(g, (local.get(g) ?? 0) + 1);
           globalPar.set(g, (globalPar.get(g) ?? 0) + 1);
         }
@@ -451,9 +504,14 @@ function chapitre05(conversations: Conversation[], soi: string, top10Dossiers: S
 const FMT_HEURE_MIN = new Intl.DateTimeFormat('fr-FR', {
   timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
 });
-function minutesDansLaJournee(ts: number): number {
+/** Sur une echelle 0-23h brute, 23:59 bat toujours 04:00 alors que 4h du
+    matin est manifestement plus tard dans la nuit. On decale : les heures
+    avant 6h du matin sont traitees comme la suite de la veille (+24h),
+    donc 04:00 (28:00 sur cette echelle) passe bien devant 23:59. */
+function minutesDansLaNuit(ts: number): number {
   const [h, m] = FMT_HEURE_MIN.format(new Date(ts)).split(':').map(Number);
-  return h * 60 + m;
+  const heureAjustee = h < 6 ? h + 24 : h;
+  return heureAjustee * 60 + m;
 }
 
 // fr-CA formate en AAAA-MM-JJ : une cle triable, sans reconstruire un
@@ -469,11 +527,25 @@ function jourCle(ts: number): string { return FMT_JOUR.format(new Date(ts)); }
 // jamais un vrai aller-retour entre deux personnes.
 const SEUIL_REPONSE_RAPIDE_MS = 2000;
 
+/** Un aperçu court du message : le vrai texte, ou une etiquette si le
+    message n'a pas de texte (photo, appel, message supprime...). Sert a
+    montrer un vrai extrait de conversation sur chaque record, pas juste un
+    chiffre sec. */
+function apercu(m: Message | undefined): string {
+  if (!m) return '';
+  if (m.content) return m.content.length > 140 ? `${m.content.slice(0, 140)}…` : m.content;
+  if (m.estSupprime) return '(message supprimé)';
+  if (m.aDesMedias) return '(photo, vidéo ou audio, sans texte)';
+  return '(message vide)';
+}
+
+type RecordDelai = { ms: number; debut: number; ts: number; avec: string; messageAvant: string; messageApres: string };
+
 function chapitre06(conversations: Conversation[], soi: string) {
-  let plusTardif: { ts: number; avec: string; minutes: number } | null = null;
-  let remisInflige: { ms: number; debut: number; ts: number; avec: string } | null = null; // toi -> lent a repondre
-  let remisSubi: { ms: number; debut: number; ts: number; avec: string } | null = null;    // l'autre -> lent a repondre
-  let reponseRapide: { ms: number; ts: number; avec: string } | null = null;
+  let plusTardif: { ts: number; avec: string; minutes: number; message: string } | null = null;
+  let remisInflige: RecordDelai | null = null; // toi -> lent a repondre
+  let remisSubi: RecordDelai | null = null;    // l'autre -> lent a repondre
+  let reponseRapide: RecordDelai | null = null;
   const messagesParJour = new Map<string, number>();
 
   for (const c of conversations) {
@@ -491,8 +563,10 @@ function chapitre06(conversations: Conversation[], soi: string) {
     for (let i = 0; i < c.messages.length; i++) {
       const m = c.messages[i];
       if (m.sender === soi) {
-        const minutes = minutesDansLaJournee(m.ts);
-        if (!plusTardif || minutes > plusTardif.minutes) plusTardif = { ts: m.ts, avec, minutes };
+        const minutes = minutesDansLaNuit(m.ts);
+        if (!plusTardif || minutes > plusTardif.minutes) {
+          plusTardif = { ts: m.ts, avec, minutes, message: apercu(m) };
+        }
       }
       if (i === 0) continue;
       const prec = c.messages[i - 1];
@@ -501,16 +575,20 @@ function chapitre06(conversations: Conversation[], soi: string) {
         if (delta <= 0) continue;
         if (prec.sender !== soi && m.sender === soi) {
           // l'autre a parle, tu reponds : ton delai a toi
-          if (!remisInflige || delta > remisInflige.ms) remisInflige = { ms: delta, debut: prec.ts, ts: m.ts, avec };
+          if (!remisInflige || delta > remisInflige.ms) {
+            remisInflige = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: apercu(prec), messageApres: apercu(m) };
+          }
           // En dessous du seuil, c'est presque toujours le meme envoi coupe en
           // deux messages par Instagram (ex: photo + legende), pas un humain
           // qui a vraiment repondu en une fraction de seconde.
           if (delta >= SEUIL_REPONSE_RAPIDE_MS && (!reponseRapide || delta < reponseRapide.ms)) {
-            reponseRapide = { ms: delta, ts: m.ts, avec };
+            reponseRapide = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: apercu(prec), messageApres: apercu(m) };
           }
         } else if (prec.sender === soi && m.sender !== soi) {
           // tu as parle, l'autre reponds : son delai a lui
-          if (!remisSubi || delta > remisSubi.ms) remisSubi = { ms: delta, debut: prec.ts, ts: m.ts, avec };
+          if (!remisSubi || delta > remisSubi.ms) {
+            remisSubi = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: apercu(prec), messageApres: apercu(m) };
+          }
         }
       }
     }
@@ -525,12 +603,13 @@ function chapitre06(conversations: Conversation[], soi: string) {
    07 — PREMIER ET DERNIER
    ============================================================ */
 function chapitre07(conversations: Conversation[], soi: string) {
-  let premier: { ts: number; avec: string } | null = null;
-  let dernier: { ts: number; avec: string } | null = null;
+  let premier: { ts: number; avec: string; message: string } | null = null;
+  let dernier: { ts: number; avec: string; message: string } | null = null;
   for (const c of conversations) {
+    const avec = c.titre || c.participants.filter((p) => p !== soi).join(', ');
     for (const m of c.messages) {
-      if (!premier || m.ts < premier.ts) premier = { ts: m.ts, avec: c.titre || c.participants.filter((p) => p !== soi).join(', ') };
-      if (!dernier || m.ts > dernier.ts) dernier = { ts: m.ts, avec: c.titre || c.participants.filter((p) => p !== soi).join(', ') };
+      if (!premier || m.ts < premier.ts) premier = { ts: m.ts, avec, message: apercu(m) };
+      if (!dernier || m.ts > dernier.ts) dernier = { ts: m.ts, avec, message: apercu(m) };
     }
   }
   return { premier, dernier };
@@ -621,7 +700,7 @@ function main() {
     console.log(`${c02.actifs.length} groupe(s) actif(s) sur ${c02.totalGroupes} au total.\n`);
     const cat = c02.categories!;
     console.log('QG (le plus vivant)      :', cat.qg?.titre, `— ${cat.qg?.totalMessages} messages`);
-    console.log('Le plus bondé             :', cat.leBondé?.titre, `— ${cat.leBondé?.membres} membres`);
+    console.log('Le plus bondé             :', cat.leBondé?.titre);
     console.log('Tu débites ici            :', cat.tuDebites?.titre, `— toi: ${cat.tuDebites?.toiEnvoyes} messages`);
     console.log('Ton groupe inutile        :', cat.inutile?.titre, `— toi: ${((cat.inutile?.toiPart ?? 0) * 100).toFixed(1)}% des messages (${cat.inutile?.toiEnvoyes}/${cat.inutile?.totalMessages})`);
     console.log('Le ring                   :', cat.leRing ? `${cat.leRing.titre} — ${cat.leRing.insultes} vannes/insultes (${(cat.leRing.tauxInsultes * 100).toFixed(1)}% des messages)` : '(aucune insulte détectée, catégorie vide)');
@@ -630,9 +709,12 @@ function main() {
   console.log('\n' + '='.repeat(60));
   console.log('03 — QUI NE TE SUIT PAS EN RETOUR');
   console.log('='.repeat(60));
-  const c03 = chrono('calcul 03', chapitre03);
-  console.log(`${c03.length} comptes.`);
-  console.log(c03.slice(0, 30).join(', ') + (c03.length > 30 ? `, … (+${c03.length - 30})` : ''));
+  const c03 = chrono('calcul 03', () => chapitre03(conversations, soi));
+  console.log(`${c03.total.length} comptes au total (following - followers).`);
+  console.log(`  dont ${c03.avecDM.length} à qui tu as vraiment envoyé un DM :`);
+  console.log('  ' + c03.avecDM.join(', '));
+  console.log(`  et ${c03.sansDM.length} jamais contactés (comptes publics probables, ex: marques, artistes) :`);
+  console.log('  ' + c03.sansDM.slice(0, 20).join(', ') + (c03.sansDM.length > 20 ? `, … (+${c03.sansDM.length - 20})` : ''));
 
   console.log('\n' + '='.repeat(60));
   console.log('04 — TES MOTS (top 15, hors mots vides)');
@@ -665,10 +747,25 @@ function main() {
   console.log('06 — TES CINQ RECORDS');
   console.log('='.repeat(60));
   const c06 = chrono('calcul 06', () => chapitre06(conversations, soi));
-  if (c06.plusTardif) console.log('Plus tardif        :', formatDate(c06.plusTardif.ts), 'avec', c06.plusTardif.avec);
-  if (c06.remisInflige) console.log('Remis le + long (toi)   :', formatDureeDecoupee(c06.remisInflige.debut, c06.remisInflige.ts), 'avec', c06.remisInflige.avec, '—', formatDate(c06.remisInflige.ts));
-  if (c06.remisSubi) console.log('Remis le + long (subi)  :', formatDureeDecoupee(c06.remisSubi.debut, c06.remisSubi.ts), 'avec', c06.remisSubi.avec, '—', formatDate(c06.remisSubi.ts));
-  if (c06.reponseRapide) console.log('Réponse la + rapide     :', formatDureeCourte(c06.reponseRapide.ms), 'avec', c06.reponseRapide.avec);
+  if (c06.plusTardif) {
+    console.log('Plus tardif        :', formatDate(c06.plusTardif.ts), 'avec', c06.plusTardif.avec);
+    console.log('   → «', c06.plusTardif.message, '»');
+  }
+  if (c06.remisInflige) {
+    console.log('Remis le + long (toi)   :', formatDureeDecoupee(c06.remisInflige.debut, c06.remisInflige.ts), 'avec', c06.remisInflige.avec, '—', formatDate(c06.remisInflige.ts));
+    console.log('   avant  → «', c06.remisInflige.messageAvant, '»');
+    console.log('   réponse → «', c06.remisInflige.messageApres, '»');
+  }
+  if (c06.remisSubi) {
+    console.log('Remis le + long (subi)  :', formatDureeDecoupee(c06.remisSubi.debut, c06.remisSubi.ts), 'avec', c06.remisSubi.avec, '—', formatDate(c06.remisSubi.ts));
+    console.log('   avant  → «', c06.remisSubi.messageAvant, '»');
+    console.log('   réponse → «', c06.remisSubi.messageApres, '»');
+  }
+  if (c06.reponseRapide) {
+    console.log('Réponse la + rapide     :', formatDureeCourte(c06.reponseRapide.ms), 'avec', c06.reponseRapide.avec);
+    console.log('   avant  → «', c06.reponseRapide.messageAvant, '»');
+    console.log('   réponse → «', c06.reponseRapide.messageApres, '»');
+  }
   if (c06.jourRecord) {
     // La cle interne est en AAAA-MM-JJ (rapide a produire) ; on ne reformate
     // en francais qu'une fois, pour l'unique ligne affichee.
@@ -681,8 +778,14 @@ function main() {
   console.log('07 — PREMIER ET DERNIER');
   console.log('='.repeat(60));
   const c07 = chrono('calcul 07', () => chapitre07(conversations, soi));
-  if (c07.premier) console.log('Premier :', formatDate(c07.premier.ts), '—', c07.premier.avec);
-  if (c07.dernier) console.log('Dernier :', formatDate(c07.dernier.ts), '—', c07.dernier.avec);
+  if (c07.premier) {
+    console.log('Premier :', formatDate(c07.premier.ts), '—', c07.premier.avec);
+    console.log('   → «', c07.premier.message, '»');
+  }
+  if (c07.dernier) {
+    console.log('Dernier :', formatDate(c07.dernier.ts), '—', c07.dernier.avec);
+    console.log('   → «', c07.dernier.message, '»');
+  }
 
   console.log('\n' + '='.repeat(60));
   console.log('08 — PROFIL RELATIONNEL (axes bruts, usage interne)');
