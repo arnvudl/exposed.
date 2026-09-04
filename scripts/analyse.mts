@@ -50,6 +50,32 @@ function formatDureeJours(ms: number): string {
   return `${heures.toFixed(1)} heures`;
 }
 
+/** Decoupe une duree en annees / mois / jours, calcule sur le vrai
+    calendrier (pas une division par 365.25) : on part de la date de debut et
+    on retire des annees puis des mois entiers avant de compter les jours
+    restants, donc « 4 ans, 1 mois, 3 jours » veut vraiment dire ça. */
+function formatDureeDecoupee(debutMs: number, finMs: number): string {
+  let d = new Date(debutMs);
+  const fin = new Date(finMs);
+
+  let annees = fin.getUTCFullYear() - d.getUTCFullYear();
+  let mois = fin.getUTCMonth() - d.getUTCMonth();
+  let jours = fin.getUTCDate() - d.getUTCDate();
+
+  if (jours < 0) {
+    mois -= 1;
+    const dernierJourMoisPrecedent = new Date(Date.UTC(fin.getUTCFullYear(), fin.getUTCMonth(), 0)).getUTCDate();
+    jours += dernierJourMoisPrecedent;
+  }
+  if (mois < 0) { annees -= 1; mois += 12; }
+
+  const parties: string[] = [];
+  if (annees > 0) parties.push(`${annees} an${annees > 1 ? 's' : ''}`);
+  if (mois > 0) parties.push(`${mois} mois`);
+  if (jours > 0 || parties.length === 0) parties.push(`${jours} jour${jours > 1 ? 's' : ''}`);
+  return parties.join(', ');
+}
+
 function formatDureeCourte(ms: number): string {
   if (ms < 1000) return `${ms} ms`;
   const s = ms / 1000;
@@ -430,6 +456,14 @@ function minutesDansLaJournee(ts: number): number {
   return h * 60 + m;
 }
 
+// fr-CA formate en AAAA-MM-JJ : une cle triable, sans reconstruire un
+// formateur a chaque appel comme le fait `toLocaleDateString` par defaut.
+// Sur 453 000 messages, cette seule reconstruction valait 40 secondes.
+const FMT_JOUR = new Intl.DateTimeFormat('fr-CA', {
+  timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+function jourCle(ts: number): string { return FMT_JOUR.format(new Date(ts)); }
+
 // En dessous, une "reponse" est presque toujours le meme envoi Instagram
 // coupe en plusieurs messages (photo + legende, deux pieces jointes...),
 // jamais un vrai aller-retour entre deux personnes.
@@ -437,8 +471,8 @@ const SEUIL_REPONSE_RAPIDE_MS = 2000;
 
 function chapitre06(conversations: Conversation[], soi: string) {
   let plusTardif: { ts: number; avec: string; minutes: number } | null = null;
-  let remisInflige: { ms: number; ts: number; avec: string } | null = null; // toi -> lent a repondre
-  let remisSubi: { ms: number; ts: number; avec: string } | null = null;    // l'autre -> lent a repondre
+  let remisInflige: { ms: number; debut: number; ts: number; avec: string } | null = null; // toi -> lent a repondre
+  let remisSubi: { ms: number; debut: number; ts: number; avec: string } | null = null;    // l'autre -> lent a repondre
   let reponseRapide: { ms: number; ts: number; avec: string } | null = null;
   const messagesParJour = new Map<string, number>();
 
@@ -448,7 +482,7 @@ function chapitre06(conversations: Conversation[], soi: string) {
     const avec = est1to1 ? identifiantAffichable(c, autres[0]) : c.titre;
 
     for (const m of c.messages) {
-      const jour = new Date(m.ts).toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' });
+      const jour = jourCle(m.ts);
       messagesParJour.set(jour, (messagesParJour.get(jour) ?? 0) + 1);
     }
 
@@ -467,7 +501,7 @@ function chapitre06(conversations: Conversation[], soi: string) {
         if (delta <= 0) continue;
         if (prec.sender !== soi && m.sender === soi) {
           // l'autre a parle, tu reponds : ton delai a toi
-          if (!remisInflige || delta > remisInflige.ms) remisInflige = { ms: delta, ts: m.ts, avec };
+          if (!remisInflige || delta > remisInflige.ms) remisInflige = { ms: delta, debut: prec.ts, ts: m.ts, avec };
           // En dessous du seuil, c'est presque toujours le meme envoi coupe en
           // deux messages par Instagram (ex: photo + legende), pas un humain
           // qui a vraiment repondu en une fraction de seconde.
@@ -476,7 +510,7 @@ function chapitre06(conversations: Conversation[], soi: string) {
           }
         } else if (prec.sender === soi && m.sender !== soi) {
           // tu as parle, l'autre reponds : son delai a lui
-          if (!remisSubi || delta > remisSubi.ms) remisSubi = { ms: delta, ts: m.ts, avec };
+          if (!remisSubi || delta > remisSubi.ms) remisSubi = { ms: delta, debut: prec.ts, ts: m.ts, avec };
         }
       }
     }
@@ -554,22 +588,32 @@ function chapitre08(conversations: Conversation[], soi: string) {
 /* ============================================================
    MAIN
    ============================================================ */
+/* Chrono par etape : sert a savoir OU va le temps avant de porter cette
+   logique au navigateur (un budget de 60s en Node peut vouloir dire tout
+   autre chose une fois dans un Web Worker). */
+function chrono<T>(label: string, fn: () => T): T {
+  const debut = Date.now();
+  const res = fn();
+  console.log(`  [${((Date.now() - debut) / 1000).toFixed(2)}s] ${label}`);
+  return res;
+}
+
 function main() {
   const t0 = Date.now();
-  const conversations = chargerConversations();
+  const conversations = chrono('chargement + parsing JSON', chargerConversations);
   const soi = detecterSoi(conversations);
   console.log(`Chargé : ${conversations.length} conversations. Toi = "${soi}".\n`);
 
   console.log('='.repeat(60));
   console.log('01 — TON CERCLE RÉEL (top 10, 1:1)');
   console.log('='.repeat(60));
-  const c01 = chapitre01(conversations, soi);
+  const c01 = chrono('calcul 01', () => chapitre01(conversations, soi));
   console.table(c01);
 
   console.log('\n' + '='.repeat(60));
   console.log('02 — TES GROUPES');
   console.log('='.repeat(60));
-  const c02 = chapitre02(conversations, soi);
+  const c02 = chrono('calcul 02', () => chapitre02(conversations, soi));
   if (c02.abandon) {
     console.log(`Aucun groupe actif (≥${SEUIL_MESSAGES_ACTIF} messages, actif dans les ${SEUIL_JOURS_RECENCE} derniers jours) sur ${c02.totalGroupes} groupes au total.`);
     console.log('→ Affiche à prévoir : « Tes groupes à l’abandon ».');
@@ -586,14 +630,15 @@ function main() {
   console.log('\n' + '='.repeat(60));
   console.log('03 — QUI NE TE SUIT PAS EN RETOUR');
   console.log('='.repeat(60));
-  const c03 = chapitre03();
+  const c03 = chrono('calcul 03', chapitre03);
   console.log(`${c03.length} comptes.`);
   console.log(c03.slice(0, 30).join(', ') + (c03.length > 30 ? `, … (+${c03.length - 30})` : ''));
 
   console.log('\n' + '='.repeat(60));
   console.log('04 — TES MOTS (top 15, hors mots vides)');
   console.log('='.repeat(60));
-  console.table(chapitre04(conversations, soi).map(([mot, n]) => ({ mot, occurrences: n })));
+  const c04 = chrono('calcul 04', () => chapitre04(conversations, soi));
+  console.table(c04.map(([mot, n]) => ({ mot, occurrences: n })));
 
   console.log('\n' + '='.repeat(60));
   console.log('05 — TES INSIDE JOKES (top 10 uniquement)');
@@ -606,7 +651,7 @@ function main() {
     const id = identifiantAffichable(c, autres[0]);
     if (c01.some((l) => l.qui === id)) top10Dossiers.add(c.dossier);
   }
-  const c05 = chapitre05(conversations, soi, top10Dossiers);
+  const c05 = chrono('calcul 05 (n-grammes)', () => chapitre05(conversations, soi, top10Dossiers));
   if (c05.length === 0) {
     console.log('Aucune expression assez concentrée trouvée (seuils : ≥5 occurrences, ≥90% dans une conv du top 10).');
   } else {
@@ -619,24 +664,30 @@ function main() {
   console.log('\n' + '='.repeat(60));
   console.log('06 — TES CINQ RECORDS');
   console.log('='.repeat(60));
-  const c06 = chapitre06(conversations, soi);
+  const c06 = chrono('calcul 06', () => chapitre06(conversations, soi));
   if (c06.plusTardif) console.log('Plus tardif        :', formatDate(c06.plusTardif.ts), 'avec', c06.plusTardif.avec);
-  if (c06.remisInflige) console.log('Remis le + long (toi)   :', formatDureeJours(c06.remisInflige.ms), 'avec', c06.remisInflige.avec, '—', formatDate(c06.remisInflige.ts));
-  if (c06.remisSubi) console.log('Remis le + long (subi)  :', formatDureeJours(c06.remisSubi.ms), 'avec', c06.remisSubi.avec, '—', formatDate(c06.remisSubi.ts));
+  if (c06.remisInflige) console.log('Remis le + long (toi)   :', formatDureeDecoupee(c06.remisInflige.debut, c06.remisInflige.ts), 'avec', c06.remisInflige.avec, '—', formatDate(c06.remisInflige.ts));
+  if (c06.remisSubi) console.log('Remis le + long (subi)  :', formatDureeDecoupee(c06.remisSubi.debut, c06.remisSubi.ts), 'avec', c06.remisSubi.avec, '—', formatDate(c06.remisSubi.ts));
   if (c06.reponseRapide) console.log('Réponse la + rapide     :', formatDureeCourte(c06.reponseRapide.ms), 'avec', c06.reponseRapide.avec);
-  if (c06.jourRecord) console.log('Journée la + intense    :', c06.jourRecord[0], '—', c06.jourRecord[1], 'messages');
+  if (c06.jourRecord) {
+    // La cle interne est en AAAA-MM-JJ (rapide a produire) ; on ne reformate
+    // en francais qu'une fois, pour l'unique ligne affichee.
+    const [an, mo, jr] = c06.jourRecord[0].split('-').map(Number);
+    const label = new Date(Date.UTC(an, mo - 1, jr)).toLocaleDateString('fr-FR', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
+    console.log('Journée la + intense    :', label, '—', c06.jourRecord[1], 'messages');
+  }
 
   console.log('\n' + '='.repeat(60));
   console.log('07 — PREMIER ET DERNIER');
   console.log('='.repeat(60));
-  const c07 = chapitre07(conversations, soi);
+  const c07 = chrono('calcul 07', () => chapitre07(conversations, soi));
   if (c07.premier) console.log('Premier :', formatDate(c07.premier.ts), '—', c07.premier.avec);
   if (c07.dernier) console.log('Dernier :', formatDate(c07.dernier.ts), '—', c07.dernier.avec);
 
   console.log('\n' + '='.repeat(60));
   console.log('08 — PROFIL RELATIONNEL (axes bruts, usage interne)');
   console.log('='.repeat(60));
-  const c08 = chapitre08(conversations, soi);
+  const c08 = chrono('calcul 08', () => chapitre08(conversations, soi));
   console.log('Qui lance (% de convs initiées par toi) :', `${(c08.axeQuiLance * 100).toFixed(1)}%`);
   console.log('Ampleur (partenaires actifs, ≥5 msg)     :', c08.axeAmpleur);
   console.log('Vitesse (délai médian de réponse)        :', `${c08.axeVitesseMinutes.toFixed(1)} min`);
