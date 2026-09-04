@@ -343,13 +343,12 @@ function nomsDepuisRelations(cheminFichier: string, cle: string): Set<string> {
   return noms;
 }
 
-/* La liste brute contient forcement des comptes publics/marques qui n'ont
-   aucune raison de suivre en retour (un artiste, une marque de sport...) :
-   les compter comme une « deception » n'a pas de sens. On la separe donc en
-   deux, uniquement a partir de donnees deja disponibles en local (aucun
-   appel reseau, aucun site tiers) : les comptes avec qui tu as vraiment
-   echange des DM sont ceux qui comptent vraiment ici. */
-function chapitre03(conversations: Conversation[], soi: string) {
+/* Deux simples differences d'ensembles, dans les deux sens. Rien d'autre :
+   ni historique de messages, ni appel reseau, ni service tiers. Un compte
+   public qui ne suit pas en retour reste dans la liste, parce que c'est la
+   verite de tes donnees, et qu'aucun champ de l'export Instagram ne permet
+   de deviner qu'un compte est une marque ou une celebrite. */
+function chapitre03() {
   // followers_1.json, followers_2.json... s'il y en a plusieurs.
   const fichiersFollowers = fs.readdirSync(CONNECTIONS).filter((f) => /^followers_\d+\.json$/.test(f));
   const followers = new Set<string>();
@@ -357,20 +356,12 @@ function chapitre03(conversations: Conversation[], soi: string) {
     for (const n of nomsDepuisRelations(path.join(CONNECTIONS, f), 'relationships_followers')) followers.add(n);
   }
   const following = nomsDepuisRelations(path.join(CONNECTIONS, 'following.json'), 'relationships_following');
-  const neSuiventPas = [...following].filter((n) => !followers.has(n)).sort();
-
-  const contactsDM = new Set<string>();
-  for (const c of conversations) {
-    const autres = c.participants.filter((p) => p !== soi);
-    if (c.participants.length !== 2 || autres.length !== 1) continue;
-    const id = identifiantAffichable(c, autres[0]);
-    if (id.startsWith('@')) contactsDM.add(id.slice(1).toLowerCase());
-  }
 
   return {
-    total: neSuiventPas,
-    avecDM: neSuiventPas.filter((n) => contactsDM.has(n)),
-    sansDM: neSuiventPas.filter((n) => !contactsDM.has(n)),
+    neSuiventPas: [...following].filter((n) => !followers.has(n)).sort(),
+    tuNeSuisPas: [...followers].filter((n) => !following.has(n)).sort(),
+    followers: followers.size,
+    following: following.size,
   };
 }
 
@@ -393,7 +384,7 @@ const MOTS_VIDES = new Set([
   // Mots frequents chez n'importe qui, pas des tics personnels : « rien du
   // tout » ou « il faut » se disent partout, ce n'est pas ta signature.
   'tout', 'tous', 'toute', 'toutes', 'même', 'meme', 'rien', 'là', 'la',
-  'faut', 'fallait', 'faudrait', 'quand',
+  'faut', 'fallait', 'faudrait', 'quand', 'parce', 'fais',
   // Contractions courantes : le tokeniseur les garde entieres maintenant
   // (« j'ai » plutot que « j » + « ai »), donc elles ont besoin de leur
   // propre entree ici.
@@ -432,71 +423,7 @@ function chapitre04(conversations: Conversation[], soi: string) {
 }
 
 /* ============================================================
-   05 — TES INSIDE JOKES
-   Une expression (2 a 4 mots), repetee au moins 5 fois, concentree a 90 %+
-   dans UNE conversation, et cette conversation fait partie de ton top 10
-   (chapitre 01). C'est ce qui la distingue du 04 : un mot qu'on dit partout
-   n'est pas une blague, une expression qu'on ne dit qu'a une personne l'est.
-   ============================================================ */
-function ngrammes(tokens: string[], n: number): string[] {
-  const res: string[] = [];
-  for (let i = 0; i + n <= tokens.length; i++) res.push(tokens.slice(i, i + n).join(' '));
-  return res;
-}
-
-function chapitre05(conversations: Conversation[], soi: string, top10Dossiers: Set<string>) {
-  // Frequence globale de chaque expression, tous messages confondus.
-  const globalPar = new Map<string, number>();
-  const parConversation = new Map<string, Map<string, number>>();
-
-  for (const c of conversations) {
-    const local = new Map<string, number>();
-    for (const m of c.messages) {
-      if (!m.content) continue;
-      const tokens = tokeniser(m.content);
-      // Les bigrammes (2 mots) sont trop courts pour distinguer une vraie
-      // blague recurrente d'une coincidence ou d'un nom de marque repete
-      // (« go pro »). A partir de 3 mots, une phrase qui revient devient
-      // beaucoup plus specifique.
-      for (const n of [3, 4]) {
-        for (const g of ngrammes(tokens, n)) {
-          const mots = g.split(' ');
-          if (mots.every((mot) => MOTS_VIDES.has(mot))) continue;
-          // « eeeee eeeee eeeee » n'est pas une phrase, c'est le meme mot
-          // tape plusieurs fois de suite.
-          if (new Set(mots).size === 1) continue;
-          local.set(g, (local.get(g) ?? 0) + 1);
-          globalPar.set(g, (globalPar.get(g) ?? 0) + 1);
-        }
-      }
-    }
-    parConversation.set(c.dossier, local);
-  }
-
-  type Candidate = { dossier: string; titre: string; expression: string; occurrences: number; concentration: number };
-  const candidats: Candidate[] = [];
-
-  for (const c of conversations) {
-    if (!top10Dossiers.has(c.dossier)) continue;
-    const local = parConversation.get(c.dossier)!;
-    let meilleur: Candidate | null = null;
-    for (const [expr, n] of local.entries()) {
-      if (n < 5) continue;
-      const total = globalPar.get(expr) ?? n;
-      const concentration = n / total;
-      if (concentration < 0.9) continue;
-      if (!meilleur || n > meilleur.occurrences) {
-        meilleur = { dossier: c.dossier, titre: c.titre, expression: expr, occurrences: n, concentration };
-      }
-    }
-    if (meilleur) candidats.push(meilleur);
-  }
-
-  return candidats.sort((a, b) => b.occurrences - a.occurrences);
-}
-
-/* ============================================================
-   06 — TES CINQ RECORDS  (1:1 uniquement, pour un « avec qui » net)
+   05 — TES CINQ RECORDS  (1:1 uniquement, pour un « avec qui » net)
    ============================================================ */
 // Formatter reutilise : en construire un par message (au lieu d'un par
 // comparaison) fait passer le chapitre de plusieurs dizaines de secondes a
@@ -541,7 +468,7 @@ function apercu(m: Message | undefined): string {
 
 type RecordDelai = { ms: number; debut: number; ts: number; avec: string; messageAvant: string; messageApres: string };
 
-function chapitre06(conversations: Conversation[], soi: string) {
+function chapitre05(conversations: Conversation[], soi: string) {
   let plusTardif: { ts: number; avec: string; minutes: number; message: string } | null = null;
   let remisInflige: RecordDelai | null = null; // toi -> lent a repondre
   let remisSubi: RecordDelai | null = null;    // l'autre -> lent a repondre
@@ -600,9 +527,9 @@ function chapitre06(conversations: Conversation[], soi: string) {
 }
 
 /* ============================================================
-   07 — PREMIER ET DERNIER
+   06 — PREMIER ET DERNIER
    ============================================================ */
-function chapitre07(conversations: Conversation[], soi: string) {
+function chapitre06(conversations: Conversation[], soi: string) {
   let premier: { ts: number; avec: string; message: string } | null = null;
   let dernier: { ts: number; avec: string; message: string } | null = null;
   for (const c of conversations) {
@@ -616,12 +543,12 @@ function chapitre07(conversations: Conversation[], soi: string) {
 }
 
 /* ============================================================
-   08 — TON PROFIL RELATIONNEL (4 axes, usage interne uniquement)
+   07 — TON PROFIL RELATIONNEL (4 axes, usage interne uniquement)
    Le script les imprime pour qu'on regarde de vrais chiffres et qu'on
    ecrive ensemble la regle de classement. Le site, lui, n'affichera JAMAIS
    ces nombres : uniquement le profil final en clair.
    ============================================================ */
-function chapitre08(conversations: Conversation[], soi: string) {
+function chapitre07(conversations: Conversation[], soi: string) {
   const uns1to1 = conversations.filter((c) => {
     const autres = c.participants.filter((p) => p !== soi);
     return c.participants.length === 2 && autres.length === 1 && autres[0] !== COMPTE_SUPPRIME;
@@ -709,12 +636,12 @@ function main() {
   console.log('\n' + '='.repeat(60));
   console.log('03 — QUI NE TE SUIT PAS EN RETOUR');
   console.log('='.repeat(60));
-  const c03 = chrono('calcul 03', () => chapitre03(conversations, soi));
-  console.log(`${c03.total.length} comptes au total (following - followers).`);
-  console.log(`  dont ${c03.avecDM.length} à qui tu as vraiment envoyé un DM :`);
-  console.log('  ' + c03.avecDM.join(', '));
-  console.log(`  et ${c03.sansDM.length} jamais contactés (comptes publics probables, ex: marques, artistes) :`);
-  console.log('  ' + c03.sansDM.slice(0, 20).join(', ') + (c03.sansDM.length > 20 ? `, … (+${c03.sansDM.length - 20})` : ''));
+  const c03 = chrono('calcul 03', chapitre03);
+  console.log(`${c03.following} abonnements, ${c03.followers} abonnés.\n`);
+  console.log(`Tu les suis, ils ne te suivent pas : ${c03.neSuiventPas.length} comptes`);
+  console.log('  ' + c03.neSuiventPas.slice(0, 25).join(', ') + (c03.neSuiventPas.length > 25 ? `, … (+${c03.neSuiventPas.length - 25})` : ''));
+  console.log(`\nIls te suivent, tu ne les suis pas : ${c03.tuNeSuisPas.length} comptes`);
+  console.log('  ' + c03.tuNeSuisPas.slice(0, 25).join(', ') + (c03.tuNeSuisPas.length > 25 ? `, … (+${c03.tuNeSuisPas.length - 25})` : ''));
 
   console.log('\n' + '='.repeat(60));
   console.log('04 — TES MOTS (top 15, hors mots vides)');
@@ -723,78 +650,57 @@ function main() {
   console.table(c04.map(([mot, n]) => ({ mot, occurrences: n })));
 
   console.log('\n' + '='.repeat(60));
-  console.log('05 — TES INSIDE JOKES (top 10 uniquement)');
+  console.log('05 — TES CINQ RECORDS');
   console.log('='.repeat(60));
-  const top10Dossiers = new Set<string>();
-  // Retrouver le dossier de chaque ligne du chapitre 01.
-  for (const c of conversations) {
-    const autres = c.participants.filter((p) => p !== soi);
-    if (c.participants.length !== 2 || autres.length !== 1) continue;
-    const id = identifiantAffichable(c, autres[0]);
-    if (c01.some((l) => l.qui === id)) top10Dossiers.add(c.dossier);
+  const c05 = chrono('calcul 05', () => chapitre05(conversations, soi));
+  if (c05.plusTardif) {
+    console.log('Plus tardif        :', formatDate(c05.plusTardif.ts), 'avec', c05.plusTardif.avec);
+    console.log('   → «', c05.plusTardif.message, '»');
   }
-  const c05 = chrono('calcul 05 (n-grammes)', () => chapitre05(conversations, soi, top10Dossiers));
-  if (c05.length === 0) {
-    console.log('Aucune expression assez concentrée trouvée (seuils : ≥5 occurrences, ≥90% dans une conv du top 10).');
-  } else {
-    console.table(c05.slice(0, 10).map((c) => ({
-      conversation: c.titre || c.dossier, expression: c.expression,
-      occurrences: c.occurrences, concentration: `${(c.concentration * 100).toFixed(0)}%`,
-    })));
+  if (c05.remisInflige) {
+    console.log('Remis le + long (toi)   :', formatDureeDecoupee(c05.remisInflige.debut, c05.remisInflige.ts), 'avec', c05.remisInflige.avec, '—', formatDate(c05.remisInflige.ts));
+    console.log('   avant  → «', c05.remisInflige.messageAvant, '»');
+    console.log('   réponse → «', c05.remisInflige.messageApres, '»');
   }
-
-  console.log('\n' + '='.repeat(60));
-  console.log('06 — TES CINQ RECORDS');
-  console.log('='.repeat(60));
-  const c06 = chrono('calcul 06', () => chapitre06(conversations, soi));
-  if (c06.plusTardif) {
-    console.log('Plus tardif        :', formatDate(c06.plusTardif.ts), 'avec', c06.plusTardif.avec);
-    console.log('   → «', c06.plusTardif.message, '»');
+  if (c05.remisSubi) {
+    console.log('Remis le + long (subi)  :', formatDureeDecoupee(c05.remisSubi.debut, c05.remisSubi.ts), 'avec', c05.remisSubi.avec, '—', formatDate(c05.remisSubi.ts));
+    console.log('   avant  → «', c05.remisSubi.messageAvant, '»');
+    console.log('   réponse → «', c05.remisSubi.messageApres, '»');
   }
-  if (c06.remisInflige) {
-    console.log('Remis le + long (toi)   :', formatDureeDecoupee(c06.remisInflige.debut, c06.remisInflige.ts), 'avec', c06.remisInflige.avec, '—', formatDate(c06.remisInflige.ts));
-    console.log('   avant  → «', c06.remisInflige.messageAvant, '»');
-    console.log('   réponse → «', c06.remisInflige.messageApres, '»');
+  if (c05.reponseRapide) {
+    console.log('Réponse la + rapide     :', formatDureeCourte(c05.reponseRapide.ms), 'avec', c05.reponseRapide.avec);
+    console.log('   avant  → «', c05.reponseRapide.messageAvant, '»');
+    console.log('   réponse → «', c05.reponseRapide.messageApres, '»');
   }
-  if (c06.remisSubi) {
-    console.log('Remis le + long (subi)  :', formatDureeDecoupee(c06.remisSubi.debut, c06.remisSubi.ts), 'avec', c06.remisSubi.avec, '—', formatDate(c06.remisSubi.ts));
-    console.log('   avant  → «', c06.remisSubi.messageAvant, '»');
-    console.log('   réponse → «', c06.remisSubi.messageApres, '»');
-  }
-  if (c06.reponseRapide) {
-    console.log('Réponse la + rapide     :', formatDureeCourte(c06.reponseRapide.ms), 'avec', c06.reponseRapide.avec);
-    console.log('   avant  → «', c06.reponseRapide.messageAvant, '»');
-    console.log('   réponse → «', c06.reponseRapide.messageApres, '»');
-  }
-  if (c06.jourRecord) {
+  if (c05.jourRecord) {
     // La cle interne est en AAAA-MM-JJ (rapide a produire) ; on ne reformate
     // en francais qu'une fois, pour l'unique ligne affichee.
-    const [an, mo, jr] = c06.jourRecord[0].split('-').map(Number);
+    const [an, mo, jr] = c05.jourRecord[0].split('-').map(Number);
     const label = new Date(Date.UTC(an, mo - 1, jr)).toLocaleDateString('fr-FR', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
-    console.log('Journée la + intense    :', label, '—', c06.jourRecord[1], 'messages');
+    console.log('Journée la + intense    :', label, '—', c05.jourRecord[1], 'messages');
   }
 
   console.log('\n' + '='.repeat(60));
-  console.log('07 — PREMIER ET DERNIER');
+  console.log('06 — PREMIER ET DERNIER');
+  console.log('='.repeat(60));
+  const c06 = chrono('calcul 06', () => chapitre06(conversations, soi));
+  if (c06.premier) {
+    console.log('Premier :', formatDate(c06.premier.ts), '—', c06.premier.avec);
+    console.log('   → «', c06.premier.message, '»');
+  }
+  if (c06.dernier) {
+    console.log('Dernier :', formatDate(c06.dernier.ts), '—', c06.dernier.avec);
+    console.log('   → «', c06.dernier.message, '»');
+  }
+
+  console.log('\n' + '='.repeat(60));
+  console.log('07 — PROFIL RELATIONNEL (axes bruts, usage interne)');
   console.log('='.repeat(60));
   const c07 = chrono('calcul 07', () => chapitre07(conversations, soi));
-  if (c07.premier) {
-    console.log('Premier :', formatDate(c07.premier.ts), '—', c07.premier.avec);
-    console.log('   → «', c07.premier.message, '»');
-  }
-  if (c07.dernier) {
-    console.log('Dernier :', formatDate(c07.dernier.ts), '—', c07.dernier.avec);
-    console.log('   → «', c07.dernier.message, '»');
-  }
-
-  console.log('\n' + '='.repeat(60));
-  console.log('08 — PROFIL RELATIONNEL (axes bruts, usage interne)');
-  console.log('='.repeat(60));
-  const c08 = chrono('calcul 08', () => chapitre08(conversations, soi));
-  console.log('Qui lance (% de convs initiées par toi) :', `${(c08.axeQuiLance * 100).toFixed(1)}%`);
-  console.log('Ampleur (partenaires actifs, ≥5 msg)     :', c08.axeAmpleur);
-  console.log('Vitesse (délai médian de réponse)        :', `${c08.axeVitesseMinutes.toFixed(1)} min`);
-  console.log('Longueur (taille médiane d’un message)   :', `${c08.axeLongueurCaracteres.toFixed(0)} caractères`);
+  console.log('Qui lance (% de convs initiées par toi) :', `${(c07.axeQuiLance * 100).toFixed(1)}%`);
+  console.log('Ampleur (partenaires actifs, ≥5 msg)     :', c07.axeAmpleur);
+  console.log('Vitesse (délai médian de réponse)        :', `${c07.axeVitesseMinutes.toFixed(1)} min`);
+  console.log('Longueur (taille médiane d’un message)   :', `${c07.axeLongueurCaracteres.toFixed(0)} caractères`);
 
   console.log(`\n(terminé en ${((Date.now() - t0) / 1000).toFixed(1)}s)`);
 }

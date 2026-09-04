@@ -1,6 +1,12 @@
 import type { DonneesAffiche } from '@/components/Affiche';
 
-/* Les huit chapitres du dossier.
+/* Les sept chapitres du dossier.
+
+   Les « inside jokes » ont ete retirees : detecter une vraie blague interne
+   demande de comprendre le sens, pas seulement de compter des repetitions.
+   Sans ca, le resultat melange de vraies blagues, des noms de marque et des
+   fragments de phrase, et une affiche qui se trompe une fois sur deux abime
+   la confiance dans les six autres.
 
    Deux decisions de contenu, prises ensemble :
 
@@ -64,17 +70,6 @@ export const revelations: DonneesAffiche[] = [
   },
   {
     piece: 'Chapitre 05',
-    titre: 'Tes inside jokes',
-    chiffre: '#CTJMFTDH',
-    note: '41 fois, et seulement dans cette conversation.',
-    ton: 5,
-    formes: [
-      { nom: 'disques', w: 50, dx: -18, ton: 'moyen' },
-      { nom: 'stries', w: 84 },
-    ],
-  },
-  {
-    piece: 'Chapitre 06',
     titre: 'Tes cinq records',
     chiffre: '4 h 12',
     note: 'le plus tardif. Puis le plus long, le plus rapide, le plus bavard.',
@@ -85,7 +80,7 @@ export const revelations: DonneesAffiche[] = [
     ],
   },
   {
-    piece: 'Chapitre 07',
+    piece: 'Chapitre 06',
     titre: 'Premier et dernier',
     paire: [
       { k: 'Premier', v: '12 janvier, 8 h 04' },
@@ -99,7 +94,7 @@ export const revelations: DonneesAffiche[] = [
     ],
   },
   {
-    piece: 'Chapitre 08',
+    piece: 'Chapitre 07',
     titre: 'Ton profil relationnel',
     chiffre: 'Le Pilier',
     note: 'Quatre axes, un profil. La dernière page du dossier.',
@@ -113,7 +108,7 @@ export const revelations: DonneesAffiche[] = [
 
 /** L'affiche du hero. Un vrai composant produit, pas un faux ecran. */
 export const afficheHero: DonneesAffiche = {
-  piece: 'Chapitre 06 · Records',
+  piece: 'Chapitre 05 · Records',
   titre: 'Ta journée la plus intense',
   chiffre: '2 847',
   note: 'avec @lena.mrt, qui n’est pas dans tes close friends.',

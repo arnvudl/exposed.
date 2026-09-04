@@ -44,7 +44,7 @@ export default function Accueil() {
           <div>
             <div className={s.dossierStep}>
               <div>
-                <h2 className="t-lg reveal">Huit chapitres.</h2>
+                <h2 className="t-lg reveal">Sept chapitres.</h2>
                 <p className="lede reveal" style={{ '--d': '80ms', marginTop: '1rem' } as Style}>
                   Tes dix personnes, tes groupes, tes mots, tes records. Et ton profil à la fin.
                 </p>
@@ -83,7 +83,7 @@ export default function Accueil() {
         <div className={`wrap ${s.revealsHead}`}>
           <p className="kicker">Ce que tu vas lire</p>
           <h2 id="rev-h" className="t-lg reveal" style={{ marginTop: '1rem' }}>
-            Les huit chapitres.
+            Les sept chapitres.
           </h2>
         </div>
 

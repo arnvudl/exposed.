@@ -53,7 +53,7 @@ texte d'une affiche est toujours noir. Aucune exception, aucun texte clair sur c
 | `--t2` | `#F0803C` | Tes groupes |
 | `--t3` | `#5C8CEA` | Qui ne te suit pas en retour |
 | `--t4` | `#5FA85C` | Ce que tu dis vraiment |
-| `--t5` | `#BE7ACD` | Tes inside jokes |
+| `--t5` | `#BE7ACD` | *(libre — servait aux inside jokes, chapitre retiré)* |
 | `--t6` | `#E9BE3C` | Tes cinq records |
 | `--t7` | `#2F9AA8` | Premier et dernier |
 | `--t8` | `#C4703A` | Ton profil relationnel |
