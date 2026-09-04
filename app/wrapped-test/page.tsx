@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { EvenementAnalyse } from '@/lib/wrapped/analyser';
 import type { chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07 } from '@/lib/wrapped/chapitres';
 import { formatDate, formatDureeDecoupee, formatDureeCourte } from '@/lib/wrapped/format';
+import type { ZipEnMemoire } from '@/lib/wrapped/zip';
 import s from './wrapped-test.module.css';
 
 /* Page de test, jamais liee depuis la navigation : valide le flux complet
@@ -87,9 +88,9 @@ export default function WrappedTest() {
     consommeRef.current = false;
   }
 
-  function demarrer(fichiersChoisis: File[]) {
-    const zips = fichiersChoisis.filter((f) => f.name.toLowerCase().endsWith('.zip'));
-    if (zips.length === 0) return;
+  async function demarrer(fichiersChoisis: File[]) {
+    const fichiersZip = fichiersChoisis.filter((f) => f.name.toLowerCase().endsWith('.zip'));
+    if (fichiersZip.length === 0) return;
 
     workerRef.current?.terminate();
     setStatut('chargement');
@@ -99,13 +100,35 @@ export default function WrappedTest() {
     setLabelEtape('Lecture de tes fichiers…');
     queueRef.current = [];
 
+    // Lu ici, sur le thread principal, tout de suite apres la selection :
+    // c'est le moment ou la reference au fichier est la plus fiable. Passer
+    // le `File` tel quel au Worker et le lire plus tard, la-bas, est ce qui
+    // declenche « The requested file could not be read... » sur certains
+    // fichiers (OneDrive pas encore telecharge, gros fichier, antivirus).
+    const zips: ZipEnMemoire[] = [];
+    for (const f of fichiersZip) {
+      try {
+        zips.push({ nom: f.name, donnees: await f.arrayBuffer() });
+      } catch {
+        setMessageErreur(
+          `Impossible de lire « ${f.name} ». Le fichier est peut-être encore "en ligne uniquement" ` +
+          `(OneDrive, Google Drive...) et pas téléchargé sur cet appareil, ou verrouillé par un antivirus. ` +
+          `Vérifie qu'il est disponible hors connexion, puis réessaie.`,
+        );
+        setStatut('erreur');
+        return;
+      }
+    }
+
     const worker = new Worker(new URL('./analyse.worker.ts', import.meta.url));
     workerRef.current = worker;
     worker.onmessage = (e: MessageEvent<EvenementAnalyse>) => {
       queueRef.current.push(e.data);
       if (!consommeRef.current) consommer();
     };
-    worker.postMessage({ fichiers: zips });
+    // Transfere les buffers plutot que de les cloner : gratuit, et le Worker
+    // en devient l'unique proprietaire.
+    worker.postMessage({ zips }, zips.map((z) => z.donnees));
   }
 
   return (

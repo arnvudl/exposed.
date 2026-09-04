@@ -21,22 +21,41 @@ function normaliserChemin(chemin: string): string {
   return chemin;
 }
 
+export type ZipEnMemoire = { nom: string; donnees: ArrayBuffer };
+
+/** Une erreur de lecture nomme le fichier fautif : sans ca, un des trois ZIP
+    d'Instagram qui coince (fichier OneDrive pas encore telecharge en local,
+    verrouille par un antivirus...) ne se distingue pas des deux autres. */
+export class ErreurLectureZip extends Error {
+  constructor(public nomFichier: string, cause: unknown) {
+    super(`Impossible de lire « ${nomFichier} ». Le fichier est peut-etre encore "en ligne uniquement" ` +
+      `(OneDrive, Google Drive...) et pas telecharge sur cet appareil, ou verrouille par un antivirus. ` +
+      `Verifie qu'il est disponible hors connexion, puis reessaie.`);
+    this.cause = cause;
+  }
+}
+
 export async function construireFileMap(
-  fichiers: File[],
+  zips: ZipEnMemoire[],
   onProgress?: (etape: string, fait: number, total: number) => void,
 ): Promise<FileMap> {
   const map: FileMap = new Map();
 
-  for (let i = 0; i < fichiers.length; i++) {
-    onProgress?.('zip', i, fichiers.length);
-    const zip = await JSZip.loadAsync(fichiers[i]);
+  for (let i = 0; i < zips.length; i++) {
+    onProgress?.('zip', i, zips.length);
+    let zip;
+    try {
+      zip = await JSZip.loadAsync(zips[i].donnees);
+    } catch (cause) {
+      throw new ErreurLectureZip(zips[i].nom, cause);
+    }
     const entrees = Object.values(zip.files).filter((f) => !f.dir && f.name.endsWith('.json'));
     for (const entree of entrees) {
       const texte = await entree.async('string');
       map.set(normaliserChemin(entree.name), texte);
     }
   }
-  onProgress?.('zip', fichiers.length, fichiers.length);
+  onProgress?.('zip', zips.length, zips.length);
 
   return map;
 }

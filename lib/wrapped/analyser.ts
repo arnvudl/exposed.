@@ -4,7 +4,7 @@
    puis tout renvoyer d'un bloc : la premiere affiche peut s'afficher avant
    que la septieme soit calculee.
    ============================================================ */
-import { construireFileMap } from './zip';
+import { construireFileMap, type ZipEnMemoire } from './zip';
 import { chargerConversations, chargerRelations, detecterSoi } from './parse';
 import {
   chapitre01, chapitre02, chapitre03, chapitre04,
@@ -31,12 +31,12 @@ function respirer(): Promise<void> {
 }
 
 export async function analyser(
-  fichiers: File[],
+  zips: ZipEnMemoire[],
   emettre: (e: EvenementAnalyse) => void,
 ): Promise<void> {
   try {
     emettre({ type: 'etape', etape: 'lecture_zip' });
-    const fileMap = await construireFileMap(fichiers);
+    const fileMap = await construireFileMap(zips);
     await respirer();
 
     emettre({ type: 'etape', etape: 'reconstruction' });
