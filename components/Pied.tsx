@@ -25,13 +25,13 @@ export default function Pied({ pub = false }: { pub?: boolean }) {
             <ul>
               <li><Link href="/#chemin">Wrapped</Link></li>
               <li><Link href="/faq/">FAQ</Link></li>
-              <li><Link href="/#chemin">Guide d’export</Link></li>
+              <li><Link href="/guide/">Guide d’export</Link></li>
             </ul>
           </div>
           <div>
-            <h4>Les types</h4>
+            <h4>Les profils</h4>
             <ul>
-              <li><Link href="/#types">Les dix types</Link></li>
+              <li><Link href="/#profils">Les dix profils</Link></li>
               <li><Link href="/faq/#soutenir">Soutenir</Link></li>
             </ul>
           </div>

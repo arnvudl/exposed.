@@ -1,0 +1,119 @@
+/* ============================================================
+   FAQ  /  une pile de rectangles qui se deplient
+   Fond noir, rectangle noir, encre blanche, contour blanc. Chaque question
+   est un <details> natif : ouvrable au clavier, lisible sans JavaScript, et
+   sans script d'accordeon a maintenir.
+   ============================================================ */
+.tete { padding-bottom: clamp(2.5rem, 6vh, 4rem); }
+.teteSub { margin-top: 1.4rem; }
+
+/* Les sections s'enchainent sans le grand rythme vertical d'une landing :
+   c'est une page de reference, on la parcourt de haut en bas. */
+.bloc { padding-block: clamp(2.5rem, 6vh, 4rem); border-top: 1px solid var(--line); }
+.blocTitre { display: flex; align-items: baseline; gap: .9rem; }
+.blocIndex {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--muted);
+}
+
+/* ---------- la liste de rectangles ---------- */
+.liste {
+  margin-top: clamp(1.6rem, 4vh, 2.4rem);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item {
+  background: var(--bg);
+  border: 1px solid color-mix(in oklab, var(--text) 66%, var(--bg));
+  border-radius: var(--r);
+  transition: border-color 180ms var(--ease-out);
+}
+.item[open] { border-color: var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .item:hover { border-color: color-mix(in oklab, var(--text) 88%, var(--bg)); }
+}
+
+/* La barre cliquable : toute la largeur du rectangle. */
+.q {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 1.1rem 1.25rem;
+  font-weight: 600;
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  line-height: 1.35;
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+.q::-webkit-details-marker { display: none; }
+.q:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 2px; }
+
+/* Le signe + qui bascule en x a l'ouverture. Mono, pour rester dans la
+   famille des metadonnees du site. */
+.signe {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--text);
+  transition: transform 220ms var(--ease-drawer);
+}
+.item[open] .signe { transform: rotate(45deg); }
+
+/* La reponse. Encre blanche adoucie d'un cran pour la lecture longue, jamais
+   grise : la hierarchie se lit a la graisse, pas a la couleur delavee. */
+.a {
+  padding: 0 1.25rem 1.2rem;
+  margin: 0;
+  font-size: clamp(.95rem, 1.2vw, 1.02rem);
+  line-height: 1.6;
+  color: color-mix(in oklab, var(--text) 92%, var(--bg));
+}
+.a a { color: var(--text); text-underline-offset: 3px; }
+.item[open] .a { animation: deplie 260ms var(--ease-out); }
+@keyframes deplie {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signe { transition: none; }
+  .item[open] .a { animation: none; }
+}
+
+/* ---------- le renvoi vers le guide d'export ---------- */
+.renvoi {
+  margin-top: clamp(1.6rem, 4vh, 2.4rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem 2rem;
+  padding: 1.6rem 1.5rem;
+  border: 1px dashed color-mix(in oklab, var(--text) 55%, var(--bg));
+  border-radius: var(--r);
+}
+.renvoiTexte { max-width: 46ch; color: color-mix(in oklab, var(--text) 82%, var(--bg)); }
+.renvoiLien {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-decoration: none;
+  padding: .7rem 1.1rem;
+  border: 1px solid var(--text);
+  border-radius: var(--r);
+  transition: background 160ms var(--ease-out), color 160ms var(--ease-out);
+}
+.renvoiLien:hover { background: var(--text); color: var(--bg); }
+.renvoiLien .fleche { transition: transform 200ms var(--ease-out); }
+.renvoiLien:hover .fleche { transform: translateX(3px); }

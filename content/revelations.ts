@@ -102,7 +102,7 @@ export const revelations: DonneesAffiche[] = [
     piece: 'Chapitre 08',
     titre: 'Ton profil relationnel',
     chiffre: 'Le Pilier',
-    note: 'Quatre axes, un type. La dernière page du dossier.',
+    note: 'Quatre axes, un profil. La dernière page du dossier.',
     ton: 8,
     formes: [
       { nom: 'barres', w: 42 },
@@ -137,9 +137,16 @@ export const afficheDossier: DonneesAffiche = {
   ],
 };
 
-/** Les dix types relationnels, index typographique de l'accueil. */
-export const types = [
-  'Le Pilier', 'Le Confident', 'Le Connecteur', 'Le Fidèle discret',
-  'Le Silencieux choisi', "L'Ouvert", 'Le Veilleur', 'Le Répondant',
-  'Le Constant', 'Le Sélectif',
+/** Les dix profils relationnels, index typographique de l'accueil. */
+export const profils: { nom: string; description: string }[] = [
+  { nom: 'Le Pilier', description: `On vient te chercher quand ça compte vraiment. Tu ne parles pas fort, mais quand tu parles, les gens écoutent — et restent.` },
+  { nom: 'Le Confident', description: `Les gens te racontent des choses qu’ils ne disent à personne d’autre. Tu portes les secrets des autres sans jamais t’en plaindre.` },
+  { nom: 'Le Connecteur', description: `Tu connais toujours quelqu’un qui connaît quelqu’un. Tu lies les mondes entre eux, souvent sans même t’en rendre compte.` },
+  { nom: 'Le Fidèle discret', description: `Tu ne likes pas, tu ne commentes pas, mais tu es là depuis le premier jour. Ta présence ne fait pas de bruit — elle fait la différence.` },
+  { nom: 'Le Silencieux choisi', description: `Peu de conversations, mais chacune a du poids. Tu ne gaspilles pas tes mots, et c’est exactement pour ça qu’on les retient.` },
+  { nom: "L'Ouvert", description: `Tu réponds à tout le monde, tu parles à tout le monde. Les gens se sentent à l’aise avec toi avant même de te connaître.` },
+  { nom: 'Le Veilleur', description: `Tu observes plus que tu ne participes. Mais quand quelqu’un a besoin d’aide, tu es souvent le premier à le remarquer.` },
+  { nom: 'Le Répondant', description: `On t’écrit, tu réponds. Vite. Toujours. Les gens comptent sur ta réactivité sans même s’en rendre compte.` },
+  { nom: 'Le Constant', description: `Tes amitiés ne font pas de montagnes russes. Tu maintiens le lien, régulièrement, sans effort apparent — et c’est ta force.` },
+  { nom: 'Le Sélectif', description: `Tu choisis tes gens avec soin. Ton cercle est petit, mais ceux qui en font partie savent qu’ils comptent vraiment.` },
 ];

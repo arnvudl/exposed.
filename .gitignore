@@ -25,6 +25,7 @@ Thumbs.db
 # Données personnelles — ne JAMAIS committer un export Instagram
 *.zip
 fixtures/real/
+/data/
 
 # Next
 /.next/

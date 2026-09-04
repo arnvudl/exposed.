@@ -115,24 +115,6 @@
   max-width: 24ch;
 }
 .privacyClaim em { font-style: normal; color: var(--signal); }
-.privacyCols {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(1.5rem, 4vw, 3rem);
-  margin-top: clamp(3rem, 7vh, 5rem);
-  border-top: 1px solid var(--line);
-  padding-top: 2.2rem;
-}
-.privacyK {
-  color: var(--vert);
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
-  line-height: 1;
-  letter-spacing: -.04em;
-}
-.privacyV { font-size: 14px; color: var(--muted); margin-top: .5rem; line-height: 1.45; }
-@media (max-width: 720px) { .privacyCols { grid-template-columns: 1fr; gap: 1.8rem; } }
 
 /* ============================================================
    5. LE CHEMIN  /  pile verticale, filets rares
@@ -151,7 +133,6 @@
 .pathH { font-size: 1.4rem; letter-spacing: -.02em; }
 .pathD { font-size: 14px; color: var(--muted); margin-top: .5rem; max-width: 52ch; line-height: 1.6; }
 .pathD strong { color: var(--text); font-weight: 400; }
-.pathRemind { margin-top: 1.1rem; }
 .pathShot {
   margin-top: 1.2rem;
   border: 1px dashed var(--line);
@@ -167,33 +148,56 @@
 }
 
 /* ============================================================
-   6. LES TYPES  /  index typographique
+   6. LES PROFILS  /  index typographique
    ============================================================ */
 .types { border-top: 1px solid var(--line); }
 .typesFlow {
   list-style: none;
   margin: clamp(2rem, 5vh, 3.5rem) 0 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .35em 1.1em;
   font-family: var(--display);
   font-weight: 700;
   font-size: clamp(1.5rem, 4.2vw, 2.6rem);
   line-height: 1.15;
   letter-spacing: -.03em;
 }
-/* Les types ne sont pas cliquables tant que la page qui les decrit n'existe
-   pas : un lien qui ne mene nulle part est pire qu'un mot pose. Le survol
-   allume quand meme la teinte de l'onglet, sinon l'index parait mort. */
-.typesFlow li {
+
+.profilLigne { margin-bottom: .35em; }
+
+.profilRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35em 1.1em;
+}
+
+.profilItem {
+  cursor: pointer;
   color: color-mix(in oklab, var(--tab) 52%, var(--bg));
   transition: color 170ms ease;
 }
 @media (hover: hover) and (pointer: fine) {
-  .typesFlow li:hover { color: var(--tab); }
+  .profilItem:hover { color: var(--tab); }
 }
 .typeMoi { color: var(--tab); }
+.profilActif { color: var(--tab) !important; }
+
+.profilDesc {
+  margin: .5em 0 .4em;
+  font-family: var(--body, sans-serif);
+  font-weight: 400;
+  font-size: clamp(.95rem, 2.2vw, 1.15rem);
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--fg);
+  border-left: 3px solid var(--tab);
+  padding-left: 1em;
+  max-width: 38em;
+  animation: descFade 300ms ease;
+}
+@keyframes descFade {
+  from { opacity: 0; transform: translateY(.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* ============================================================
    7. APPEL FINAL  /  le seul aplat pleine largeur du site

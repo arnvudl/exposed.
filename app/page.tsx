@@ -3,8 +3,8 @@ import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
 import Affiche from '@/components/Affiche';
 import { BoutonLien } from '@/components/Bouton';
-import RappelIcs from '@/components/RappelIcs';
-import { revelations, afficheHero, afficheDossier, types } from '@/content/revelations';
+import ListeProfils from '@/components/ListeProfils';
+import { revelations, afficheHero, afficheDossier, profils } from '@/content/revelations';
 import s from './page.module.css';
 
 type Style = React.CSSProperties;
@@ -23,7 +23,7 @@ export default function Accueil() {
           <div>
             <h1 className="t-xl">Ce que tes DMs<br />disent de toi.</h1>
             <p className={`lede ${s.heroSub}`}>
-              Dépose le ZIP que t’envoie Instagram. Ton navigateur les lira.
+              Dépose les fichiers ZIP que t’envoie Instagram, souvent plusieurs. Ton navigateur les lit.
             </p>
             <div className={s.heroCta}>
               <BoutonLien href="/#chemin">Ouvrir mon dossier</BoutonLien>
@@ -46,7 +46,7 @@ export default function Accueil() {
               <div>
                 <h2 className="t-lg reveal">Huit chapitres.</h2>
                 <p className="lede reveal" style={{ '--d': '80ms', marginTop: '1rem' } as Style}>
-                  Tes dix personnes, tes groupes, tes mots, tes records. Et ton type à la fin.
+                  Tes dix personnes, tes groupes, tes mots, tes records. Et ton profil à la fin.
                 </p>
               </div>
             </div>
@@ -109,21 +109,6 @@ export default function Accueil() {
             regardes sans la publier. Rien n’est envoyé, rien n’est gardé. Tu fermes l’onglet
             et tout a disparu.
           </p>
-
-          <div className={s.privacyCols}>
-            <div className="reveal">
-              <p className={`${s.privacyK} num`}>0</p>
-              <p className={s.privacyV}>message envoyé sur internet. Tout se passe sur ta machine.</p>
-            </div>
-            <div className="reveal" style={{ '--d': '90ms' } as Style}>
-              <p className={`${s.privacyK} num`}>0</p>
-              <p className={s.privacyV}>compte à créer. Pas de mot de passe, pas d’adresse e-mail.</p>
-            </div>
-            <div className="reveal" style={{ '--d': '180ms' } as Style}>
-              <p className={`${s.privacyK} num`}>1</p>
-              <p className={s.privacyV}>fichier à déposer, le tien. Puis tu le refermes.</p>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -158,47 +143,35 @@ export default function Accueil() {
                 <h3 className={s.pathH}>Attends</h3>
                 <p className={s.pathD}>
                   Instagram met de quelques minutes à <strong>48 heures</strong> à préparer le
-                  fichier, puis t’envoie un lien. Mets-toi un rappel : c’est là que la plupart
-                  des gens oublient de revenir.
+                  fichier, puis t’envoie une notification. C’est là que la plupart des gens
+                  oublient de revenir.
                 </p>
-                <p className={s.pathRemind}><RappelIcs /></p>
               </div>
             </div>
 
             <div className={`${s.pathStep} reveal`}>
               <p className={`${s.pathI} num`}>03</p>
               <div>
-                <h3 className={s.pathH}>Dépose le ZIP</h3>
-                <p className={s.pathD}>Reviens ici et glisse le fichier. Rien à installer.</p>
+                <h3 className={s.pathH}>Dépose tes fichiers</h3>
+                <p className={s.pathD}>
+                  Reviens ici et glisse tes ZIP. Instagram en envoie souvent plusieurs, dépose-les
+                  tous, sans les décompresser. Rien à installer.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* --------------------------- LES TYPES ----------------------- */}
-      <section className={s.types} id="types">
+      {/* --------------------------- LES PROFILS ----------------------- */}
+      <section className={s.types} id="profils">
         <div className="wrap">
-          <h2 className="t-lg reveal">Dix types. Le tien est à la dernière page.</h2>
+          <h2 className="t-lg reveal">Dix profils. Le tien est à la dernière page.</h2>
           <p className="lede reveal" style={{ '--d': '80ms', marginTop: '1.2rem' } as Style}>
             Quatre axes le déterminent : qui lance, à combien de gens tu parles, à quelle
             vitesse tu réponds, et la longueur de tes messages.
           </p>
-          <ul
-            className={`${s.typesFlow} reveal`}
-            style={{ '--d': '140ms' } as Style}
-            aria-label="Les dix types relationnels"
-          >
-            {types.map((t, i) => (
-              <li
-                key={t}
-                className={i === 0 ? s.typeMoi : undefined}
-                style={{ '--tab': `var(--t${i + 1})` } as Style}
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
+          <ListeProfils profils={profils} />
         </div>
       </section>
 
