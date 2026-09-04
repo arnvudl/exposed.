@@ -23,20 +23,24 @@ function normaliserChemin(chemin: string): string {
 
 export type ZipEnMemoire = { nom: string; donnees: ArrayBuffer };
 
-// Les exports Instagram complets (avec les photos/videos) depassent souvent
-// 2 Go. Au-dela de cette taille, `Blob.arrayBuffer()` en un seul appel echoue
-// dans Chrome avec « The requested file could not be read... » — une limite
-// du navigateur sur la lecture d'un Blob d'un coup, pas un fichier corrompu
-// ni un antivirus. La parade : decouper la lecture en tranches, chacune bien
-// en dessous du plafond, puis les recoller en un seul buffer en memoire (ca,
-// V8 le supporte sans probleme sur un navigateur 64 bits).
-const TAILLE_TRANCHE = 512 * 1024 * 1024; // 512 Mo
+// Les exports Instagram complets (avec les photos/videos) depassent parfois
+// 2 Go. Au-dela de cette taille, `Blob.arrayBuffer()` en un seul appel peut
+// echouer dans Chrome avec « The requested file could not be read... » —
+// une limite du navigateur sur la lecture d'un Blob d'un coup, pas un
+// fichier corrompu ni un antivirus. Mais cette limite n'apparait que pres
+// de 2 Go : la plupart des exports (quelques centaines de Mo a ~1,5 Go)
+// n'en approchent jamais et n'ont aucune raison de payer le cout du
+// decoupage. Deux constantes distinctes, donc : le SEUIL a partir duquel on
+// bascule en mode securise, et la TAILLE de chaque tranche une fois qu'on y
+// est.
+const SEUIL_DECOUPAGE = 1.5 * 1024 * 1024 * 1024; // 1,5 Go : marge confortable sous le plafond
+const TAILLE_TRANCHE = 512 * 1024 * 1024; // 512 Mo par tranche, une fois le decoupage necessaire
 
-/** Lit un fichier en memoire, par tranches si besoin. Ne fait rien de
-    particulier pour les petits fichiers : `f.slice()` sur l'ensemble du
-    fichier revient a le lire d'un coup. */
+/** Lit un fichier en memoire. En dessous du seuil, un seul appel direct (de
+    loin le plus rapide) ; au-dela, par tranches pour rester sous le plafond
+    de lecture d'un Blob que Chrome applique pres de 2 Go. */
 export async function lireFichierEnMemoire(f: File): Promise<ArrayBuffer> {
-  if (f.size <= TAILLE_TRANCHE) return f.arrayBuffer();
+  if (f.size <= SEUIL_DECOUPAGE) return f.arrayBuffer();
 
   const resultat = new Uint8Array(f.size);
   let position = 0;
