@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "analyse": "node scripts/analyse.mts"
   },
   "dependencies": {
     "next": "^15.5.4",
