@@ -104,20 +104,32 @@ export default function WrappedTest() {
     // c'est le moment ou la reference au fichier est la plus fiable. Passer
     // le `File` tel quel au Worker et le lire plus tard, la-bas, est ce qui
     // declenche « The requested file could not be read... » sur certains
-    // fichiers (OneDrive pas encore telecharge, gros fichier, antivirus).
+    // fichiers (gros fichier, antivirus qui scanne un ZIP tout juste
+    // telecharge). Un verrou d'antivirus est transitoire : quelques
+    // tentatives espacees suffisent generalement a passer au travers.
     const zips: ZipEnMemoire[] = [];
     for (const f of fichiersZip) {
-      try {
-        zips.push({ nom: f.name, donnees: await f.arrayBuffer() });
-      } catch {
+      let donnees: ArrayBuffer | null = null;
+      for (let tentative = 1; tentative <= 4 && !donnees; tentative++) {
+        try {
+          donnees = await f.arrayBuffer();
+        } catch {
+          if (tentative === 4) break;
+          setLabelEtape(`« ${f.name} » n’a pas répondu, nouvel essai (${tentative}/3)…`);
+          await new Promise((r) => setTimeout(r, tentative * 800));
+        }
+      }
+      if (!donnees) {
         setMessageErreur(
-          `Impossible de lire « ${f.name} ». Le fichier est peut-être encore "en ligne uniquement" ` +
-          `(OneDrive, Google Drive...) et pas téléchargé sur cet appareil, ou verrouillé par un antivirus. ` +
-          `Vérifie qu'il est disponible hors connexion, puis réessaie.`,
+          `Impossible de lire « ${f.name} » après plusieurs tentatives. Le fichier est peut-être encore ` +
+          `"en ligne uniquement" (OneDrive, Google Drive...) et pas téléchargé sur cet appareil, verrouillé ` +
+          `par un antivirus, ou trop volumineux pour ce navigateur. Vérifie qu'il est bien disponible hors ` +
+          `connexion et réessaie ; si ça persiste, redémarre le navigateur.`,
         );
         setStatut('erreur');
         return;
       }
+      zips.push({ nom: f.name, donnees });
     }
 
     const worker = new Worker(new URL('./analyse.worker.ts', import.meta.url));
