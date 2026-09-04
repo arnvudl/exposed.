@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { EvenementAnalyse } from '@/lib/wrapped/analyser';
 import type { chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07 } from '@/lib/wrapped/chapitres';
 import { formatDate, formatDureeDecoupee, formatDureeCourte } from '@/lib/wrapped/format';
-import { lireFichierEnMemoire, type ZipEnMemoire } from '@/lib/wrapped/zip';
 import s from './wrapped-test.module.css';
 
 /* Page de test, jamais liee depuis la navigation : valide le flux complet
@@ -88,7 +87,7 @@ export default function WrappedTest() {
     consommeRef.current = false;
   }
 
-  async function demarrer(fichiersChoisis: File[]) {
+  function demarrer(fichiersChoisis: File[]) {
     const fichiersZip = fichiersChoisis.filter((f) => f.name.toLowerCase().endsWith('.zip'));
     if (fichiersZip.length === 0) return;
 
@@ -100,47 +99,16 @@ export default function WrappedTest() {
     setLabelEtape('Lecture de tes fichiers…');
     queueRef.current = [];
 
-    // Lu ici, sur le thread principal, tout de suite apres la selection :
-    // c'est le moment ou la reference au fichier est la plus fiable. Passer
-    // le `File` tel quel au Worker et le lire plus tard, la-bas, est ce qui
-    // declenche « The requested file could not be read... » sur certains
-    // fichiers (gros fichier, antivirus qui scanne un ZIP tout juste
-    // telecharge). Un verrou d'antivirus est transitoire : quelques
-    // tentatives espacees suffisent generalement a passer au travers.
-    const zips: ZipEnMemoire[] = [];
-    for (const f of fichiersZip) {
-      let donnees: ArrayBuffer | null = null;
-      for (let tentative = 1; tentative <= 4 && !donnees; tentative++) {
-        try {
-          donnees = await lireFichierEnMemoire(f);
-        } catch {
-          if (tentative === 4) break;
-          setLabelEtape(`« ${f.name} » n’a pas répondu, nouvel essai (${tentative}/3)…`);
-          await new Promise((r) => setTimeout(r, tentative * 800));
-        }
-      }
-      if (!donnees) {
-        setMessageErreur(
-          `Impossible de lire « ${f.name} » après plusieurs tentatives. Le fichier est peut-être encore ` +
-          `"en ligne uniquement" (OneDrive, Google Drive...) et pas téléchargé sur cet appareil, verrouillé ` +
-          `par un antivirus, ou trop volumineux pour ce navigateur. Vérifie qu'il est bien disponible hors ` +
-          `connexion et réessaie ; si ça persiste, redémarre le navigateur.`,
-        );
-        setStatut('erreur');
-        return;
-      }
-      zips.push({ nom: f.name, donnees });
-    }
-
+    // Les `File` partent tels quels : zip.js les lit par petits acces
+    // cibles (voir lib/wrapped/zip.ts), jamais en chargeant tout le ZIP en
+    // un bloc memoire — donc pas besoin de les pre-lire ici.
     const worker = new Worker(new URL('./analyse.worker.ts', import.meta.url));
     workerRef.current = worker;
     worker.onmessage = (e: MessageEvent<EvenementAnalyse>) => {
       queueRef.current.push(e.data);
       if (!consommeRef.current) consommer();
     };
-    // Transfere les buffers plutot que de les cloner : gratuit, et le Worker
-    // en devient l'unique proprietaire.
-    worker.postMessage({ zips }, zips.map((z) => z.donnees));
+    worker.postMessage({ fichiers: fichiersZip });
   }
 
   return (

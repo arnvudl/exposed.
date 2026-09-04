@@ -1,11 +1,21 @@
 /* ============================================================
    ZIP  /  les fichiers deposes -> une FileMap
-   Instagram decoupe parfois un gros export en plusieurs ZIP (part 1, part
-   2...). On les fusionne tous dans une seule Map, en ne gardant que le JSON
-   (les photos/videos ne servent jamais aux 7 chapitres : les decompresser
-   couterait du temps et de la memoire pour rien).
+   Un export Instagram complet (avec les photos/videos) depasse souvent
+   2 Go. Charger tout le ZIP en un seul buffer memoire echoue de facon
+   systematique et reproductible dans Chrome au-dela de ~2 Go
+   (`RangeError: Array buffer allocation failed`) : ce n'est ni un fichier
+   verrouille, ni OneDrive, ni un souci ponctuel qu'un nouvel essai
+   resoudrait. C'est une limite dure sur la taille d'UN SEUL buffer.
+
+   La solution n'est donc pas de decouper la LECTURE (deja tente, ca ne
+   change rien puisque le buffer final restait un seul gros bloc) mais de ne
+   JAMAIS reconstituer l'archive entiere en memoire. zip.js lit le ZIP par
+   petits acces cibles directement depuis le fichier (via `Blob.slice()`),
+   entree par entree, et ne decompresse que celles qu'on lui demande — donc
+   jamais plus que quelques Ko a la fois pour les JSON qui nous interessent,
+   quelle que soit la taille du ZIP.
    ============================================================ */
-import JSZip from 'jszip';
+import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js';
 import type { FileMap } from './parse';
 
 // Un ZIP peut envelopper le contenu dans un dossier (nom du compte, date...) :
@@ -21,71 +31,39 @@ function normaliserChemin(chemin: string): string {
   return chemin;
 }
 
-export type ZipEnMemoire = { nom: string; donnees: ArrayBuffer };
-
-// Les exports Instagram complets (avec les photos/videos) depassent parfois
-// 2 Go. Au-dela de cette taille, `Blob.arrayBuffer()` en un seul appel peut
-// echouer dans Chrome avec « The requested file could not be read... » —
-// une limite du navigateur sur la lecture d'un Blob d'un coup, pas un
-// fichier corrompu ni un antivirus. Mais cette limite n'apparait que pres
-// de 2 Go : la plupart des exports (quelques centaines de Mo a ~1,5 Go)
-// n'en approchent jamais et n'ont aucune raison de payer le cout du
-// decoupage. Deux constantes distinctes, donc : le SEUIL a partir duquel on
-// bascule en mode securise, et la TAILLE de chaque tranche une fois qu'on y
-// est.
-const SEUIL_DECOUPAGE = 1.5 * 1024 * 1024 * 1024; // 1,5 Go : marge confortable sous le plafond
-const TAILLE_TRANCHE = 512 * 1024 * 1024; // 512 Mo par tranche, une fois le decoupage necessaire
-
-/** Lit un fichier en memoire. En dessous du seuil, un seul appel direct (de
-    loin le plus rapide) ; au-dela, par tranches pour rester sous le plafond
-    de lecture d'un Blob que Chrome applique pres de 2 Go. */
-export async function lireFichierEnMemoire(f: File): Promise<ArrayBuffer> {
-  if (f.size <= SEUIL_DECOUPAGE) return f.arrayBuffer();
-
-  const resultat = new Uint8Array(f.size);
-  let position = 0;
-  while (position < f.size) {
-    const fin = Math.min(position + TAILLE_TRANCHE, f.size);
-    const tranche = await f.slice(position, fin).arrayBuffer();
-    resultat.set(new Uint8Array(tranche), position);
-    position = fin;
-  }
-  return resultat.buffer;
-}
-
 /** Une erreur de lecture nomme le fichier fautif : sans ca, un des trois ZIP
-    d'Instagram qui coince (fichier OneDrive pas encore telecharge en local,
-    verrouille par un antivirus...) ne se distingue pas des deux autres. */
+    d'Instagram qui coince ne se distingue pas des deux autres. */
 export class ErreurLectureZip extends Error {
   constructor(public nomFichier: string, cause: unknown) {
-    super(`Impossible de lire « ${nomFichier} ». Le fichier est peut-etre encore "en ligne uniquement" ` +
-      `(OneDrive, Google Drive...) et pas telecharge sur cet appareil, ou verrouille par un antivirus. ` +
-      `Verifie qu'il est disponible hors connexion, puis reessaie.`);
+    super(`Impossible de lire « ${nomFichier} ». Le fichier est peut-etre corrompu ou incomplet ` +
+      `(re-telecharge-le depuis Instagram si le probleme persiste).`);
     this.cause = cause;
   }
 }
 
 export async function construireFileMap(
-  zips: ZipEnMemoire[],
+  fichiers: File[],
   onProgress?: (etape: string, fait: number, total: number) => void,
 ): Promise<FileMap> {
   const map: FileMap = new Map();
 
-  for (let i = 0; i < zips.length; i++) {
-    onProgress?.('zip', i, zips.length);
-    let zip;
+  for (let i = 0; i < fichiers.length; i++) {
+    onProgress?.('zip', i, fichiers.length);
+    const lecteur = new ZipReader(new BlobReader(fichiers[i]));
     try {
-      zip = await JSZip.loadAsync(zips[i].donnees);
+      const entrees = await lecteur.getEntries();
+      for (const entree of entrees) {
+        if (entree.directory || !entree.filename.endsWith('.json') || !entree.getData) continue;
+        const texte = await entree.getData(new TextWriter());
+        map.set(normaliserChemin(entree.filename), texte);
+      }
     } catch (cause) {
-      throw new ErreurLectureZip(zips[i].nom, cause);
-    }
-    const entrees = Object.values(zip.files).filter((f) => !f.dir && f.name.endsWith('.json'));
-    for (const entree of entrees) {
-      const texte = await entree.async('string');
-      map.set(normaliserChemin(entree.name), texte);
+      throw new ErreurLectureZip(fichiers[i].name, cause);
+    } finally {
+      await lecteur.close();
     }
   }
-  onProgress?.('zip', zips.length, zips.length);
+  onProgress?.('zip', fichiers.length, fichiers.length);
 
   return map;
 }

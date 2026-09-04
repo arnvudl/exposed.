@@ -10,7 +10,7 @@
     "analyse": "node scripts/analyse.mts"
   },
   "dependencies": {
-    "jszip": "^3.10.1",
+    "@zip.js/zip.js": "^2.10.0",
     "next": "^15.5.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
