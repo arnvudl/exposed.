@@ -27,6 +27,9 @@
   color: var(--muted);
   white-space: nowrap;
   transition: color 150ms ease;
+  /* Cible tactile d'au moins 40 px, sans toucher a l'espacement visible. */
+  padding: 10px 4px;
+  margin-inline: -4px;
 }
 .links a[aria-current] { color: var(--text); }
 @media (hover: hover) and (pointer: fine) { .links a:hover { color: var(--text); } }

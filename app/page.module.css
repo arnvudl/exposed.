@@ -59,6 +59,7 @@
     max-width: 340px;
   }
   .dossierStep { min-height: 0; padding-block: 2.2rem; }
+  .dossierCarte { transform: none; }
 }
 
 /* ============================================================

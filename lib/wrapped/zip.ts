@@ -35,9 +35,25 @@ function normaliserChemin(chemin: string): string {
     d'Instagram qui coince ne se distingue pas des deux autres. */
 export class ErreurLectureZip extends Error {
   constructor(public nomFichier: string, cause: unknown) {
-    super(`Impossible de lire « ${nomFichier} ». Le fichier est peut-etre corrompu ou incomplet ` +
-      `(re-telecharge-le depuis Instagram si le probleme persiste).`);
+    super(`Impossible de lire « ${nomFichier} ». Le fichier est peut-être corrompu ou incomplet ` +
+      `(re-télécharge-le depuis Instagram si le problème persiste).`);
     this.cause = cause;
+  }
+}
+
+/** L'erreur la plus frequente : l'export demande en HTML au lieu de JSON.
+    Elle merite son propre message, pas un dossier vide. */
+export class ErreurExportHtml extends Error {
+  constructor() {
+    super('Ton export est au format HTML : le site ne peut rien y lire. Redemande-le à ' +
+      'Instagram en choisissant le format JSON (voir le guide d’export).');
+  }
+}
+
+export class ErreurExportVide extends Error {
+  constructor() {
+    super('Aucun fichier JSON trouvé dans ce ZIP. Vérifie que c’est bien l’export envoyé ' +
+      'par Instagram, et qu’il est complet.');
   }
 }
 
@@ -46,6 +62,9 @@ export async function construireFileMap(
   onProgress?: (etape: string, fait: number, total: number) => void,
 ): Promise<FileMap> {
   const map: FileMap = new Map();
+  // Compte sur l'ensemble des ZIP, pas par fichier : Instagram decoupe un
+  // gros export en parties, et une partie peut ne contenir que des medias.
+  let htmlVu = false;
 
   for (let i = 0; i < fichiers.length; i++) {
     onProgress?.('zip', i, fichiers.length);
@@ -53,7 +72,9 @@ export async function construireFileMap(
     try {
       const entrees = await lecteur.getEntries();
       for (const entree of entrees) {
-        if (entree.directory || !entree.filename.endsWith('.json') || !entree.getData) continue;
+        if (entree.directory || !entree.getData) continue;
+        if (entree.filename.endsWith('.html')) { htmlVu = true; continue; }
+        if (!entree.filename.endsWith('.json')) continue;
         const texte = await entree.getData(new TextWriter());
         map.set(normaliserChemin(entree.filename), texte);
       }
@@ -64,6 +85,8 @@ export async function construireFileMap(
     }
   }
   onProgress?.('zip', fichiers.length, fichiers.length);
+
+  if (map.size === 0) throw htmlVu ? new ErreurExportHtml() : new ErreurExportVide();
 
   return map;
 }

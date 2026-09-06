@@ -106,7 +106,7 @@ export default function Affiche({
       <div className={styles.corps}>
         <div>
           <p className={styles.piece}>{a.piece}</p>
-          <h3 className={styles.titre}>{a.titre}</h3>
+          <p className={styles.titre}>{a.titre}</p>
         </div>
 
         <div className={styles.bande} aria-hidden="true">

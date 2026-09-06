@@ -147,6 +147,11 @@
   border-bottom: 1px solid var(--line);
   font-size: 14px;
   font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+/* Sur un telephone, deux colonnes tronquent les pseudos longs. */
+@media (max-width: 480px) {
+  .detailListe { grid-template-columns: 1fr; }
 }
 
 /* ---------- fin du parcours ---------- */

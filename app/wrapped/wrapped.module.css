@@ -18,6 +18,11 @@
 }
 .zoneActive { border-color: var(--signal); background: color-mix(in oklab, var(--signal) 6%, var(--bg)); }
 .zoneTitre { font-size: clamp(1.2rem, 2.4vw, 1.5rem); font-weight: 800; letter-spacing: -.01em; }
+.doigt { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .souris { display: none; }
+  .doigt { display: inline; }
+}
 .zoneSub { margin-top: .6rem; color: var(--muted); font-size: 14px; }
 .zoneBouton {
   margin-top: 1.6rem; display: inline-block; cursor: pointer;

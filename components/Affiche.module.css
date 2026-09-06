@@ -101,15 +101,19 @@
 .onglet { aspect-ratio: 3.4; background: var(--ink); border-radius: 2px 2px 0 0; }
 
 /* ---------- le texte, toujours au-dessus ---------- */
+/* Les textes secondaires restent en encre pleine : sur l'onglet rouge, la
+   moindre attenuation passe sous 4.5:1 (l'encre y est deja a 5.4). La
+   hierarchie se lit a la taille et a la mono, pas au gris. */
 .piece {
   margin: 0;
   font-family: var(--mono);
   font-size: 4.1cqw;
   letter-spacing: .14em;
   text-transform: uppercase;
-  opacity: .72;
 }
 
+/* Un <p>, pas un titre de document : l'affiche est un objet graphique, et
+   un h3 juste sous le h1 du hero cassait l'ordre des titres. */
 .titre {
   font-size: 11.5cqw;
   font-weight: 800;
@@ -117,6 +121,7 @@
   line-height: .95;
   margin-top: 2.5cqw;
   max-width: 15ch;
+  text-wrap: balance;
 }
 
 .bas { align-self: end; }
@@ -144,7 +149,6 @@
   font-family: var(--mono);
   font-size: 3.9cqw;
   letter-spacing: .1em;
-  opacity: .62;
   margin: 3.2cqw 0 0;
 }
 
@@ -156,7 +160,6 @@
   font-size: 3.9cqw;
   letter-spacing: .14em;
   text-transform: uppercase;
-  opacity: .72;
 }
 .paireV {
   margin: 1cqw 0 0;
@@ -176,7 +179,6 @@
   width: 3.6em;
   font-family: var(--mono);
   font-size: 3.4cqw;
-  opacity: .55;
 }
 .rangTexte {
   font-size: 4.3cqw;

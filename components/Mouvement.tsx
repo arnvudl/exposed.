@@ -66,8 +66,13 @@ export default function Mouvement() {
       const railScene = document.querySelector<HTMLElement>('[data-rail-scene]');
       const railVue = document.querySelector<HTMLElement>('[data-rail-vue]');
 
+      // Sous 700 px l'affiche n'est plus epinglee (cf. page.module.css) : elle
+      // sortirait de l'ecran avant de s'etre redressee, et DESIGN.md interdit
+      // toute rotation sur mobile. On la laisse droite.
+      const etroit = window.matchMedia('(max-width: 699px)');
       if (carte && scene) {
         scrubs.push(() => {
+          if (etroit.matches) { carte.style.transform = ''; return; }
           const p = progression(scene);
           carte.style.transform =
             `rotate(${(-3 + 3 * p).toFixed(2)}deg) scale(${(0.94 + 0.06 * p).toFixed(3)})`;

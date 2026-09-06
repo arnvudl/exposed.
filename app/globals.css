@@ -103,7 +103,14 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
 }
 @media (max-width: 768px) { .stamp { transform: none; } }
 
-/* Wordmark : le "o" est un disque plein rouge. */
+/* Texte lu par les lecteurs d'ecran, invisible a l'ecran. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Wordmark : le "o" est un disque plein rouge, qui garde un « o » cache
+   dedans pour que le nom lu soit bien « exposed. ». */
 .logo {
   font-family: var(--mono);
   font-weight: 500;
@@ -119,7 +126,10 @@ section { padding-block: clamp(6rem, 14vh, 9.5rem); }
   border-radius: 50%;
   background: var(--signal);
   display: inline-block;
-  transform: translateY(-.02em);
+  /* Centre sur la hauteur d'x des lettres, quelle que soit la police : le
+     bas du disque repose sur la ligne de base, on le remonte de l'ecart entre
+     son rayon (.26em) et la demi-hauteur d'x (.5ex). */
+  transform: translateY(calc(.26em - .5ex));
 }
 
 /* ============================================================

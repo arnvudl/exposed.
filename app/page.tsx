@@ -15,6 +15,7 @@ export default function Accueil() {
       <Nav page="accueil" />
       <Mouvement />
 
+      <main>
       {/* ---------------------------- HERO ----------------------------
           Titre, sous-titre, une action. Pas de bandeau de reassurance,
           pas de tagline sous le bouton. */}
@@ -184,8 +185,9 @@ export default function Accueil() {
           </div>
         </div>
       </section>
+      </main>
 
-      <Pied pub />
+      <Pied />
     </>
   );
 }

@@ -241,14 +241,22 @@ export function chapitre05(conversations: Conversation[], soi: string) {
 /* ============================================================
    06 — PREMIER ET DERNIER
    ============================================================ */
+export type Borne = { ts: number; avec: string; de: string; message: string };
+
 export function chapitre06(conversations: Conversation[], soi: string) {
-  let premier: { ts: number; avec: string; message: string } | null = null;
-  let dernier: { ts: number; avec: string; message: string } | null = null;
+  let premier: Borne | null = null;
+  let dernier: Borne | null = null;
   for (const c of conversations) {
-    const avec = c.titre || c.participants.filter((p) => p !== soi).join(', ');
+    const autres = c.participants.filter((p) => p !== soi);
+    const est1to1 = c.participants.length === 2 && autres.length === 1;
+    // Le meme « avec » que les records : le @ de la personne en 1:1, le nom
+    // du groupe sinon. Et qui a ecrit ce message, parce qu'un premier message
+    // recu et un premier message envoye ne racontent pas la meme chose.
+    const avec = est1to1 ? identifiantAffichable(c, autres[0]) : (c.titre || autres.join(', '));
     for (const m of c.messages) {
-      if (!premier || m.ts < premier.ts) premier = { ts: m.ts, avec, message: apercu(m) };
-      if (!dernier || m.ts > dernier.ts) dernier = { ts: m.ts, avec, message: apercu(m) };
+      const de = m.sender === soi ? 'Toi' : m.sender;
+      if (!premier || m.ts < premier.ts) premier = { ts: m.ts, avec, de, message: apercu(m) };
+      if (!dernier || m.ts > dernier.ts) dernier = { ts: m.ts, avec, de, message: apercu(m) };
     }
   }
   return { premier, dernier };

@@ -115,7 +115,7 @@ export default function Wrapped() {
     <>
       <Nav page="wrapped" />
 
-      <div className="wrap" style={{ paddingTop: 'clamp(3rem, 8vh, 6rem)', paddingBottom: 'clamp(4rem, 10vh, 7rem)' }}>
+      <main className="wrap" style={{ paddingTop: 'clamp(3rem, 8vh, 6rem)', paddingBottom: 'clamp(4rem, 10vh, 7rem)' }}>
         <header className={s.tete}>
           <p className="kicker">Ton dossier</p>
           <h1 className="t-xl">Tes 7 chapitres.</h1>
@@ -125,7 +125,13 @@ export default function Wrapped() {
           </p>
         </header>
 
-        {statut === 'attente' && (
+        {statut === 'erreur' && (
+          <div className={s.erreur} role="alert">{messageErreur}</div>
+        )}
+
+        {/* La zone reste en place apres une erreur : on redepose le bon
+            fichier sans recharger la page. */}
+        {(statut === 'attente' || statut === 'erreur') && (
           <div
             className={`${s.zone} ${dragActif ? s.zoneActive : ''}`}
             onDragOver={(e) => { e.preventDefault(); setDragActif(true); }}
@@ -136,7 +142,11 @@ export default function Wrapped() {
               demarrer(Array.from(e.dataTransfer.files));
             }}
           >
-            <p className={s.zoneTitre}>Glisse ton ou tes ZIP ici</p>
+            {/* Au doigt, rien ne se glisse : le titre change sur les ecrans tactiles. */}
+            <p className={s.zoneTitre}>
+              <span className={s.souris}>Glisse ton ou tes ZIP ici</span>
+              <span className={s.doigt}>Ajoute ton ou tes ZIP</span>
+            </p>
             <p className={s.zoneSub}>
               Instagram en envoie parfois plusieurs : dépose-les tous en même temps.
             </p>
@@ -163,10 +173,7 @@ export default function Wrapped() {
           </div>
         )}
 
-        {statut === 'erreur' && (
-          <div className={s.erreur}>{messageErreur}</div>
-        )}
-      </div>
+      </main>
 
       <Pied />
     </>

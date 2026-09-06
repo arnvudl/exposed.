@@ -41,6 +41,14 @@ export async function analyser(
 
     emettre({ type: 'etape', etape: 'reconstruction' });
     const conversations = chargerConversations(fileMap);
+    if (conversations.length === 0) {
+      emettre({
+        type: 'erreur',
+        message: 'Aucune conversation dans cet export : la catégorie « Messages » n’a pas été ' +
+          'cochée au moment de la demande. Refais la demande à Instagram en l’incluant.',
+      });
+      return;
+    }
     const { followers, following } = chargerRelations(fileMap);
     const soi = detecterSoi(conversations);
     await respirer();

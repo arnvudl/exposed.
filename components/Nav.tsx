@@ -8,8 +8,8 @@ export default function Nav({ page }: { page?: 'accueil' | 'wrapped' | 'faq' }) 
   return (
     <nav className={styles.nav}>
       <div className={styles.in}>
-        <Link className="logo" href="/" aria-label="Exposed, accueil">
-          exp<span className="logo__o" aria-hidden="true" />sed.
+        <Link className="logo" href="/">
+          exp<span className="logo__o"><span className="sr-only">o</span></span>sed.
         </Link>
         <div className={styles.links}>
           <Link href="/" aria-current={page === 'accueil' ? 'page' : undefined}>Accueil</Link>

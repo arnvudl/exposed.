@@ -81,9 +81,9 @@ const sections: Section[] = [
         q: 'Comment je peux soutenir le projet ?',
         r: (
           <>
-            Exposed est gratuit et le restera. Si tu veux aider : tu peux m’offrir un café{' '}
-            [lien Buy me a coffee à ajouter], ou juste en parler autour de toi. Pour un
-            partenariat ou du sponsoring, écris-moi [contact à ajouter].
+            Exposed est gratuit et le restera. Si tu veux aider, parles-en autour de toi. Pour
+            un partenariat ou du sponsoring, écris-moi :{' '}
+            <a href="mailto:arnaudleroy20@gmail.com">arnaudleroy20@gmail.com</a>.
           </>
         ),
       },
@@ -107,7 +107,14 @@ const sections: Section[] = [
       },
       {
         q: 'Êtes-vous conformes au RGPD ?',
-        r: 'Par construction. Le RGPD encadre les données qu’une entreprise collecte ; nous, on ne collecte rien. Tes données ne quittent pas ton appareil : il n’y a rien à déclarer, stocker ou protéger de notre côté.',
+        r: (
+          <>
+            Par construction. Le RGPD encadre les données qu’une entreprise collecte ; nous, on
+            ne collecte rien. Tes données ne quittent pas ton appareil : il n’y a rien à
+            déclarer, stocker ou protéger de notre côté. Le détail est sur la page{' '}
+            <a href="/confidentialite/">Confidentialité</a>.
+          </>
+        ),
       },
     ],
   },
@@ -121,6 +128,7 @@ export default function Faq() {
       <Nav page="faq" />
       <Mouvement />
 
+      <main>
       <header className={`wrap ${s.tete}`} style={{ paddingTop: 'clamp(3rem, 8vh, 6rem)' }}>
         <p className="kicker">FAQ</p>
         <h1 className="t-xl reveal" style={{ marginTop: '1rem' }}>Les questions<br />qui reviennent.</h1>
@@ -164,8 +172,9 @@ export default function Faq() {
           </div>
         </section>
       ))}
+      </main>
 
-      <Pied pub />
+      <Pied />
     </>
   );
 }

@@ -121,6 +121,7 @@ export default function Guide() {
       <Nav />
       <Mouvement />
 
+      <main>
       <header className={`wrap ${s.tete}`} style={{ paddingTop: 'clamp(3rem, 8vh, 6rem)' }}>
         <p className="kicker">Guide d’export</p>
         <h1 className="t-xl reveal" style={{ marginTop: '1rem' }}>Récupérer ton<br />fichier Instagram.</h1>
@@ -165,16 +166,17 @@ export default function Guide() {
         <div className={`${s.fin} reveal`}>
           <h2 className={s.finH}>Tes fichiers sont prêts ?</h2>
           <p className={s.finD}>
-            Reviens à l’accueil et dépose tes ZIP, tous en même temps. Ils sont lus directement
-            dans ton navigateur, rien ne sort de ton appareil.
+            Dépose tes ZIP, tous en même temps. Ils sont lus directement dans ton navigateur,
+            rien ne sort de ton appareil.
           </p>
           <div className={s.finCta}>
-            <BoutonLien href="/#chemin">Déposer mon fichier</BoutonLien>
+            <BoutonLien href="/wrapped/">Déposer mon fichier</BoutonLien>
           </div>
         </div>
       </div>
+      </main>
 
-      <Pied pub />
+      <Pied />
     </>
   );
 }

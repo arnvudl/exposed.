@@ -22,10 +22,14 @@ export default function StoryPlayer({
   onFermer: () => void;
 }) {
   const [index, setIndex] = useState(0);
-  const [enPause, setEnPause] = useState(false);
+  const [pauseManuelle, setPauseManuelle] = useState(false);
+  const [enAppui, setEnAppui] = useState(false);
   const [enAttente, setEnAttente] = useState(false);
   const [termine, setTermine] = useState(false);
   const [vueDetail, setVueDetail] = useState<string | null>(null);
+  // Trois raisons distinctes de retenir la story, qui ne s'annulent pas entre
+  // elles : une pause posee au bouton survit a un tap pour changer de carte.
+  const enPause = pauseManuelle || enAppui || vueDetail !== null;
 
   const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const animRef = useRef<Animation | null>(null);
@@ -79,7 +83,7 @@ export default function StoryPlayer({
       if (e.key === 'ArrowRight') avancer();
       else if (e.key === 'ArrowLeft') reculer();
       else if (e.key === 'Escape') onFermer();
-      else if (e.key === ' ') { e.preventDefault(); setEnPause((p) => !p); }
+      else if (e.key === ' ') { e.preventDefault(); setPauseManuelle((p) => !p); }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -87,17 +91,17 @@ export default function StoryPlayer({
   }, [cartes.length, enCoursDeChargement]);
 
   const HOLD_SEUIL_MS = 250;
-  function surAppui() { downTsRef.current = Date.now(); setEnPause(true); }
+  function surAppui() { downTsRef.current = Date.now(); setEnAppui(true); }
   function surRelache(direction: 'avant' | 'arriere') {
     const duree = Date.now() - downTsRef.current;
-    setEnPause(false);
+    setEnAppui(false);
     if (duree < HOLD_SEUIL_MS) { if (direction === 'avant') avancer(); else reculer(); }
   }
 
   // La liste complete se lit a son rythme, jamais en tapant sur un
-  // defilement automatique : on suspend la story tant qu'elle est ouverte.
-  function ouvrirDetail(id: string) { setEnPause(true); setVueDetail(id); }
-  function fermerDetail() { setVueDetail(null); setEnPause(false); }
+  // defilement automatique : la story est retenue tant qu'elle est ouverte.
+  function ouvrirDetail(id: string) { setVueDetail(id); }
+  function fermerDetail() { setVueDetail(null); }
 
   if (termine) {
     return (
@@ -131,10 +135,10 @@ export default function StoryPlayer({
       <div className={s.controles}>
         <button
           className={s.pause}
-          onClick={() => setEnPause((p) => !p)}
-          aria-label={enPause ? 'Reprendre' : 'Mettre en pause'}
+          onClick={() => setPauseManuelle((p) => !p)}
+          aria-label={pauseManuelle ? 'Reprendre' : 'Mettre en pause'}
         >
-          {enPause ? '▶' : '❚❚'}
+          {pauseManuelle ? '▶' : '❚❚'}
         </button>
         <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
       </div>
@@ -148,13 +152,13 @@ export default function StoryPlayer({
           className={s.zoneGauche}
           onPointerDown={surAppui}
           onPointerUp={() => surRelache('arriere')}
-          onPointerLeave={() => setEnPause(false)}
+          onPointerLeave={() => setEnAppui(false)}
         />
         <div
           className={s.zoneDroite}
           onPointerDown={surAppui}
           onPointerUp={() => surRelache('avant')}
-          onPointerLeave={() => setEnPause(false)}
+          onPointerLeave={() => setEnAppui(false)}
         />
       </div>
 

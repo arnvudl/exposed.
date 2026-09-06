@@ -1,0 +1,21 @@
+.tete { padding-top: clamp(3rem, 8vh, 6rem); padding-bottom: clamp(2.5rem, 6vh, 4rem); }
+.teteSub { margin-top: 1.4rem; }
+
+.bloc { padding-block: clamp(2rem, 5vh, 3rem); border-top: 1px solid var(--line); }
+.bloc h2 { max-width: 30ch; }
+
+/* Encre blanche adoucie d'un cran pour la lecture longue, comme les reponses
+   de la FAQ : la hierarchie se lit a la graisse, pas au gris. */
+.corps { max-width: 62ch; line-height: 1.6; color: color-mix(in oklab, var(--text) 92%, var(--bg)); }
+.corps p { margin-top: 1rem; }
+.corps ul { margin: 1rem 0 0; padding-left: 1.2em; display: grid; gap: .4rem; }
+.corps strong { font-weight: 600; color: var(--text); }
+.corps a { color: var(--text); text-underline-offset: 3px; }
+
+.maj {
+  padding-block: 2.5rem 1rem;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  color: var(--muted);
+}

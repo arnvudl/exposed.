@@ -12,7 +12,7 @@
    ============================================================ */
 import type { DonneesAffiche } from '@/components/Affiche';
 import type {
-  chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07,
+  Borne, chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07,
 } from './chapitres';
 import { determinerProfil } from './profil';
 import { profils as PROFILS_COMPLETS } from '@/content/revelations';
@@ -32,13 +32,12 @@ const NOMS_CHAPITRES: Record<number, string> = {
 };
 const piece = (n: number) => `Chapitre ${String(n).padStart(2, '0')} · ${NOMS_CHAPITRES[n]}`;
 
-const FMT_COURT = new Intl.DateTimeFormat('fr-FR', {
-  timeZone: 'Europe/Paris', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+const FMT_JOUR_ANNEE = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris', day: 'numeric', month: 'short', year: 'numeric',
 });
-/** "12 janv., 08:04" -> "12 janv., 8 h 04" : le style maison, deja utilise
-    dans les exemples de revelations.ts. */
-function dateCourte(ts: number): string {
-  return FMT_COURT.format(new Date(ts)).replace(':', ' h ').replace(/^0/, '');
+/** "12 janv. 2016" : pour un premier message, l'annee compte plus que l'heure. */
+function dateAvecAnnee(ts: number): string {
+  return FMT_JOUR_ANNEE.format(new Date(ts));
 }
 
 function heureCourte(ts: number): string {
@@ -270,25 +269,41 @@ function formatDureeCourteLocale(ms: number): string {
 }
 
 /* ============================================================
-   06 — PREMIER ET DERNIER  (deja les deux faits sur une seule carte,
-   via la paire : rien a eclater)
+   06 — PREMIER ET DERNIER  (deux cartes : chacune dit quand, avec qui, et
+   ce que disait le message. Deux dates seules ne racontaient rien.)
    ============================================================ */
-export function mapChapitre06(c: C06): DonneesAffiche[] {
-  const memeAvec = c.premier && c.dernier && c.premier.avec === c.dernier.avec;
-  return [{
+const MAX_CITATION = 110;
+function citation(texte: string): string {
+  const t = texte.length > MAX_CITATION ? `${texte.slice(0, MAX_CITATION).trimEnd()}…` : texte;
+  return `« ${t} »`;
+}
+
+function carteBorne(titre: string, b: Borne | null, formes: DonneesAffiche['formes']): DonneesAffiche {
+  if (!b) return { piece: piece(6), titre, chiffre: '—', note: 'Rien à montrer.', ton: 7, formes };
+  return {
     piece: piece(6),
-    titre: 'Premier et dernier',
+    titre,
     paire: [
-      { k: 'Premier', v: c.premier ? dateCourte(c.premier.ts) : '—' },
-      { k: 'Dernier', v: c.dernier ? dateCourte(c.dernier.ts) : '—' },
+      { k: 'Quand', v: dateAvecAnnee(b.ts) },
+      { k: 'Avec', v: b.avec },
     ],
-    note: memeAvec ? `les deux à ${c.premier!.avec}.` : 'à des moments très différents de ta vie.',
+    note: `${b.de} : ${citation(b.message)}`,
     ton: 7,
-    formes: [
+    formes,
+  };
+}
+
+export function mapChapitre06(c: C06): DonneesAffiche[] {
+  return [
+    carteBorne('Le premier message', c.premier, [
       { nom: 'stries', w: 56, dx: -26, ton: 'moyen' },
       { nom: 'onglet', place: 'coin', x: 58, y: -4, w: 52 },
-    ],
-  }];
+    ]),
+    carteBorne('Le dernier message', c.dernier, [
+      { nom: 'arc', w: 62, dx: 18, ton: 'moyen' },
+      { nom: 'onglet', place: 'coin', x: 58, y: -4, w: 52 },
+    ]),
+  ];
 }
 
 /* ============================================================
