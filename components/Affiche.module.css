@@ -169,7 +169,7 @@
 /* Un classement complet (top 10, top 5...) : chaque ligne reste lisible
    meme a dix lignes, parce que le rang est mono et petit, jamais en
    concurrence avec le nom. */
-.classement { display: grid; gap: 1.7cqw; margin: 0; padding: 0; list-style: none; }
+.classement { display: grid; gap: 1.7cqw; margin: 2cqw 0 0; padding: 0; list-style: none; }
 .rangLigne { display: flex; align-items: baseline; gap: 2.6cqw; }
 .rangNum {
   flex: none;

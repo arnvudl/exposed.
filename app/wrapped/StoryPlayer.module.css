@@ -100,6 +100,55 @@
   pointer-events: none;
 }
 
+/* ---------- voir la liste complete ---------- */
+.voirTout {
+  position: fixed;
+  bottom: clamp(1.2rem, 5vh, 2.4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .03em;
+  color: var(--bg);
+  background: var(--text);
+  border: none;
+  border-radius: 999px;
+  padding: .7rem 1.3rem;
+  cursor: pointer;
+  opacity: .92;
+}
+.voirTout:hover { opacity: 1; }
+
+/* Une vraie vue, pas une carte : plein ecran, on lit a son rythme, la
+   story reste en pause dessous jusqu'a la fermeture. */
+.detail {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.2rem, 4vh, 2rem) clamp(1.2rem, 5vw, 2.4rem);
+}
+.detailTete {
+  display: flex; align-items: center; justify-content: space-between;
+  flex: none; padding-bottom: 1rem; border-bottom: 1px solid var(--line);
+}
+.detailTitre { font-size: clamp(1.1rem, 2.6vw, 1.4rem); font-weight: 800; letter-spacing: -.01em; }
+.detailListe {
+  flex: 1; overflow-y: auto;
+  margin: 1.2rem 0 0; padding: 0; list-style: none;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: .1rem 1rem;
+}
+.detailListe li {
+  padding-block: .5rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  font-family: var(--mono);
+}
+
 /* ---------- fin du parcours ---------- */
 .fin {
   text-align: center;

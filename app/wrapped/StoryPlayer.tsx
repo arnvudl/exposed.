@@ -9,10 +9,15 @@ const DUREE_MS = 6000;
 
 export default function StoryPlayer({
   cartes,
+  details,
   enCoursDeChargement,
   onFermer,
 }: {
   cartes: DonneesAffiche[];
+  /** Donnees completes derriere certaines cartes (cf. `DonneesAffiche.id`),
+      montrees hors du defilement : une liste de 118 comptes n'a pas sa
+      place dans une story qui avance toute seule. */
+  details: Record<string, string[]>;
   enCoursDeChargement: boolean;
   onFermer: () => void;
 }) {
@@ -20,6 +25,7 @@ export default function StoryPlayer({
   const [enPause, setEnPause] = useState(false);
   const [enAttente, setEnAttente] = useState(false);
   const [termine, setTermine] = useState(false);
+  const [vueDetail, setVueDetail] = useState<string | null>(null);
 
   const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const animRef = useRef<Animation | null>(null);
@@ -88,6 +94,11 @@ export default function StoryPlayer({
     if (duree < HOLD_SEUIL_MS) { if (direction === 'avant') avancer(); else reculer(); }
   }
 
+  // La liste complete se lit a son rythme, jamais en tapant sur un
+  // defilement automatique : on suspend la story tant qu'elle est ouverte.
+  function ouvrirDetail(id: string) { setEnPause(true); setVueDetail(id); }
+  function fermerDetail() { setVueDetail(null); setEnPause(false); }
+
   if (termine) {
     return (
       <div className={s.scene}>
@@ -151,6 +162,24 @@ export default function StoryPlayer({
         <Affiche a={carte} marque="exposed." />
         {enAttente && <div className={s.attente}>La suite arrive…</div>}
       </div>
+
+      {carte.id && details[carte.id] && (
+        <button className={s.voirTout} onClick={() => ouvrirDetail(carte.id!)}>
+          Voir les {details[carte.id].length} comptes en entier
+        </button>
+      )}
+
+      {vueDetail && details[vueDetail] && (
+        <div className={s.detail}>
+          <div className={s.detailTete}>
+            <p className={s.detailTitre}>{carte.titre} · {details[vueDetail].length}</p>
+            <button className={s.fermer} onClick={fermerDetail} aria-label="Fermer la liste">&times;</button>
+          </div>
+          <ul className={s.detailListe}>
+            {details[vueDetail].map((compte) => <li key={compte}>@{compte}</li>)}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

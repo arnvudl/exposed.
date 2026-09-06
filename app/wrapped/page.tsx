@@ -25,6 +25,10 @@ export default function Wrapped() {
   const [statut, setStatut] = useState<'attente' | 'chargement' | 'fini' | 'erreur'>('attente');
   const [labelEtape, setLabelEtape] = useState('');
   const [cartes, setCartes] = useState<DonneesAffiche[]>([]);
+  // Donnees completes derriere une carte precise (ex. la liste entiere des
+  // comptes qui ne suivent pas en retour), affichees hors du defilement de
+  // la story : voir StoryPlayer, prop `details`.
+  const [details, setDetails] = useState<Record<string, string[]>>({});
   const [messageErreur, setMessageErreur] = useState<string | null>(null);
   const [dragActif, setDragActif] = useState(false);
 
@@ -48,6 +52,9 @@ export default function Wrapped() {
         evt.numero === 6 ? mapChapitre06(evt.donnees) :
         mapChapitre07(evt.donnees);
       setCartes((prev) => [...prev, ...nouvelles]);
+      if (evt.numero === 3) {
+        setDetails((d) => ({ ...d, 'follow-back': evt.donnees.neSuiventPas }));
+      }
     } else if (evt.type === 'termine') {
       setStatut('fini');
     } else if (evt.type === 'erreur') {
@@ -73,6 +80,7 @@ export default function Wrapped() {
     workerRef.current?.terminate();
     setStatut('chargement');
     setCartes([]);
+    setDetails({});
     setMessageErreur(null);
     setLabelEtape('Lecture de tes fichiers…');
     queueRef.current = [];
@@ -93,7 +101,14 @@ export default function Wrapped() {
   }
 
   if ((statut === 'chargement' || statut === 'fini') && cartes.length > 0) {
-    return <StoryPlayer cartes={cartes} enCoursDeChargement={statut === 'chargement'} onFermer={fermerStory} />;
+    return (
+      <StoryPlayer
+        cartes={cartes}
+        details={details}
+        enCoursDeChargement={statut === 'chargement'}
+        onFermer={fermerStory}
+      />
+    );
   }
 
   return (

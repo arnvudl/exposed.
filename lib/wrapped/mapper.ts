@@ -141,15 +141,36 @@ export function mapChapitre02(c: C02): DonneesAffiche[] {
 }
 
 /* ============================================================
-   03 — QUI NE TE SUIT PAS EN RETOUR
-   ============================================================ */
+   03 — QUI NE TE SUIT PAS EN RETOUR  (des exemples sur la carte, la liste
+   complete accessible a part, en dehors du defilement de la story)
+
+   Impossible de privilegier les « petits comptes non certifies » : l'export
+   Instagram ne donne ni le nombre d'abonnes ni le statut de certification
+   des AUTRES comptes, seulement leurs pseudos. Avoir cette info demanderait
+   un appel reseau vers Instagram, contraire a la promesse du site. A defaut,
+   les exemples sont tires au hasard a chaque calcul plutot que de toujours
+   montrer les memes (les premiers par ordre alphabetique). */
+const MAX_EXEMPLES_FOLLOWBACK = 10;
+function echantillon<T>(liste: T[], n: number): T[] {
+  const copie = [...liste];
+  for (let i = copie.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copie[i], copie[j]] = [copie[j], copie[i]];
+  }
+  return copie.slice(0, n);
+}
+
 export function mapChapitre03(c: C03): DonneesAffiche[] {
+  const exemples = echantillon(c.neSuiventPas, MAX_EXEMPLES_FOLLOWBACK);
+  const reste = c.neSuiventPas.length - exemples.length;
   return [{
+    id: 'follow-back',
     piece: piece(3),
     titre: 'Qui ne te suit pas en retour',
     chiffre: String(c.neSuiventPas.length),
-    note: c.neSuiventPas[0]
-      ? `dont @${c.neSuiventPas[0]}, sur ${nb(c.following)} comptes suivis.`
+    liste: exemples.length ? exemples.map((n, i) => ({ rang: i + 1, texte: `@${n}` })) : undefined,
+    note: reste > 0
+      ? `parmi d’autres, sur ${nb(c.following)} comptes suivis.`
       : `sur ${nb(c.following)} comptes que tu suis.`,
     ton: 3,
     formes: [
@@ -160,32 +181,22 @@ export function mapChapitre03(c: C03): DonneesAffiche[] {
 }
 
 /* ============================================================
-   04 — TES MOTS  (le mot signature, puis le top 5)
+   04 — TES MOTS  (une carte : le mot signature en tete, le top 5 dessous)
    ============================================================ */
 export function mapChapitre04(c: C04): DonneesAffiche[] {
   const [mot, occurrences] = c[0] ?? ['', 0];
-  const reveal: DonneesAffiche = {
+  return [{
     piece: piece(4),
     titre: 'Ce que tu dis vraiment',
     chiffre: mot ? `« ${mot} »` : '—',
+    liste: c.length > 1 ? c.slice(0, 5).map(([m, n], i) => ({ rang: i + 1, texte: `« ${m} » · ${nb(n)}` })) : undefined,
     note: occurrences ? `ton mot à toi, ${nb(occurrences)} fois.` : 'Pas encore assez de mots.',
     ton: 4,
     formes: [
       { nom: 'barres', w: 70 },
       { nom: 'arc', w: 54, ton: 'moyen' },
     ],
-  };
-  if (c.length === 0) return [reveal];
-
-  const classement: DonneesAffiche = {
-    piece: piece(4),
-    titre: 'Tes 5 mots',
-    liste: c.slice(0, 5).map(([m, n], i) => ({ rang: i + 1, texte: `« ${m} » · ${nb(n)}` })),
-    note: 'hors mots vides (« je », « le », « et »...).',
-    ton: 4,
-    formes: [{ nom: 'trame', w: 46, ton: 'faible' }],
-  };
-  return [reveal, classement];
+  }];
 }
 
 /* ============================================================
@@ -288,26 +299,15 @@ export function mapChapitre06(c: C06): DonneesAffiche[] {
 export function mapChapitre07(c: C07): DonneesAffiche[] {
   const profil = determinerProfil(c);
   const complet = PROFILS_COMPLETS.find((p) => p.nom === profil.nom);
-
-  const reveal: DonneesAffiche = {
+  return [{
     piece: piece(7),
     titre: 'Ton profil relationnel',
     chiffre: profil.nom,
-    note: profil.note,
+    note: complet ? complet.description : profil.note,
     ton: 8,
     formes: [
       { nom: 'barres', w: 42 },
       { nom: 'faisceau', w: 78, ton: 'moyen' },
     ],
-  };
-  if (!complet) return [reveal];
-
-  const description: DonneesAffiche = {
-    piece: piece(7),
-    titre: profil.nom,
-    note: complet.description,
-    ton: 8,
-    formes: [{ nom: 'trame', w: 50, ton: 'faible' }],
-  };
-  return [reveal, description];
+  }];
 }

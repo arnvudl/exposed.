@@ -32,6 +32,10 @@ export type Forme = {
 };
 
 export type DonneesAffiche = {
+  /** Identifiant libre, optionnel : sert a raccrocher une action a une
+      carte precise (ex. "voir la liste complete") sans que ce composant
+      partage sache ce qu'elle signifie. */
+  id?: string;
   piece: string;
   titre: string;
   chiffre?: string;
@@ -110,16 +114,6 @@ export default function Affiche({
         </div>
 
         <div className={styles.bas}>
-          {a.liste && (
-            <ol className={styles.classement}>
-              {a.liste.map((l) => (
-                <li key={l.rang} className={styles.rangLigne}>
-                  <span className={`${styles.rangNum} num`}>{String(l.rang).padStart(2, '0')}</span>
-                  <span className={styles.rangTexte}>{l.texte}</span>
-                </li>
-              ))}
-            </ol>
-          )}
           {a.paire && (
             <dl className={styles.paire}>
               {a.paire.map((e) => (
@@ -137,6 +131,16 @@ export default function Affiche({
             <p className={`${styles.chiffre} ${a.chiffre.length > 6 ? styles.chiffreLong : ''} num`}>
               {a.chiffre}
             </p>
+          )}
+          {a.liste && (
+            <ol className={styles.classement}>
+              {a.liste.map((l) => (
+                <li key={l.rang} className={styles.rangLigne}>
+                  <span className={`${styles.rangNum} num`}>{String(l.rang).padStart(2, '0')}</span>
+                  <span className={styles.rangTexte}>{l.texte}</span>
+                </li>
+              ))}
+            </ol>
           )}
           <p className={styles.note}>{a.note}</p>
           <p className={styles.marque}>{marque}</p>
