@@ -1,0 +1,54 @@
+/* ============================================================
+   /WRAPPED  /  depot -> calcul -> tes cartes, en story
+   Une fois le calcul lance, la page laisse place a StoryPlayer (plein
+   ecran) : ce module ne styles que ce qui vit encore ici, l'ecran de depot
+   et les etats de chargement/erreur avant la premiere carte.
+   ============================================================ */
+.tete { padding-bottom: clamp(2rem, 5vh, 3.5rem); }
+.tete p { margin-top: .9rem; max-width: 56ch; }
+
+/* ---------- zone de depot ---------- */
+.zone {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  border: 1px dashed color-mix(in oklab, var(--text) 38%, var(--bg));
+  border-radius: var(--r);
+  padding: clamp(2.6rem, 7vw, 4.5rem) 1.5rem;
+  text-align: center;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.zoneActive { border-color: var(--signal); background: color-mix(in oklab, var(--signal) 6%, var(--bg)); }
+.zoneTitre { font-size: clamp(1.2rem, 2.4vw, 1.5rem); font-weight: 800; letter-spacing: -.01em; }
+.zoneSub { margin-top: .6rem; color: var(--muted); font-size: 14px; }
+.zoneBouton {
+  margin-top: 1.6rem; display: inline-block; cursor: pointer;
+  font-family: var(--mono); font-size: 13px; letter-spacing: .04em;
+  padding: .75rem 1.3rem; border: 1px solid var(--text); border-radius: var(--r);
+  transition: background 160ms ease, color 160ms ease;
+}
+.zoneBouton:hover { background: var(--text); color: var(--bg); }
+.inputCache { display: none; }
+
+/* ---------- chargement ---------- */
+.chargement {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  padding: 1.5rem 1.7rem; border-radius: var(--r);
+  background: var(--surface); border: 1px solid var(--line);
+  display: flex; align-items: center; gap: 1.1rem;
+}
+.spin {
+  width: 20px; height: 20px; flex: none; border-radius: 50%;
+  border: 2px solid color-mix(in oklab, var(--text) 25%, var(--bg));
+  border-top-color: var(--signal);
+  animation: tourner 800ms linear infinite;
+}
+@keyframes tourner { to { transform: rotate(360deg); } }
+.chargementLabel { font-size: 15px; font-weight: 600; }
+.chargementSub { font-size: 13px; color: var(--muted); margin-top: .2rem; }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+
+.erreur {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  padding: 1.3rem 1.5rem; border-radius: var(--r);
+  background: color-mix(in oklab, var(--signal) 12%, var(--bg));
+  border: 1px solid var(--signal); font-size: 14px; line-height: 1.5;
+}

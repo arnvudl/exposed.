@@ -1,0 +1,108 @@
+/* ============================================================
+   STORY PLAYER  /  plein ecran, façon story Instagram
+   Une carte a la fois, avance automatique, tap pour naviguer, appui long
+   pour suspendre. Aucune barre de defilement : on tape, ca avance.
+   ============================================================ */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vh, 2rem) clamp(1rem, 4vw, 2rem);
+}
+
+.barres {
+  position: absolute;
+  top: clamp(.8rem, 2.5vh, 1.4rem);
+  left: clamp(1rem, 4vw, 2rem);
+  right: clamp(1rem, 4vw, 2rem);
+  display: flex;
+  gap: 5px;
+  z-index: 3;
+}
+.segment {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--text) 22%, transparent);
+  overflow: hidden;
+}
+.segmentFait { background: var(--text); }
+.segmentRemplissage {
+  height: 100%;
+  width: 0%;
+  background: var(--text);
+  border-radius: inherit;
+}
+
+.fermer {
+  position: absolute;
+  top: clamp(.7rem, 2.2vh, 1.2rem);
+  right: clamp(1rem, 4vw, 2rem);
+  z-index: 3;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  background: none; border: none; cursor: pointer;
+  opacity: .8;
+}
+.fermer:hover { opacity: 1; }
+
+.entete {
+  position: absolute;
+  top: clamp(2.2rem, 6vh, 3.2rem);
+  left: clamp(1rem, 4vw, 2rem);
+  z-index: 3;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.scene { touch-action: none; }
+
+.stage {
+  position: relative;
+  height: min(76dvh, 680px);
+  aspect-ratio: 9 / 13;
+  max-width: 100%;
+}
+.stage > * { width: 100%; height: 100%; }
+
+/* Zones de tap invisibles, sur tout l'ecran (pas seulement la carte) : sur
+   desktop, la carte est encadree de noir de chaque cote, et cet espace
+   reste cliquable, comme dans une vraie story. */
+.zones { position: fixed; inset: 0; display: flex; z-index: 2; }
+.zoneGauche { flex: 0 0 32%; cursor: w-resize; }
+.zoneDroite { flex: 1; cursor: e-resize; }
+
+.attente {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface);
+  border-radius: var(--r);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* ---------- fin du parcours ---------- */
+.fin {
+  text-align: center;
+  max-width: 40ch;
+}
+.finTitre { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -.02em; }
+.finSub { color: var(--muted); margin-top: .8rem; }
+.finBouton { margin-top: 1.8rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .segmentRemplissage { transition: none !important; }
+}
