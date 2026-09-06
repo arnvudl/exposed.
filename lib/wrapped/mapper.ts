@@ -2,17 +2,20 @@
    MAPPER  /  resultats des 7 chapitres -> DonneesAffiche[]
    Chaque chapitre renvoie UN TABLEAU de cartes, pas une seule : un chapitre
    qui calcule plusieurs faits distincts (les 5 categories de groupes, les 5
-   records) les montre tous, une carte par fait. C'est deliberement nomme
-   « Tes cinq records » : en montrer un seul ne tient pas la promesse.
-   Les chapitres a fait unique (cercle reel, follow-back, mots, premier/
-   dernier, profil) restent des tableaux a une seule entree, pour garder un
-   contrat homogene cote appelant.
+   records, un top 10 ou un top 5) les montre tous, une carte par fait.
+   C'est deliberement nomme « Tes cinq records » : en montrer un seul ne
+   tient pas la promesse.
+
+   Chaque carte porte aussi le nom du chapitre dans `piece`
+   (« Chapitre 02 · Tes groupes »), pas juste son numero : en pleine story,
+   loin du sommaire, un numero seul ne dit pas de quoi on parle.
    ============================================================ */
 import type { DonneesAffiche } from '@/components/Affiche';
 import type {
   chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07,
 } from './chapitres';
 import { determinerProfil } from './profil';
+import { profils as PROFILS_COMPLETS } from '@/content/revelations';
 
 type C01 = ReturnType<typeof chapitre01>;
 type C02 = ReturnType<typeof chapitre02>;
@@ -21,6 +24,13 @@ type C04 = [string, number][];
 type C05 = ReturnType<typeof chapitre05>;
 type C06 = ReturnType<typeof chapitre06>;
 type C07 = ReturnType<typeof chapitre07>;
+
+const NOMS_CHAPITRES: Record<number, string> = {
+  1: 'Ton cercle réel', 2: 'Tes groupes', 3: 'Qui ne te suit pas en retour',
+  4: 'Ce que tu dis vraiment', 5: 'Tes cinq records', 6: 'Premier et dernier',
+  7: 'Ton profil relationnel',
+};
+const piece = (n: number) => `Chapitre ${String(n).padStart(2, '0')} · ${NOMS_CHAPITRES[n]}`;
 
 const FMT_COURT = new Intl.DateTimeFormat('fr-FR', {
   timeZone: 'Europe/Paris', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
@@ -39,13 +49,12 @@ function heureCourte(ts: number): string {
 const nb = (n: number) => n.toLocaleString('fr-FR');
 
 /* ============================================================
-   01 — TON CERCLE RÉEL  (une carte : c'est l'annonce du top 10, pas
-   chaque personne — ainsi nommee dans les tout premiers exemples)
+   01 — TON CERCLE RÉEL  (la grande revelation, puis le classement complet)
    ============================================================ */
 export function mapChapitre01(c: C01): DonneesAffiche[] {
   const top = c[0];
-  return [{
-    piece: 'Chapitre 01',
+  const reveal: DonneesAffiche = {
+    piece: piece(1),
     titre: 'Ton cercle réel',
     chiffre: top ? String(top.total) : '0',
     note: top
@@ -56,7 +65,18 @@ export function mapChapitre01(c: C01): DonneesAffiche[] {
       { nom: 'disques', w: 98, dx: 34 },
       { nom: 'onglet', place: 'coin', x: 62, y: -3, w: 46, ton: 'moyen' },
     ],
-  }];
+  };
+  if (c.length === 0) return [reveal];
+
+  const classement: DonneesAffiche = {
+    piece: piece(1),
+    titre: 'Ton top 10',
+    liste: c.map((l, i) => ({ rang: i + 1, texte: `${l.qui} · ${nb(l.total)}` })),
+    note: 'total de messages échangés, tous les deux sens confondus.',
+    ton: 1,
+    formes: [{ nom: 'onglet', place: 'coin', x: 60, y: -4, w: 48, ton: 'moyen' }],
+  };
+  return [reveal, classement];
 }
 
 /* ============================================================
@@ -66,7 +86,7 @@ export function mapChapitre01(c: C01): DonneesAffiche[] {
 export function mapChapitre02(c: C02): DonneesAffiche[] {
   if (c.abandon || !c.categories) {
     return [{
-      piece: 'Chapitre 02',
+      piece: piece(2),
       titre: 'Tes groupes à l’abandon',
       chiffre: String(c.totalGroupes),
       note: 'groupes au total, aucun assez vivant pour concourir.',
@@ -83,35 +103,35 @@ export function mapChapitre02(c: C02): DonneesAffiche[] {
 
   if (cat.qg) {
     cartes.push({
-      piece: 'Chapitre 02', titre: 'Ton QG', chiffre: cat.qg.titre,
+      piece: piece(2), titre: 'Ton QG', chiffre: cat.qg.titre,
       note: `${nb(cat.qg.totalMessages)} messages, ton groupe le plus vivant.`,
       ton: 2, formes: [{ nom: 'barres', w: 74 }, { nom: 'trame', w: 52, ton: 'faible' }],
     });
   }
   if (cat.leBondé) {
     cartes.push({
-      piece: 'Chapitre 02', titre: 'Le plus bondé', chiffre: cat.leBondé.titre,
+      piece: piece(2), titre: 'Le plus bondé', chiffre: cat.leBondé.titre,
       note: `${nb(cat.leBondé.membres)} membres dans ce groupe.`,
       ton: 2, formes: [{ nom: 'disques', w: 92, dx: 24 }, { nom: 'onglet', place: 'coin', x: 64, y: -3, w: 42, ton: 'moyen' }],
     });
   }
   if (cat.tuDebites) {
     cartes.push({
-      piece: 'Chapitre 02', titre: 'Tu débites ici', chiffre: nb(cat.tuDebites.toiEnvoyes),
+      piece: piece(2), titre: 'Tu débites ici', chiffre: nb(cat.tuDebites.toiEnvoyes),
       note: `messages de toi dans « ${cat.tuDebites.titre} ».`,
       ton: 2, formes: [{ nom: 'barres', w: 58 }, { nom: 'arc', w: 46, ton: 'moyen' }],
     });
   }
   if (cat.inutile) {
     cartes.push({
-      piece: 'Chapitre 02', titre: 'Ton groupe inutile', chiffre: `${Math.round(cat.inutile.toiPart * 100)}%`,
+      piece: piece(2), titre: 'Ton groupe inutile', chiffre: `${Math.round(cat.inutile.toiPart * 100)}%`,
       note: `de tes messages dans « ${cat.inutile.titre} ». Le reste, silence.`,
       ton: 2, formes: [{ nom: 'cadre', w: 66, ton: 'moyen' }, { nom: 'stries', w: 40, dx: -18, ton: 'faible' }],
     });
   }
   if (cat.leRing) {
     cartes.push({
-      piece: 'Chapitre 02', titre: 'Le ring', chiffre: String(cat.leRing.insultes),
+      piece: piece(2), titre: 'Le ring', chiffre: String(cat.leRing.insultes),
       note: `vannes échangées dans « ${cat.leRing.titre} », ${Math.round(cat.leRing.tauxInsultes * 100)}% des messages.`,
       ton: 2, formes: [{ nom: 'faisceau', w: 80, ton: 'moyen' }, { nom: 'cadre', w: 50 }],
     });
@@ -125,7 +145,7 @@ export function mapChapitre02(c: C02): DonneesAffiche[] {
    ============================================================ */
 export function mapChapitre03(c: C03): DonneesAffiche[] {
   return [{
-    piece: 'Chapitre 03',
+    piece: piece(3),
     titre: 'Qui ne te suit pas en retour',
     chiffre: String(c.neSuiventPas.length),
     note: c.neSuiventPas[0]
@@ -140,12 +160,12 @@ export function mapChapitre03(c: C03): DonneesAffiche[] {
 }
 
 /* ============================================================
-   04 — TES MOTS
+   04 — TES MOTS  (le mot signature, puis le top 5)
    ============================================================ */
 export function mapChapitre04(c: C04): DonneesAffiche[] {
   const [mot, occurrences] = c[0] ?? ['', 0];
-  return [{
-    piece: 'Chapitre 04',
+  const reveal: DonneesAffiche = {
+    piece: piece(4),
     titre: 'Ce que tu dis vraiment',
     chiffre: mot ? `« ${mot} »` : '—',
     note: occurrences ? `ton mot à toi, ${nb(occurrences)} fois.` : 'Pas encore assez de mots.',
@@ -154,7 +174,18 @@ export function mapChapitre04(c: C04): DonneesAffiche[] {
       { nom: 'barres', w: 70 },
       { nom: 'arc', w: 54, ton: 'moyen' },
     ],
-  }];
+  };
+  if (c.length === 0) return [reveal];
+
+  const classement: DonneesAffiche = {
+    piece: piece(4),
+    titre: 'Tes 5 mots',
+    liste: c.slice(0, 5).map(([m, n], i) => ({ rang: i + 1, texte: `« ${m} » · ${nb(n)}` })),
+    note: 'hors mots vides (« je », « le », « et »...).',
+    ton: 4,
+    formes: [{ nom: 'trame', w: 46, ton: 'faible' }],
+  };
+  return [reveal, classement];
 }
 
 /* ============================================================
@@ -166,42 +197,42 @@ export function mapChapitre05(c: C05): DonneesAffiche[] {
 
   if (c.plusTardif) {
     cartes.push({
-      piece: 'Chapitre 05', titre: 'Le plus tardif', chiffre: heureCourte(c.plusTardif.ts),
+      piece: piece(5), titre: 'Le plus tardif', chiffre: heureCourte(c.plusTardif.ts),
       note: `avec ${c.plusTardif.avec}.`,
       ton: 6, formes: [{ nom: 'arc', w: 76, dx: -14 }, { nom: 'cadre', w: 52, ton: 'moyen' }],
     });
   }
   if (c.remisInflige) {
     cartes.push({
-      piece: 'Chapitre 05', titre: 'Le plus long remis (toi)', chiffre: dureeCourte(c.remisInflige.debut, c.remisInflige.ts),
+      piece: piece(5), titre: 'Le plus long remis (toi)', chiffre: dureeCourte(c.remisInflige.debut, c.remisInflige.ts),
       note: `avant que tu répondes à ${c.remisInflige.avec}.`,
       ton: 6, formes: [{ nom: 'stries', w: 82, dx: -20, ton: 'moyen' }, { nom: 'onglet', place: 'coin', x: 60, y: -4, w: 44 }],
     });
   }
   if (c.remisSubi) {
     cartes.push({
-      piece: 'Chapitre 05', titre: 'Le plus long remis (subi)', chiffre: dureeCourte(c.remisSubi.debut, c.remisSubi.ts),
+      piece: piece(5), titre: 'Le plus long remis (subi)', chiffre: dureeCourte(c.remisSubi.debut, c.remisSubi.ts),
       note: `avant que ${c.remisSubi.avec} te réponde.`,
       ton: 6, formes: [{ nom: 'trame', w: 70 }, { nom: 'cadre', w: 48, ton: 'moyen' }],
     });
   }
   if (c.reponseRapide) {
     cartes.push({
-      piece: 'Chapitre 05', titre: 'Ta réponse la plus rapide', chiffre: formatDureeCourteLocale(c.reponseRapide.ms),
+      piece: piece(5), titre: 'Ta réponse la plus rapide', chiffre: formatDureeCourteLocale(c.reponseRapide.ms),
       note: `à ${c.reponseRapide.avec}.`,
       ton: 6, formes: [{ nom: 'faisceau', w: 78, ton: 'moyen' }, { nom: 'barres', w: 40 }],
     });
   }
   if (c.jourRecord) {
     cartes.push({
-      piece: 'Chapitre 05', titre: 'Ta journée la plus intense', chiffre: nb(c.jourRecord.messages),
+      piece: piece(5), titre: 'Ta journée la plus intense', chiffre: nb(c.jourRecord.messages),
       note: `messages le ${c.jourRecord.date}.`,
       ton: 6, formes: [{ nom: 'arc', w: 88, dx: 34 }, { nom: 'onglet', place: 'coin', x: 68, y: -4, w: 46, ton: 'moyen' }],
     });
   }
 
   return cartes.length ? cartes : [{
-    piece: 'Chapitre 05', titre: 'Tes cinq records', chiffre: '—', note: 'Pas encore assez de messages.',
+    piece: piece(5), titre: 'Tes cinq records', chiffre: '—', note: 'Pas encore assez de messages.',
     ton: 6, formes: [{ nom: 'arc', w: 76, dx: -14 }, { nom: 'cadre', w: 52, ton: 'moyen' }],
   }];
 }
@@ -234,7 +265,7 @@ function formatDureeCourteLocale(ms: number): string {
 export function mapChapitre06(c: C06): DonneesAffiche[] {
   const memeAvec = c.premier && c.dernier && c.premier.avec === c.dernier.avec;
   return [{
-    piece: 'Chapitre 06',
+    piece: piece(6),
     titre: 'Premier et dernier',
     paire: [
       { k: 'Premier', v: c.premier ? dateCourte(c.premier.ts) : '—' },
@@ -250,12 +281,16 @@ export function mapChapitre06(c: C06): DonneesAffiche[] {
 }
 
 /* ============================================================
-   07 — TON PROFIL RELATIONNEL
+   07 — TON PROFIL RELATIONNEL  (la revelation, puis la description
+   complete deja ecrite pour l'index de l'accueil : le meme texte, pas
+   une version raccourcie inventee pour tenir dans une carte)
    ============================================================ */
 export function mapChapitre07(c: C07): DonneesAffiche[] {
   const profil = determinerProfil(c);
-  return [{
-    piece: 'Chapitre 07',
+  const complet = PROFILS_COMPLETS.find((p) => p.nom === profil.nom);
+
+  const reveal: DonneesAffiche = {
+    piece: piece(7),
     titre: 'Ton profil relationnel',
     chiffre: profil.nom,
     note: profil.note,
@@ -264,5 +299,15 @@ export function mapChapitre07(c: C07): DonneesAffiche[] {
       { nom: 'barres', w: 42 },
       { nom: 'faisceau', w: 78, ton: 'moyen' },
     ],
-  }];
+  };
+  if (!complet) return [reveal];
+
+  const description: DonneesAffiche = {
+    piece: piece(7),
+    titre: profil.nom,
+    note: complet.description,
+    ton: 8,
+    formes: [{ nom: 'trame', w: 50, ton: 'faible' }],
+  };
+  return [reveal, description];
 }

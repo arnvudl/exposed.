@@ -39,6 +39,9 @@ export type DonneesAffiche = {
       record : un chiffre geant plus une phrase en petit obligeait a lire deux
       informations dans deux typographies differentes. */
   paire?: { k: string; v: string }[];
+  /** Un classement complet (top 10, top 5...), quand la carte montre une
+      liste plutot qu'un chiffre unique. Remplace chiffre/paire. */
+  liste?: { rang: number; texte: string }[];
   note: string;
   /** Index de l'onglet de couleur, de 1 a 10. */
   ton: number;
@@ -107,6 +110,16 @@ export default function Affiche({
         </div>
 
         <div className={styles.bas}>
+          {a.liste && (
+            <ol className={styles.classement}>
+              {a.liste.map((l) => (
+                <li key={l.rang} className={styles.rangLigne}>
+                  <span className={`${styles.rangNum} num`}>{String(l.rang).padStart(2, '0')}</span>
+                  <span className={styles.rangTexte}>{l.texte}</span>
+                </li>
+              ))}
+            </ol>
+          )}
           {a.paire && (
             <dl className={styles.paire}>
               {a.paire.map((e) => (

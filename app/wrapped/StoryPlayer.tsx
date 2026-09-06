@@ -73,6 +73,7 @@ export default function StoryPlayer({
       if (e.key === 'ArrowRight') avancer();
       else if (e.key === 'ArrowLeft') reculer();
       else if (e.key === 'Escape') onFermer();
+      else if (e.key === ' ') { e.preventDefault(); setEnPause((p) => !p); }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -90,7 +91,9 @@ export default function StoryPlayer({
   if (termine) {
     return (
       <div className={s.scene}>
-        <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
+        <div className={s.controles}>
+          <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
+        </div>
         <div className={s.fin}>
           <p className={s.finTitre}>C’est tout.</p>
           <p className={s.finSub}>Tes {cartes.length} cartes, calculées dans ton navigateur, jamais envoyées nulle part.</p>
@@ -114,7 +117,16 @@ export default function StoryPlayer({
         ))}
       </div>
       <p className={s.entete}>{carte.piece}</p>
-      <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
+      <div className={s.controles}>
+        <button
+          className={s.pause}
+          onClick={() => setEnPause((p) => !p)}
+          aria-label={enPause ? 'Reprendre' : 'Mettre en pause'}
+        >
+          {enPause ? '▶' : '❚❚'}
+        </button>
+        <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
+      </div>
 
       {/* Les zones couvrent tout l'ecran, pas seulement la carte : sur
           desktop la carte est encadree de noir, et cet espace doit rester
