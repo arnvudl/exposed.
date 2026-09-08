@@ -7,9 +7,16 @@ import { BoutonLien } from '@/components/Bouton';
 import s from './guide.module.css';
 
 export const metadata: Metadata = {
-  title: 'Guide d’export. Exposed',
+  title: ‘Guide d’export Instagram’,
   description:
-    'Récupérer ton fichier Instagram, étape par étape, depuis ton téléphone. Format JSON, puis tu déposes tes fichiers ZIP.',
+    ‘Comment télécharger tes données Instagram en format JSON en 5 minutes, étape par étape depuis ton téléphone. Abonnés, messages, connexions.’,
+  alternates: { canonical: ‘https://getexposed.me/guide’ },
+  openGraph: {
+    title: ‘Comment exporter tes données Instagram (guide complet)’,
+    description:
+      ‘Télécharge tes abonnés, messages et connexions Instagram en format JSON. Guide illustré, 10 étapes depuis ton téléphone.’,
+    url: ‘https://getexposed.me/guide’,
+  },
 };
 
 type Style = React.CSSProperties;

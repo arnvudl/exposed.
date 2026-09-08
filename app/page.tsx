@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
@@ -6,6 +7,19 @@ import { BoutonLien } from '@/components/Bouton';
 import ListeProfils from '@/components/ListeProfils';
 import { revelations, afficheHero, afficheDossier, profils } from '@/content/revelations';
 import s from './page.module.css';
+
+export const metadata: Metadata = {
+  title: 'Exposed — Analyse tes données Instagram gratuitement',
+  description:
+    'Télécharge tes données Instagram et découvre en quelques secondes tes abonnés fantômes, tes conversations les plus actives et ton profil complet. 100 % gratuit, tout se passe dans ton navigateur.',
+  alternates: { canonical: 'https://getexposed.me' },
+  openGraph: {
+    title: 'Exposed — Analyse tes données Instagram',
+    description:
+      'Abonnés fantômes, conversations les plus actives, ton profil Instagram décortiqué. Gratuit, aucun compte requis.',
+    url: 'https://getexposed.me',
+  },
+};
 
 type Style = React.CSSProperties;
 

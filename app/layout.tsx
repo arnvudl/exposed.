@@ -17,9 +17,37 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Exposed. Ce que tes DMs disent de toi',
+  metadataBase: new URL('https://getexposed.me'),
+  title: {
+    template: '%s · Exposed',
+    default: 'Exposed — Analyse tes données Instagram gratuitement',
+  },
   description:
-    'Un Wrapped pour tes DMs Instagram, lu entièrement dans ton navigateur. Aucun message ne quitte ta machine.',
+    'Découvre ce que tes données Instagram révèlent : abonnés fantômes, conversations les plus actives, ton profil complet. Gratuit, sans compte, tout reste dans ton navigateur.',
+  keywords: [
+    'analyser données instagram',
+    'instagram wrapped',
+    'voir mes données instagram',
+    'analyse compte instagram gratuit',
+    'abonnés fantômes instagram',
+    'données personnelles instagram',
+    'export instagram json',
+    'instagram statistics',
+  ],
+  openGraph: {
+    siteName: 'Exposed',
+    locale: 'fr_BE',
+    type: 'website',
+    url: 'https://getexposed.me',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    creator: '@arnvudl',
+    site: '@arnvudl',
+  },
+  alternates: {
+    canonical: 'https://getexposed.me',
+  },
 };
 
 export const viewport: Viewport = {

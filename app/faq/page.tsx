@@ -5,9 +5,10 @@ import Mouvement from '@/components/Mouvement';
 import s from './faq.module.css';
 
 export const metadata: Metadata = {
-  title: 'FAQ. Exposed',
+  title: 'FAQ',
   description:
-    'Confidentialité, fonctionnement, compatibilité, légal : les réponses sur Exposed, le Wrapped de tes DMs lu dans ton navigateur.',
+    'Comment fonctionne Exposed ? Confidentialité des données Instagram, compatibilité iOS et Android, légal RGPD : toutes les réponses.',
+  alternates: { canonical: 'https://getexposed.me/faq' },
 };
 
 type Item = { q: string; r: React.ReactNode };
