@@ -1,118 +1,118 @@
 # Exposed. — COPY.md
 
-Règles de rédaction, opposables comme `DESIGN.md`. Toute chaîne visible du site passe par ici.
+Writing rules, binding just like `DESIGN.md`. Every visible string on the site goes through here.
 
-## Les trois tics à traquer
+## The three tics to hunt down
 
-1. **L'inflation émotionnelle et le jargon.** « Révolutionnez », « plongez au cœur de »,
-   « une expérience unique ».
-2. **Le flou abstrait.** Parler de ce que le produit apporte sans jamais nommer ce qu'il fait.
-3. **La symétrie parfaite.** Phrases de même longueur, listes ternaires prévisibles,
-   connecteurs lourds.
+1. **Emotional inflation and jargon.** "Revolutionize", "dive into the heart of",
+   "a unique experience".
+2. **Abstract vagueness.** Talking about what the product brings without ever naming what it does.
+3. **Perfect symmetry.** Sentences of equal length, predictable ternary lists,
+   heavy connectors.
 
-Le troisième est le plus difficile à voir et le plus révélateur.
+The third is the hardest to spot and the most telling.
 
-## Les cinq règles
+## The five rules
 
-### 1. Concret immédiat
+### 1. Immediate concreteness
 
-Chaque adjectif valorisant est remplacé par un fait, un chiffre ou une action.
+Every flattering adjective is replaced by a fact, a number, or an action.
 
-- Non : « Une analyse puissante de tes conversations. »
-- Oui : « On compte tes messages et on croise tes listes d'abonnés. »
+- No: "A powerful analysis of your conversations."
+- Yes: "We count your messages and cross-reference your follower lists."
 
-### 2. Bannissement lexical
+### 2. Lexical ban
 
-Interdits, sans exception : révolutionner, booster, transformer, catalyser, plonger,
-innovant, holistique, synergie, écosystème, incontournable, phare, vecteur, univers,
-puissant, sur-mesure, sans faille, à portée de main, en toute simplicité, expérience
-unique, conçu pour, pensé pour, au service de, libérer, exploiter, insights, data-driven,
-magique, force est de constater, il n'a jamais été aussi facile de.
+Forbidden, no exceptions: revolutionize, boost, transform, catalyze, dive into,
+innovative, holistic, synergy, ecosystem, game-changing, cutting-edge, groundbreaking,
+powerful, tailor-made, seamless, effortless, unique experience, designed for, built
+for, empower, leverage, insights, data-driven, magical, it turns out that,
+it has never been easier to.
 
-Connecteurs interdits : De plus, En outre, Par ailleurs, En conclusion, Que vous soyez X
-ou Y, Non seulement... mais aussi.
+Forbidden connectors: Moreover, In addition, Furthermore, In conclusion, Whether you're X
+or Y, Not only... but also.
 
-Ponctuation interdite : le point d'exclamation, le tiret cadratin, l'emoji, la question
-rhétorique en titre (« Prêt à découvrir ? »).
+Forbidden punctuation: the exclamation mark, the em dash, the emoji, the rhetorical
+question in a title ("Ready to find out?").
 
-### 3. Asymétrie rythmique
+### 3. Rhythmic asymmetry
 
-Alterner délibérément. Une phrase de deux mots après une phrase de vingt. Jamais trois
-propositions de longueur égale à la suite.
+Deliberately alternate. A two-word sentence after a twenty-word sentence. Never three
+clauses of equal length in a row.
 
-**La liste ternaire est le tic le plus repérable.** « Rien à installer, rien à configurer,
-rien à envoyer » sonne bien à l'oreille et ne dit rien. On coupe à un seul élément, celui
-qui compte.
+**The ternary list is the most recognizable tic.** "Nothing to install, nothing to
+configure, nothing to send" sounds nice and says nothing. Cut it down to the one
+element that matters.
 
-Une énumération de faits reste permise quand elle est réellement informative : nommer les
-trois entrées d'un calcul n'est pas un effet de style.
+An enumeration of facts stays fine when it's genuinely informative: naming the
+three inputs of a calculation isn't a stylistic effect.
 
-### 3 bis. L'antithèse et la paire parallèle
+### 3 bis. Antithesis and the parallel pair
 
-Le tic le plus difficile à repérer, parce qu'il sonne bien. Trois formes à traquer :
+The hardest tic to spot, because it sounds good. Three forms to hunt down:
 
-- **« Ce n'est pas X, c'est Y. »** « Ce n'est pas une promesse, c'est une contrainte. »
-- **« X, pas Y. »** « C'est leur délai, pas le nôtre. »
-- **La paire de négations.** « Pas d'IA, pas de devinettes. »
+- **"It's not X, it's Y."** "It's not a promise, it's a constraint."
+- **"X, not Y."** "It's their delay, not ours."
+- **The negation pair.** "No AI, no guesswork."
 
-Ces tournures donnent une impression de tranchant sans rien ajouter. Elles se remplacent
-par l'affirmation seule : « Il n'y a aucun serveur à qui l'envoyer. » Le fait suffit, et
-il porte plus loin que la figure de style.
+These turns of phrase create an impression of sharpness without adding anything. They get
+replaced by the plain statement: "There's no server to send it to." The fact is enough, and
+it lands further than the figure of speech.
 
-Corollaire : deux propositions de longueur égale reliées par une virgule sont presque
-toujours à couper en une seule.
+Corollary: two clauses of equal length joined by a comma are almost
+always to be cut down to one.
 
-### 4. Test de l'oral
+### 4. The spoken test
 
-Chaque phrase doit pouvoir être dite à voix haute à un ami sans avoir l'air d'une
-publicité. Si elle ne passe pas, elle est réécrite.
+Every sentence must be sayable out loud to a friend without sounding like an
+ad. If it doesn't pass, it gets rewritten.
 
-### 5. Tu, pas nous
+### 5. You, not we
 
-Éliminer l'auto-félicitation. Le sujet de la phrase est le visiteur et son état final,
-jamais le produit et ses intentions.
+Eliminate self-congratulation. The subject of the sentence is the visitor and their
+end state, never the product and its intentions.
 
-- Non : « Notre mission est de te donner le contrôle sur tes données. »
-- Oui : « Ton fichier ne quitte pas ta machine. »
+- No: "Our mission is to give you control over your data."
+- Yes: "Your file doesn't leave your machine."
 
-## Deux règles propres à Exposed
+## Two rules specific to Exposed
 
-### Ne jamais dire IA, ni analyse intelligente, ni algorithme prédictif
+### Never say AI, nor smart analysis, nor predictive algorithm
 
-Le produit fait de l'arithmétique : des comptages, des tris, des croisements de listes,
-des seuils. C'est tout, et c'est une force. Le dire franchement est plus crédible que
-n'importe quelle promesse, et le contraire serait un mensonge.
+The product does arithmetic: counting, sorting, cross-referencing lists,
+thresholds. That's it, and it's a strength. Saying so plainly is more credible than
+any promise, and the opposite would be a lie.
 
-### Protéger le registre émotionnel quand il est factuel
+### Protect the emotional register when it's factual
 
-Exposed n'est pas un outil B2B. Une phrase peut toucher et rester concrète, parce qu'elle
-décrit une donnée réelle : « 41 jours de silence avec la personne à qui tu écrivais tous
-les jours en janvier. » On garde ce registre.
+Exposed isn't a B2B tool. A sentence can land emotionally and stay concrete, because it
+describes a real data point: "41 days of silence with the person you used to message
+every day back in January." We keep that register.
 
-Ce qu'on supprime, c'est le lyrisme qui ne décrit rien : « Tes messages te connaissent
-mieux que toi. » Belle phrase, aucun fait dedans. La règle de tri est simple : **si la
-phrase ne pointe pas vers une donnée que le rapport affiche, elle sort.**
+What we cut is lyricism that describes nothing: "Your messages know you
+better than you do." A nice sentence, no fact inside. The sorting rule is simple: **if the
+sentence doesn't point to a data point the report displays, it goes.**
 
-## Grille appliquée à l'accueil
+## Grid applied to the home page
 
-| Emplacement | Réflexe à bannir | Retenu |
+| Location | Reflex to ban | Kept |
 |---|---|---|
-| Sous-titre du hero | Analysé dans ton navigateur, rien n'est envoyé nulle part. | Dépose le ZIP que t'envoie Instagram. Tout est lu dans ton navigateur. Rien ne part. |
-| Dossier, étape 2 | On compte, on croise, on te montre. | On compte tes messages et on croise tes listes d'abonnés. C'est de l'arithmétique, rien de plus. |
-| Confidentialité | Ce n'est pas une promesse, c'est une contrainte. | Il n'y a aucun serveur à qui l'envoyer. |
-| Chemin, étape 3 | Rien à installer, rien à configurer, rien à envoyer. | Rien à installer. |
-| Chemin, délai | C'est leur délai, pas le nôtre. | (supprimé, la phrase précédente le disait déjà) |
-| Les types | Quatre axes se croisent pour donner ton type. | Qui lance, à combien de gens, à quelle vitesse, avec quelle longueur. |
-| Appel final | Tes messages te connaissent mieux que toi. | Tout est déjà dans tes messages. |
+| Hero subtitle | Analyzed in your browser, nothing is sent anywhere. | Drop the ZIP Instagram sends you. Everything is read in your browser. Nothing leaves. |
+| Folder, step 2 | We count, we cross-reference, we show you. | We count your messages and cross-reference your follower lists. It's arithmetic, nothing more. |
+| Privacy | It's not a promise, it's a constraint. | There's no server to send it to. |
+| Path, step 3 | Nothing to install, nothing to configure, nothing to send. | Nothing to install. |
+| Path, delay | It's their delay, not ours. | (removed, the previous sentence already said it) |
+| The types | Four axes cross to give you your type. | Who starts it, with how many people, how fast, how long. |
+| Final call | Your messages know you better than you do. | It's all already in your messages. |
 
-## Contrôle avant publication
+## Pre-publish check
 
-Relire chaque chaîne visible et vérifier :
+Reread every visible string and check:
 
-- [ ] Aucun mot de la liste bannie.
-- [ ] Aucune liste ternaire décorative.
-- [ ] Aucun point d'exclamation, aucun tiret cadratin, aucun emoji.
-- [ ] Aucune phrase qui ne pointe vers rien de vérifiable dans le produit.
-- [ ] Aucune phrase dont le sujet est « nous ».
-- [ ] Trois longueurs de phrase différentes au moins par bloc.
-- [ ] Aucune mention d'IA, d'algorithme ou d'intelligence.
+- [ ] No word from the banned list.
+- [ ] No decorative ternary list.
+- [ ] No exclamation mark, no em dash, no emoji.
+- [ ] No sentence that doesn't point to something verifiable in the product.
+- [ ] No sentence whose subject is "we".
+- [ ] At least three different sentence lengths per block.
+- [ ] No mention of AI, algorithm, or intelligence.
