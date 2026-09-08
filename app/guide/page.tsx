@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Nav from '@/components/Nav';
 import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
@@ -13,112 +14,122 @@ export const metadata: Metadata = {
 
 type Style = React.CSSProperties;
 
-/* Les captures sont prises sur le telephone, en vertical : chaque etape qui
-   montre un ecran a un cadre 9:16 a remplir. L'etape « quelles infos » se fait
-   au texte, elle ne se capture pas bien. */
+/* Dix captures reelles, prises sur le compte du site, avec le bon bouton
+   entoure en rouge a chaque etape. */
 type Etape = {
   titre: string;
   corps: React.ReactNode;
-  shot?: string; // legende du cadre a remplir ; absent = pas d'image
+  shot: string; // chemin dans /public/guide
 };
 
 const etapes: Etape[] = [
   {
-    titre: 'Ouvre tes réglages',
+    titre: 'Ouvre ton profil',
     corps: (
       <>
-        Depuis ton profil, appuie sur le menu <strong>☰</strong> en haut à droite, puis sur{' '}
-        <strong>Paramètres et confidentialité</strong>.
+        Depuis ton profil Instagram, appuie sur le menu <strong>☰</strong> en haut à droite.
       </>
     ),
-    shot: 'Capture : le menu du profil, avec « Paramètres et confidentialité ».',
+    shot: '/guide/01-menu-profil.png',
   },
   {
-    titre: 'Va dans le Centre de comptes',
+    titre: 'Ouvre le Centre de comptes',
     corps: (
       <>
-        Ouvre <strong>Centre de comptes</strong>, puis{' '}
-        <strong>Tes informations et autorisations</strong>, puis{' '}
-        <strong>Télécharger tes informations</strong>.
+        Dans <strong>Paramètres et activité</strong>, appuie sur <strong>Centre de comptes</strong>{' '}
+        (<span className={s.orig}>Accounts Centre</span>), tout en haut.
       </>
     ),
-    shot: 'Capture : l’écran « Tes informations et autorisations ».',
+    shot: '/guide/02-parametres.png',
   },
   {
-    titre: 'Crée une demande',
+    titre: 'Tes informations et autorisations',
     corps: (
       <>
-        Appuie sur <strong>Créer une demande de téléchargement</strong>, choisis ton compte,
-        puis <strong>Télécharger sur ton appareil</strong>.
+        Dans le Centre de comptes, appuie sur{' '}
+        <strong>Tes informations et autorisations</strong> (<span className={s.orig}>Your information and permissions</span>).
       </>
     ),
-    shot: 'Capture : le bouton « Créer une demande de téléchargement ».',
+    shot: '/guide/03-centre-comptes.png',
   },
   {
-    titre: 'Choisis quelles infos',
+    titre: 'Exporte tes informations',
     corps: (
       <>
-        Sélectionne <strong>Une partie de tes informations</strong>, puis coche les quatre
-        catégories qui nourrissent ton dossier :
-        <ul className={s.liste}>
-          <li><strong>Messages</strong></li>
-          <li><strong>Contacts</strong></li>
-          <li><strong>Abonné(e)s et suivi(e)s</strong></li>
-          <li><strong>Abonnements</strong></li>
-        </ul>
-        Tu peux tout prendre si tu veux, mais ces quatre-là suffisent et gardent le fichier
-        plus léger.
+        Appuie sur <strong>Exporter tes informations</strong> (<span className={s.orig}>Export your information</span>).
       </>
     ),
-    // Pas de cadre : cette etape se fait au texte.
+    shot: '/guide/04-export-infos.png',
   },
   {
-    titre: 'Un seul réglage à ne pas rater',
+    titre: 'Vers ton appareil, pas ailleurs',
     corps: (
       <>
-        Une seule chose est vraiment obligatoire, le reste t’appartient :
-        <ul className={s.liste}>
-          <li><strong>Format : <em>JSON</em>.</strong> C’est la seule à ne pas rater. En HTML, le site ne peut rien lire.</li>
-          <li><strong>Période :</strong> celle que tu veux. Plus c’est long, plus ton dossier est complet, mais c’est toi qui décides.</li>
-          <li>
-            <strong>Qualité des médias :</strong> baisse-la si le stockage te manque.{' '}
-            <span className={s.sain}>On ne lit que le texte de tes messages, jamais tes photos</span>, donc
-            ça n’enlève rien à ton dossier et ça allège le fichier.
-          </li>
-        </ul>
+        Choisis <strong>Exporter vers l’appareil</strong>. L’autre option envoie tes messages à un
+        service externe : ce n’est pas celle-là.
       </>
     ),
-    shot: 'Capture : l’écran des options, avec le format JSON entouré.',
+    shot: '/guide/05-export-appareil.png',
   },
   {
-    titre: 'Lance, puis attends',
+    titre: 'Décoche tout pour repartir de zéro',
     corps: (
       <>
-        Appuie sur <strong>Créer les fichiers</strong>. Instagram prépare ton export : de
-        quelques minutes à <strong>48 heures</strong> selon la période choisie. Il t’envoie une
-        notification dès que ton fichier est prêt à télécharger.
+        Instagram coche tout par défaut. Appuie sur <strong>Tout effacer</strong> (
+        <span className={s.orig}>Clear all</span>) en haut de la liste avant de choisir toi-même.
       </>
     ),
-    shot: 'Capture : l’écran de confirmation « Ta demande est en cours ».',
+    shot: '/guide/06-tout-decocher.png',
   },
   {
-    titre: 'Télécharge, puis dépose',
+    titre: 'Coche Abonnements et Messages',
     corps: (
       <>
-        Quand Instagram t’envoie la notification, ouvre-la et télécharge. Si ton export est
-        volumineux, <strong>Instagram le découpe en plusieurs fichiers</strong> (part 1, part 2…) :
-        télécharge-les tous. Pas besoin de les décompresser, reviens sur Exposed et glisse-les
-        tels quels, le site les recombine.
+        Dans <strong>Ton activité Instagram</strong>, coche seulement{' '}
+        <strong>Abonnements</strong> (<span className={s.orig}>Subscriptions</span>) et <strong>Messages</strong>. Le
+        reste ne nourrit pas ton dossier.
       </>
     ),
-    shot: 'Capture : la notification Instagram avec le ou les fichiers prêts à télécharger.',
+    shot: '/guide/07-abonnements-messages.png',
+  },
+  {
+    titre: 'Coche tout dans Connexions',
+    corps: (
+      <>
+        Plus bas, dans <strong>Connexions</strong>, coche <strong>Contacts</strong> et{' '}
+        <strong>Abonné(e)s et suivi(e)s</strong> (<span className={s.orig}>Followers and following</span>). Laisse{' '}
+        <strong>Informations personnelles</strong> décoché.
+      </>
+    ),
+    shot: '/guide/08-connexions.png',
+  },
+  {
+    titre: 'Format : JSON, sans exception',
+    corps: (
+      <>
+        <span className={s.alerte}>La seule chose à ne surtout pas rater.</span> Choisis{' '}
+        <strong>JSON</strong>, jamais HTML. En HTML, le site ne peut rien lire de ton fichier.
+      </>
+    ),
+    shot: '/guide/09-format-json.png',
+  },
+  {
+    titre: 'Vérifie, puis lance',
+    corps: (
+      <>
+        Relis le récapitulatif : les catégories cochées, le format <strong>JSON</strong>. Puis
+        appuie sur <strong>Créer les fichiers</strong> (<span className={s.orig}>Start export</span>). Instagram
+        t’envoie une notification dès que c’est prêt, de quelques minutes à 48 heures.
+      </>
+    ),
+    shot: '/guide/10-recap.png',
   },
 ];
 
 export default function Guide() {
   return (
     <>
-      <Nav />
+      <Nav page="guide" />
       <Mouvement />
 
       <main>
@@ -147,16 +158,20 @@ export default function Guide() {
           {etapes.map((e, i) => (
             <div key={e.titre} className={`${s.step} reveal`}>
               <p className={`${s.stepIndex} num`}>{String(i + 1).padStart(2, '0')}</p>
-              <div className={`${s.stepMain} ${e.shot ? '' : s.sansImage}`}>
+              <div className={s.stepMain}>
                 <div>
                   <h2 className={s.stepH}>{e.titre}</h2>
                   <div className={s.stepD}>{e.corps}</div>
                 </div>
-                {e.shot && (
-                  <div className={s.shot} aria-hidden="true">
-                    <span>{e.shot}</span>
-                  </div>
-                )}
+                <div className={s.shot}>
+                  <Image
+                    src={e.shot}
+                    alt={e.titre}
+                    width={402}
+                    height={874}
+                    sizes="(max-width: 720px) 60vw, 232px"
+                  />
+                </div>
               </div>
             </div>
           ))}

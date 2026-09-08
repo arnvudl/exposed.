@@ -1,9 +1,7 @@
 /* ============================================================
    GUIDE D'EXPORT  /  une seule chose a faire, une fois
-   Pense pour des captures d'ecran verticales (9:16, prises sur le telephone) :
-   chaque etape pose son texte a gauche et un cadre 9:16 a droite, ou le vrai
-   screenshot viendra se glisser. L'etape de selection des infos n'a pas de
-   cadre : elle se fait au texte, parce qu'on ne peut pas la capturer proprement.
+   Dix vraies captures d'ecran verticales (9:16) : chaque etape pose son
+   texte a gauche et la capture correspondante a droite.
    ============================================================ */
 .tete { padding-bottom: clamp(2rem, 5vh, 3.5rem); }
 .teteSub { margin-top: 1.4rem; }
@@ -34,14 +32,13 @@
   color: color-mix(in oklab, var(--text) 70%, var(--bg));
 }
 
-/* La colonne contenu : texte a gauche, cadre a droite quand il y a une image. */
+/* La colonne contenu : texte a gauche, capture a droite. */
 .stepMain {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: clamp(1.4rem, 4vw, 3rem);
   align-items: start;
 }
-.stepMain.sansImage { grid-template-columns: 1fr; }
 
 .stepH { font-size: clamp(1.45rem, 2.9vw, 1.8rem); letter-spacing: -.02em; line-height: 1.1; }
 .stepD {
@@ -76,39 +73,29 @@
    chiffres de confidentialite de l'accueil. */
 .sain { color: var(--vert); font-weight: 700; }
 
-/* ---------- le cadre 9:16 ou vient le screenshot ---------- */
+/* Le nom original du bouton dans l'appli, en anglais : discret, jamais
+   confondu avec le rouge d'alerte reserve au format JSON. */
+.orig { font-style: italic; color: var(--muted); }
+
+/* L'avertissement du format JSON, seule regle vraiment obligatoire. */
+.alerte { color: var(--signal); font-weight: 700; }
+
+/* ---------- le cadre 9:16 avec la vraie capture ---------- */
 .shot {
   width: clamp(150px, 24vw, 232px);
   aspect-ratio: 9 / 16;
-  border: 1px dashed color-mix(in oklab, var(--text) 42%, var(--bg));
+  border: 1px solid var(--line);
   border-radius: 18px;
-  background:
-    repeating-linear-gradient(-45deg,
-      transparent 0 12px,
-      color-mix(in oklab, var(--text) 5%, transparent) 12px 13px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.2rem;
-  text-align: center;
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
 }
-.shot span {
-  font-family: var(--mono);
-  font-size: 11px;
-  line-height: 1.5;
-  letter-spacing: .02em;
-  color: var(--muted);
-}
-/* Petite encoche pour evoquer l'ecran d'un telephone. */
-.shot { position: relative; }
-.shot::before {
-  content: '';
-  position: absolute;
-  top: 10px; left: 50%;
-  transform: translateX(-50%);
-  width: 34%; height: 5px;
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--text) 22%, transparent);
+.shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
 }
 
 /* Sous 720px, le cadre passe sous le texte et se centre. */
