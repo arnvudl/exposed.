@@ -1,0 +1,35 @@
+Exposed. Source-Available License
+
+Copyright (c) 2026 Arnaud Leroy. All rights reserved.
+
+1. Grant of rights
+   You may view, download, fork, and modify this source code for personal,
+   educational, and non-commercial evaluation purposes, including running it
+   locally to test changes before submitting a contribution under CLA.md.
+
+2. What you may not do without prior written permission from the copyright
+   holder
+   - Use this software, in whole or in part, in a product or service made
+     available to third parties, commercially or free of charge.
+   - Redistribute this software or a modified version of it, in source or
+     compiled form, outside of contributing back to this repository.
+   - Remove or alter this license notice.
+
+3. Contributions
+   Contributions submitted to this repository are governed by CLA.md. By
+   submitting a pull request, you agree to the terms described there.
+
+4. No warranty
+   This software is provided "as is", without warranty of any kind, express
+   or implied, including but not limited to the warranties of
+   merchantability, fitness for a particular purpose, and noninfringement.
+   In no event shall the copyright holder be liable for any claim, damages,
+   or other liability arising from the use of this software.
+
+5. Contact
+   For licensing inquiries (commercial use, acquisition, partnerships),
+   open a GitHub issue or contact the repository owner directly.
+
+This is not an OSI-approved open-source license. It is a source-available
+license: the code is public for transparency and collaboration, but
+commercial rights are reserved.
