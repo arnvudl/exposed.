@@ -422,7 +422,7 @@ ExportFlow(cards):
 
 ## 4. Rebranding sans IA
 
-### 4.1 Diagnostic de la maquette actuelle (`exposed_dark_branding.html`)
+### 4.1 Diagnostic de la maquette actuelle (`archive/exposed_dark_branding.html`)
 
 Passée au crible des 61 détecteurs Impeccable + des principes Taste, la maquette coche presque tous les « AI tells » :
 

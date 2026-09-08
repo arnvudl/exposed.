@@ -13,6 +13,13 @@ For anything non-trivial, open an issue first to discuss the approach before
 writing code. It avoids wasted work on a PR that doesn't fit the project's
 direction.
 
+## Understanding the codebase
+
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) explains the data flow (ZIP
+in, browser-only parsing, computed reveals, canvas-based share cards) and
+maps out `app/`, `components/`, and `lib/`. Read it before your first
+non-trivial change.
+
 ## Project rules that override personal taste
 
 Two documents are the non-negotiable style bible for this project. They are
