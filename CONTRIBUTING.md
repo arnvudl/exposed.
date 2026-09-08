@@ -6,7 +6,7 @@ Thanks for wanting to help. Please read this before opening a pull request.
 
 This project uses a [source-available license](LICENSE), not a permissive
 open-source one: the owner retains commercial ownership. Contributions are
-governed by the [Contributor License Agreement](CLA.md) — by submitting a
+governed by the [Contributor License Agreement](CLA.md): by submitting a
 pull request you agree to it. Read it before you invest time in a change.
 
 For anything non-trivial, open an issue first to discuss the approach before
