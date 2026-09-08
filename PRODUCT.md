@@ -1,60 +1,60 @@
 # Exposed. — PRODUCT.md
 
-## Ce que c'est
+## What it is
 
-Un Wrapped pour les DMs Instagram. L'utilisateur dépose l'export de ses données Instagram,
-le site l'analyse dans son navigateur, et lui rend un rapport de 8 révélations sur ses
-relations, son vocabulaire et ses habitudes. Il choisit ensuite ce qu'il partage.
+A Wrapped for Instagram DMs. The user drops in their Instagram data export,
+the site analyzes it in their browser, and hands back a report of 8 reveals about their
+relationships, their vocabulary, and their habits. They then choose what to share.
 
-## Mode utilisateur
+## User mode
 
-**Experience.** Ce n'est pas un outil qu'on opère, c'est un document qu'on lit.
-L'utilisateur ne configure rien, ne compare rien, ne pilote rien. Il défile et il découvre.
-Toute affordance de tableau de bord (filtres, réglages, options visibles) est hors sujet.
+**Experience.** This isn't a tool you operate, it's a document you read.
+The user configures nothing, compares nothing, drives nothing. They scroll and they discover.
+Any dashboard affordance (filters, settings, visible options) is off the table.
 
 ## Audience
 
-16 à 30 ans, francophone puis anglophone, mobile d'abord. Vient d'une story ou d'un TikTok.
-Aucune patience pour une inscription. Très sensible à la question « qui voit mes messages ».
+16 to 30 years old, French-speaking first then English-speaking, mobile first. Arrives from a
+story or a TikTok. No patience for a sign-up. Very sensitive to the question "who sees my messages".
 
-## Promesse
+## Promise
 
-> Ce que tes DMs disent de toi.
+> What your DMs say about you.
 
-## Contre-promesse, aussi importante
+## Counter-promise, just as important
 
-Aucun message ne quitte la machine de l'utilisateur. Pas de compte, pas de serveur,
-pas de tracking. C'est vérifiable en ouvrant l'onglet Réseau du navigateur, et cette
-vérifiabilité est l'argument central du produit.
+No message ever leaves the user's machine. No account, no server,
+no tracking. It's verifiable by opening the browser's Network tab, and this
+verifiability is the product's central argument.
 
-## Ton
+## Tone
 
-Sec, factuel, un peu provocateur. Exposed ne célèbre pas les statistiques comme le fait
-Spotify Wrapped, il les constate. Des phrases courtes, affirmatives, sans point
-d'exclamation. « Tu lui parles plus qu'à tes close friends. Il n'y est pas. »
+Dry, factual, a little provocative. Exposed doesn't celebrate its stats the way
+Spotify Wrapped does, it states them. Short, declarative sentences, no exclamation
+marks. "You talk to them more than your close friends. They're not in it."
 
-Ce qu'on ne fait jamais : féliciter l'utilisateur, employer un emoji dans l'interface,
-promettre de la magie, parler de psychologie.
+What we never do: congratulate the user, use an emoji in the interface,
+promise magic, talk about psychology.
 
-## La friction centrale, à ne jamais oublier
+## The central friction, never to forget
 
-Le produit demande une corvée avant de donner quoi que ce soit : aller dans les réglages
-d'Instagram, demander l'export, **attendre jusqu'à 48 heures**, revenir. Aucun autre
-produit de cette catégorie n'exige ça. Chaque page doit être jugée à l'aune de cette
-question : est-ce que ça aide quelqu'un à franchir cette attente ?
+The product asks for a chore before giving anything back: go into Instagram's
+settings, request the export, **wait up to 48 hours**, come back. No other
+product in this category demands that. Every page must be judged against this
+question: does it help someone get through that wait?
 
-## Modèle économique
+## Business model
 
-Gratuit et sans publicité intrusive sur l'usage principal. Un pourboire proposé au pic
-émotionnel du rapport, un emplacement sponsor à l'export, une unité publicitaire native
-en bas de l'accueil seulement. Objectif assumé : quelques dizaines d'euros par mois.
+Free, with no intrusive advertising on the core usage. A tip offered at the report's
+emotional peak, a sponsor slot at export time, one native ad unit
+at the bottom of the home page only. Stated goal: a few dozen euros a month.
 
-## Hors périmètre
+## Out of scope
 
-Pas de comptes, pas de sauvegarde en ligne, pas de comparaison entre amis, pas de
-classement, pas de fonctionnalité sociale. Le partage se fait par image exportée, point.
+No accounts, no online saving, no comparing between friends, no
+leaderboard, no social features. Sharing happens through an exported image, period.
 
-## Mentions obligatoires
+## Required mentions
 
-Exposed n'est pas affilié à Instagram ni à Meta. Instagram est une marque de
-Meta Platforms, Inc. Aucun élément visuel de Meta n'est employé, dégradé compris.
+Exposed is not affiliated with Instagram or Meta. Instagram is a trademark of
+Meta Platforms, Inc. No Meta visual asset is used, gradients included.
