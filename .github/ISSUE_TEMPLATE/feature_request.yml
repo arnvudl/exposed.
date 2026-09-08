@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an idea for Exposed.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What are you trying to do that the product doesn't support today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Non-negotiable check
+      description: >-
+        Confirm your idea doesn't conflict with the project's core
+        principles (see README.md).
+      options:
+        - label: This does not require sending user data to a server.
+          required: true
+        - label: This does not add a third-party script to /wrapped.
+          required: true

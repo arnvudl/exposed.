@@ -1,0 +1,45 @@
+name: Bug report
+description: Something in Exposed. isn't working as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps to trigger the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: "Chrome 129 on macOS 15"
+    validations:
+      required: true
+  - type: textarea
+    id: export-size
+    attributes:
+      label: Instagram export size (if relevant)
+      description: >-
+        Only if the bug happens while processing a data export. Do not
+        attach the export file itself.
+      placeholder: "e.g. 1.2 GB, single ZIP"
+    validations:
+      required: false
