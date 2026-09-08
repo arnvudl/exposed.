@@ -2,29 +2,29 @@
 
 > You might see some things. We show them.
 
-Un Wrapped pour tes DMs Instagram, qui tourne **entièrement dans ton navigateur**.
-Tu déposes l'export de tes données Instagram, tu lis ton rapport, tu partages ce que tu veux.
-Aucun message ne quitte ta machine — pas de compte, pas de serveur, pas de tracking.
+A Wrapped for your Instagram DMs, running **entirely in your browser**.
+You drop in your Instagram data export, you read your report, you share what you want.
+No message ever leaves your machine: no account, no server, no tracking.
 
-## État
+## Status
 
-Pré-développement. Le plan complet vit dans **[docs/EXPOSED_BLUEPRINT.md](docs/EXPOSED_BLUEPRINT.md)** :
-faisabilité, pseudo-code des 8 révélations, direction artistique, arborescence des pages,
-monétisation, et les checklists sécurité / juridique / performance / SEO.
+Pre-development. The full plan lives in **[docs/EXPOSED_BLUEPRINT.md](docs/EXPOSED_BLUEPRINT.md)**:
+feasibility, pseudo-code for the 8 reveals, art direction, page tree,
+monetization, and the security / legal / performance / SEO checklists.
 
-## Principes non négociables
+## Non-negotiable principles
 
-1. **Zéro serveur pour les données.** Le parsing et l'analyse tournent dans un Web Worker, côté client.
-2. **Zéro script tiers sur `/wrapped`.** Ni pub, ni analytics, ni monitoring sur la page qui touche aux messages.
-3. **Vérifiable.** N'importe qui peut ouvrir l'onglet Réseau pendant l'analyse et constater qu'il ne se passe rien.
+1. **Zero server for the data.** Parsing and analysis run in a Web Worker, client-side.
+2. **Zero third-party script on `/wrapped`.** No ads, no analytics, no monitoring on the page that touches messages.
+3. **Verifiable.** Anyone can open the Network tab during analysis and see that nothing happens.
 
-## Stack visée
+## Target stack
 
-Next.js · TypeScript · export statique.
+Next.js · TypeScript · static export.
 
-## Skills de design
+## Design skills
 
-Le projet s'appuie sur des skills tierces, non versionnées ici (voir `skills-lock.json`) :
+The project relies on third-party skills, not versioned here (see `skills-lock.json`):
 
 ```bash
 npx skills add Leonxlnx/taste-skill
@@ -35,4 +35,4 @@ npx skills add emilkowalski/skill
 
 ---
 
-Exposed n'est pas affilié à Instagram ni à Meta. Instagram est une marque de Meta Platforms, Inc.
+Exposed is not affiliated with Instagram or Meta. Instagram is a trademark of Meta Platforms, Inc.
