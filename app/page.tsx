@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Nav from '@/components/Nav';
 import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
@@ -9,7 +10,7 @@ import { revelations, afficheHero, afficheDossier, profils } from '@/content/rev
 import s from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'Exposed — Analyse tes données Instagram gratuitement',
+  title: { absolute: 'Exposed — Analyse tes données Instagram gratuitement' },
   description:
     'Télécharge tes données Instagram et découvre en quelques secondes tes abonnés fantômes, tes conversations les plus actives et ton profil complet. 100 % gratuit, tout se passe dans ton navigateur.',
   alternates: { canonical: 'https://getexposed.me' },
@@ -76,8 +77,7 @@ export default function Accueil() {
             </div>
             <div className={s.dossierStep}>
               <div>
-                <span className="stamp reveal">Confidentiel</span>
-                <h2 className="t-lg reveal" style={{ '--d': '80ms', marginTop: '1.2rem' } as Style}>
+                <h2 className="t-lg reveal">
                   Et tu pourras<br />le partager.
                 </h2>
               </div>
@@ -138,17 +138,24 @@ export default function Accueil() {
           <div className={s.pathSteps}>
             <div className={`${s.pathStep} reveal`}>
               <p className={`${s.pathI} num`}>01</p>
-              <div>
-                <h3 className={s.pathH}>Demande ton export</h3>
-                <p className={s.pathD}>
-                  Dans Instagram : Réglages, Centre de comptes, Tes informations et
-                  autorisations, Télécharger tes informations. Choisis le format
-                  <strong> JSON</strong>, surtout pas HTML, et la période la plus longue possible.
-                </p>
-                {/* TODO : capture reelle de l'ecran Instagram, 1200x800. */}
-                <p className={s.pathShot}>
-                  Capture à insérer : l’écran de demande d’export Instagram, avec le choix JSON entouré.
-                </p>
+              <div className={s.pathStepMain}>
+                <div>
+                  <h3 className={s.pathH}>Demande ton export</h3>
+                  <p className={s.pathD}>
+                    Dans Instagram : Réglages, Centre de comptes, Tes informations et
+                    autorisations, Télécharger tes informations. Choisis le format
+                    <strong> JSON</strong>, surtout pas HTML, et la période la plus longue possible.
+                  </p>
+                </div>
+                <div className={s.pathShot}>
+                  <Image
+                    src="/guide/10-recap.png"
+                    alt="Écran de demande d'export Instagram, format JSON sélectionné"
+                    width={600}
+                    height={1304}
+                    sizes="(max-width: 640px) 70vw, 440px"
+                  />
+                </div>
               </div>
             </div>
 

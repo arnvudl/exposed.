@@ -216,6 +216,23 @@
    telephone etroit. Seule cette instance passe en plusieurs lignes. */
 .finBoutonTexte { white-space: normal; text-align: center; max-width: 100%; }
 
+.finBmc { margin-top: 2.2rem; }
+.finBmcMsg { font-size: 13px; color: var(--muted); margin-bottom: .9rem; }
+.finBmcBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  background: #FFDD00;
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: var(--r);
+  text-decoration: none;
+  transition: filter 140ms ease;
+}
+.finBmcBtn:hover { filter: brightness(.92); }
+
 @media (prefers-reduced-motion: reduce) {
   .segmentRemplissage { transition: none !important; }
 }

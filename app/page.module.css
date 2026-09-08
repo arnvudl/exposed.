@@ -131,21 +131,39 @@
 }
 .pathStep:last-child { border-bottom: 1px solid var(--line); }
 .pathI { font-family: var(--mono); font-size: 13px; color: var(--signal); padding-top: .35rem; }
-.pathH { font-size: 1.4rem; letter-spacing: -.02em; }
-.pathD { font-size: 14px; color: var(--muted); margin-top: .5rem; max-width: 52ch; line-height: 1.6; }
-.pathD strong { color: var(--text); font-weight: 400; }
+.pathH { font-size: clamp(1.45rem, 2.9vw, 1.8rem); letter-spacing: -.02em; line-height: 1.1; }
+.pathD { font-size: clamp(1rem, 1.35vw, 1.125rem); color: var(--muted); margin-top: .9rem; max-width: 52ch; line-height: 1.62; }
+.pathD strong { color: var(--text); font-weight: 700; }
+
+.pathStepMain {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: clamp(1.4rem, 4vw, 3rem);
+  align-items: start;
+}
 .pathShot {
-  margin-top: 1.2rem;
-  border: 1px dashed var(--line);
+  width: clamp(260px, 44vw, 440px);
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--line);
   border-radius: var(--r);
-  padding: 1.1rem;
-  font-size: 12px;
-  color: var(--muted);
+  overflow: hidden;
   background: var(--surface);
+  flex-shrink: 0;
+  transform: rotate(7deg);
+  margin: .8rem 1rem 1.4rem 0;
+}
+.pathShot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
 }
 @media (max-width: 640px) {
   .pathStep { grid-template-columns: 1fr; gap: .5rem; }
   .pathI { padding-top: 0; }
+  .pathStepMain { grid-template-columns: 1fr; justify-items: center; }
+  .pathShot { margin-top: 1.2rem; }
 }
 
 /* ============================================================

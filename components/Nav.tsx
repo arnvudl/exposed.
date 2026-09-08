@@ -19,14 +19,6 @@ export default function Nav({ page }: { page?: 'accueil' | 'wrapped' | 'guide' |
           <Link href="/guide/" aria-current={page === 'guide' ? 'page' : undefined}>Guide</Link>
           <Link href="/faq/" aria-current={page === 'faq' ? 'page' : undefined}>FAQ</Link>
         </div>
-        <a
-          className={styles.support}
-          href="https://buymeacoffee.com/arnvudl"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span aria-hidden="true">☕</span> Buy me a coffee
-        </a>
       </div>
     </nav>
   );

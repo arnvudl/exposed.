@@ -82,7 +82,7 @@
 
 /* ---------- le cadre 9:16 avec la vraie capture ---------- */
 .shot {
-  width: clamp(150px, 24vw, 232px);
+  width: clamp(200px, 32vw, 320px);
   aspect-ratio: 9 / 16;
   border: 1px solid var(--line);
   border-radius: 18px;

@@ -124,6 +124,17 @@ export default function StoryPlayer({
             <div className={s.finBouton}>
               <Bouton ton="paper" onClick={onFermer} className={s.finBoutonTexte}>Recommencer avec un autre fichier</Bouton>
             </div>
+            <div className={s.finBmc}>
+              <p className={s.finBmcMsg}>J’espère que t’as aimé le site.</p>
+              <a
+                className={s.finBmcBtn}
+                href="https://buymeacoffee.com/arnvudl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ☕ Buy me a coffee
+              </a>
+            </div>
           </div>
         </div>
       </div>

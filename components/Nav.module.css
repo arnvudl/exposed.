@@ -33,23 +33,3 @@
 }
 .links a[aria-current] { color: var(--text); }
 @media (hover: hover) and (pointer: fine) { .links a:hover { color: var(--text); } }
-
-.support {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  color: #000;
-  background: #FFDD00;
-  border: 1px solid #FFDD00;
-  border-radius: var(--r);
-  padding: 6px 13px;
-  transition: filter 160ms ease;
-}
-@media (hover: hover) and (pointer: fine) {
-  .support:hover { filter: brightness(0.94); }
-}
-@media (max-width: 560px) { .support { display: none; } }
