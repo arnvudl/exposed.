@@ -24,7 +24,11 @@ export default function Pied() {
             <p className={styles.colonne}>Les profils</p>
             <ul>
               <li><Link href="/#profils">Les dix profils</Link></li>
-              <li><Link href="/faq/#soutenir">Soutenir</Link></li>
+              <li>
+                <a href="https://buymeacoffee.com/arnvudl" target="_blank" rel="noopener noreferrer">
+                  Soutenir
+                </a>
+              </li>
             </ul>
           </div>
           <div>

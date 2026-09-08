@@ -16,7 +16,14 @@ export default function Nav({ page }: { page?: 'accueil' | 'wrapped' | 'faq' }) 
           <Link href="/wrapped/" aria-current={page === 'wrapped' ? 'page' : undefined}>Wrapped</Link>
           <Link href="/faq/" aria-current={page === 'faq' ? 'page' : undefined}>FAQ</Link>
         </div>
-        <Link className={styles.support} href="/faq/#soutenir">Soutenir</Link>
+        <a
+          className={styles.support}
+          href="https://buymeacoffee.com/arnvudl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span aria-hidden="true">☕</span> Buy me a coffee
+        </a>
       </div>
     </nav>
   );

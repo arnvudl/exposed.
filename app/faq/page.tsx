@@ -81,8 +81,11 @@ const sections: Section[] = [
         q: 'Comment je peux soutenir le projet ?',
         r: (
           <>
-            Exposed est gratuit et le restera. Si tu veux aider, parles-en autour de toi. Pour
-            un partenariat ou du sponsoring, écris-moi :{' '}
+            Exposed est gratuit et le restera. Si tu veux aider, parles-en autour de toi, ou
+            offre-moi un café sur{' '}
+            <a href="https://buymeacoffee.com/arnvudl" target="_blank" rel="noopener noreferrer">
+              buymeacoffee.com/arnvudl
+            </a>. Pour un partenariat ou du sponsoring, écris-moi :{' '}
             <a href="mailto:arnaudleroy20@gmail.com">arnaudleroy20@gmail.com</a>.
           </>
         ),
