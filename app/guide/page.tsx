@@ -7,15 +7,15 @@ import { BoutonLien } from '@/components/Bouton';
 import s from './guide.module.css';
 
 export const metadata: Metadata = {
-  title: ‘Guide d’export Instagram’,
+  title: "Guide d’export Instagram",
   description:
-    ‘Comment télécharger tes données Instagram en format JSON en 5 minutes, étape par étape depuis ton téléphone. Abonnés, messages, connexions.’,
-  alternates: { canonical: ‘https://getexposed.me/guide’ },
+    "Comment telecharger tes donnees Instagram en format JSON en 5 minutes, etape par etape depuis ton telephone. Abonnes, messages, connexions.",
+  alternates: { canonical: "https://getexposed.me/guide" },
   openGraph: {
-    title: ‘Comment exporter tes données Instagram (guide complet)’,
+    title: "Comment exporter tes donnees Instagram (guide complet)",
     description:
-      ‘Télécharge tes abonnés, messages et connexions Instagram en format JSON. Guide illustré, 10 étapes depuis ton téléphone.’,
-    url: ‘https://getexposed.me/guide’,
+      "Telecharge tes abonnes, messages et connexions Instagram en format JSON. Guide illustre, 10 etapes depuis ton telephone.",
+    url: "https://getexposed.me/guide",
   },
 };
 
