@@ -168,6 +168,7 @@
 .profilRow {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   gap: .35em 1.1em;
 }
 

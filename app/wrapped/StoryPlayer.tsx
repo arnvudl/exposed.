@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Affiche, { type DonneesAffiche } from '@/components/Affiche';
 import { Bouton } from '@/components/Bouton';
+import type { Fait } from '@/lib/partage/faits';
+import Composer from './Composer';
 import s from './StoryPlayer.module.css';
 
 const DUREE_MS = 6000;
@@ -10,6 +12,7 @@ const DUREE_MS = 6000;
 export default function StoryPlayer({
   cartes,
   details,
+  faits,
   enCoursDeChargement,
   onFermer,
 }: {
@@ -18,6 +21,9 @@ export default function StoryPlayer({
       montrees hors du defilement : une liste de 118 comptes n'a pas sa
       place dans une story qui avance toute seule. */
   details: Record<string, string[]>;
+  /** Bibliotheque de faits pour le compositeur de partage (voir
+      docs/CARTES_PERSONNALISABLES.md), independante des cartes affichees. */
+  faits: Fait[];
   enCoursDeChargement: boolean;
   onFermer: () => void;
 }) {
@@ -27,9 +33,11 @@ export default function StoryPlayer({
   const [enAttente, setEnAttente] = useState(false);
   const [termine, setTermine] = useState(false);
   const [vueDetail, setVueDetail] = useState<string | null>(null);
-  // Trois raisons distinctes de retenir la story, qui ne s'annulent pas entre
-  // elles : une pause posee au bouton survit a un tap pour changer de carte.
-  const enPause = pauseManuelle || enAppui || vueDetail !== null;
+  const [compositeurOuvert, setCompositeurOuvert] = useState(false);
+  // Quatre raisons distinctes de retenir la story, qui ne s'annulent pas
+  // entre elles : une pause posee au bouton survit a un tap pour changer de
+  // carte, et le compositeur suspend tout tant qu'il est ouvert.
+  const enPause = pauseManuelle || enAppui || vueDetail !== null || compositeurOuvert;
 
   const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const animRef = useRef<Animation | null>(null);
@@ -106,14 +114,16 @@ export default function StoryPlayer({
   if (termine) {
     return (
       <div className={s.scene}>
-        <div className={s.controles}>
+        <div className={s.finFermer}>
           <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
         </div>
-        <div className={s.fin}>
-          <p className={s.finTitre}>C’est tout.</p>
-          <p className={s.finSub}>Tes {cartes.length} cartes, calculées dans ton navigateur, jamais envoyées nulle part.</p>
-          <div className={s.finBouton}>
-            <Bouton ton="paper" onClick={onFermer}>Recommencer avec un autre fichier</Bouton>
+        <div className={s.corps}>
+          <div className={s.fin}>
+            <p className={s.finTitre}>C’est tout.</p>
+            <p className={s.finSub}>Tes {cartes.length} cartes, calculées dans ton navigateur, jamais envoyées nulle part.</p>
+            <div className={s.finBouton}>
+              <Bouton ton="paper" onClick={onFermer} className={s.finBoutonTexte}>Recommencer avec un autre fichier</Bouton>
+            </div>
           </div>
         </div>
       </div>
@@ -121,57 +131,87 @@ export default function StoryPlayer({
   }
 
   const carte = cartes[index];
+  // Rapproche la carte affichee d'un fait du meme chapitre (meme prefixe
+  // « Chapitre NN ») pour pre-cocher quelque chose de pertinent a
+  // l'ouverture du compositeur ; aucune correspondance exacte n'est
+  // garantie (une carte peut ne pas avoir d'equivalent en fait), et c'est
+  // sans consequence : l'utilisateur choisit lui-meme ensuite.
+  const prefixeCarte = carte.piece.split('·')[0].trim();
+  const faitInitial = faits.find((f) => f.label.split('·')[0].trim() === prefixeCarte);
 
   return (
     <div className={s.scene}>
-      <div className={s.barres}>
-        {cartes.map((_, i) => (
-          <div key={i} className={`${s.segment} ${i < index ? s.segmentFait : ''}`}>
-            {i === index && <div ref={(el) => { segmentRefs.current[i] = el; }} className={s.segmentRemplissage} />}
+      {/* Un vrai bandeau, dans le flux normal : les barres/entete/controles
+          reservent leur propre hauteur au lieu d'etre poses en absolu
+          par-dessus la carte, ce qui pouvait les faire chevaucher son coin
+          haut droit (voir docs, bug rapporte sur iPhone). */}
+      <div className={s.header}>
+        <div className={s.barres}>
+          {cartes.map((_, i) => (
+            <div key={i} className={`${s.segment} ${i < index ? s.segmentFait : ''}`}>
+              {i === index && <div ref={(el) => { segmentRefs.current[i] = el; }} className={s.segmentRemplissage} />}
+            </div>
+          ))}
+        </div>
+        <div className={s.headerLigne}>
+          <p className={s.entete}>{carte.piece}</p>
+          <div className={s.controles}>
+            <button
+              className={s.pause}
+              onClick={() => setPauseManuelle((p) => !p)}
+              aria-label={pauseManuelle ? 'Reprendre' : 'Mettre en pause'}
+            >
+              {pauseManuelle ? '▶' : '❚❚'}
+            </button>
+            {faits.length > 0 && (
+              <button
+                className={s.partager}
+                onClick={() => setCompositeurOuvert(true)}
+                aria-label="Personnaliser et partager cette carte"
+              >
+                Partager
+              </button>
+            )}
+            <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
           </div>
-        ))}
-      </div>
-      <p className={s.entete}>{carte.piece}</p>
-      <div className={s.controles}>
-        <button
-          className={s.pause}
-          onClick={() => setPauseManuelle((p) => !p)}
-          aria-label={pauseManuelle ? 'Reprendre' : 'Mettre en pause'}
-        >
-          {pauseManuelle ? '▶' : '❚❚'}
-        </button>
-        <button className={s.fermer} onClick={onFermer} aria-label="Fermer">&times;</button>
+        </div>
       </div>
 
-      {/* Les zones couvrent tout l'ecran, pas seulement la carte : sur
-          desktop la carte est encadree de noir, et cet espace doit rester
-          cliquable (exactement comme les stories, ou la zone de tap deborde
-          largement le contenu visible). */}
-      <div className={s.zones}>
-        <div
-          className={s.zoneGauche}
-          onPointerDown={surAppui}
-          onPointerUp={() => surRelache('arriere')}
-          onPointerLeave={() => setEnAppui(false)}
-        />
-        <div
-          className={s.zoneDroite}
-          onPointerDown={surAppui}
-          onPointerUp={() => surRelache('avant')}
-          onPointerLeave={() => setEnAppui(false)}
-        />
-      </div>
-
-      <div className={s.stage}>
-        <Affiche a={carte} marque="exposed." />
-        {enAttente && <div className={s.attente}>La suite arrive…</div>}
-      </div>
-
-      {carte.id && details[carte.id] && (
-        <button className={s.voirTout} onClick={() => ouvrirDetail(carte.id!)}>
-          Voir les {details[carte.id].length} comptes en entier
-        </button>
+      {compositeurOuvert && (
+        <Composer faits={faits} faitInitial={faitInitial} onFermer={() => setCompositeurOuvert(false)} />
       )}
+
+      <div className={s.corps}>
+        {/* Les zones couvrent tout le corps, pas seulement la carte : sur
+            desktop la carte est encadree de noir, et cet espace doit rester
+            cliquable (exactement comme les stories, ou la zone de tap deborde
+            largement le contenu visible). */}
+        <div className={s.zones}>
+          <div
+            className={s.zoneGauche}
+            onPointerDown={surAppui}
+            onPointerUp={() => surRelache('arriere')}
+            onPointerLeave={() => setEnAppui(false)}
+          />
+          <div
+            className={s.zoneDroite}
+            onPointerDown={surAppui}
+            onPointerUp={() => surRelache('avant')}
+            onPointerLeave={() => setEnAppui(false)}
+          />
+        </div>
+
+        <div className={s.stage}>
+          <Affiche a={carte} marque="exposed." />
+          {enAttente && <div className={s.attente}>La suite arrive…</div>}
+        </div>
+
+        {carte.id && details[carte.id] && (
+          <button className={s.voirTout} onClick={() => ouvrirDetail(carte.id!)}>
+            Voir les {details[carte.id].length} comptes en entier
+          </button>
+        )}
+      </div>
 
       {vueDetail && details[vueDetail] && (
         <div className={s.detail}>

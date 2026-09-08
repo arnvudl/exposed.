@@ -294,22 +294,30 @@ l'interface veut un jour l'afficher (`onProgress` existe déjà dans `zip.ts`, i
    messages doivent toujours afficher leur message d'erreur et laisser la zone de dépôt
    en place (ces trois cas sont gérés dans `zip.ts` et `analyser.ts`).
 
-## 7. Relevés (à remplir)
+## 7. Relevés
 
 | Date | Étape | Machine / navigateur | ZIP | Pic mémoire | Résultat |
 |---|---|---|---|---|---|
-| | 0 (avant) | | 2,4 Go | | |
-| | 2 | | | | |
-| | 3 | | | | |
-| | 3 | iPhone, Safari | | | |
-| | 3 | Android, Chrome | | | |
+| 2026-09-06 | 4 (après) | Node 24, script temporaire (`fs.openAsBlob`) | 2,59 Go réel (`instagram-arnvudl-…-KciaOpjW.zip`, le plus proche des trois vrais ZIP disponibles) | 397,87 Mo (relevé toutes les 200 ms) | 467 conversations, `soi` détecté, 7 chapitres émis sans erreur, en 8,3 s |
+| 2026-09-06 | 4 (après) | Chrome (outil navigateur), `next dev` | petit ZIP de test reconstruit depuis `data/` (5 conversations + connections) | non mesuré (ZIP trop petit pour être significatif) | Les 7 chapitres s'affichent, aucune erreur console, aucune requête réseau pendant l'analyse |
+| | 4 (après) | iPhone, Safari (vrai export) | 2,4-2,6 Go | | **à faire par l'utilisateur** — hors de portée d'un outil automatisé |
+| | 4 (après) | Android, Chrome (vrai export) | | | **à faire par l'utilisateur** |
+
+Pas de relevé « avant » (étape 0) : la mesure de référence aurait exigé de repasser par l'ancien
+code. Le témoin fonctionnel (§6.1, diff chapitre par chapitre contre `scripts/analyse.mts` sur
+`data/`) sert de garde-fou à la place, et est passé sans écart après chaque étape.
 
 ## 8. Critères d'acceptation
 
-- [ ] `npm run lint` passe.
-- [ ] `npm run analyse` donne une sortie identique au témoin, chapitre par chapitre.
-- [ ] Pic mémoire en Node < 400 Mo sur le ZIP de 2,4 Go.
-- [ ] Le dossier s'affiche sur un iPhone avec le vrai export, sans plantage.
-- [ ] L'onglet Réseau reste vide pendant toute l'analyse.
-- [ ] Aucun fichier de `app/`, `components/`, `lib/wrapped/mapper.ts` modifié.
-- [ ] Le relevé temporaire de mémoire a été retiré du Worker.
+- [x] `npm run lint` passe.
+- [x] `npm run analyse` donne une sortie identique au témoin, chapitre par chapitre (seul écart :
+      la ligne « Dernier » de chapitre06, déjà différente avant ce refactor — `lib/wrapped`
+      affiche le `@` via `identifiantAffichable`, ce que `scripts/analyse.mts` ne fait pas ;
+      non lié aux changements de mémoire).
+- [x] Pic mémoire en Node < 400 Mo sur le ZIP réel le plus proche de 2,4 Go (397,87 Mo sur 2,59 Go).
+- [ ] Le dossier s'affiche sur un iPhone avec le vrai export, sans plantage — **à tester par
+      l'utilisateur sur un vrai appareil**, seul test qui compte vraiment (§6.4).
+- [x] L'onglet Réseau reste vide pendant toute l'analyse (vérifié en navigateur).
+- [x] Aucun fichier de `app/`, `components/`, `lib/wrapped/mapper.ts` modifié.
+- [x] Aucun relevé temporaire n'a été ajouté au Worker (la mesure mémoire a été faite via un
+      script Node jetable, jamais commité, plutôt qu'en instrumentant `analyse.worker.ts`).

@@ -4,8 +4,8 @@
    puis tout renvoyer d'un bloc : la premiere affiche peut s'afficher avant
    que la septieme soit calculee.
    ============================================================ */
-import { construireFileMap } from './zip';
-import { chargerConversations, chargerRelations, detecterSoi } from './parse';
+import { lireZips } from './zip';
+import { Accumulateur, detecterSoi, type Periode } from './parse';
 import {
   chapitre01, chapitre02, chapitre03, chapitre04,
   chapitre05, chapitre06, chapitre07,
@@ -33,14 +33,16 @@ function respirer(): Promise<void> {
 export async function analyser(
   fichiers: File[],
   emettre: (e: EvenementAnalyse) => void,
+  periode?: Periode,
 ): Promise<void> {
   try {
     emettre({ type: 'etape', etape: 'lecture_zip' });
-    const fileMap = await construireFileMap(fichiers);
+    const acc = new Accumulateur(periode);
+    await lireZips(fichiers, (chemin, texte) => acc.ingerer(chemin, texte));
     await respirer();
 
     emettre({ type: 'etape', etape: 'reconstruction' });
-    const conversations = chargerConversations(fileMap);
+    const { conversations, followers, following, motsParExpediteur } = acc.terminer();
     if (conversations.length === 0) {
       emettre({
         type: 'erreur',
@@ -49,7 +51,6 @@ export async function analyser(
       });
       return;
     }
-    const { followers, following } = chargerRelations(fileMap);
     const soi = detecterSoi(conversations);
     await respirer();
 
@@ -62,7 +63,7 @@ export async function analyser(
     emettre({ type: 'chapitre', numero: 3, donnees: chapitre03(followers, following) });
     await respirer();
 
-    emettre({ type: 'chapitre', numero: 4, donnees: chapitre04(conversations, soi) });
+    emettre({ type: 'chapitre', numero: 4, donnees: chapitre04(motsParExpediteur, soi) });
     await respirer();
 
     emettre({ type: 'chapitre', numero: 5, donnees: chapitre05(conversations, soi) });

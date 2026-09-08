@@ -7,6 +7,37 @@
 .tete { padding-bottom: clamp(2rem, 5vh, 3.5rem); }
 .tete p { margin-top: .9rem; max-width: 56ch; }
 
+/* ---------- periode a analyser (optionnel) ---------- */
+.periode {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  padding: 1.1rem 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+.periodeLabel {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 .9rem;
+}
+.raccourcis { display: flex; flex-wrap: wrap; gap: 8px; }
+.raccourciBouton {
+  padding: .5rem .85rem; font-size: 13px; font-family: var(--mono);
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--r);
+  color: var(--text); cursor: pointer;
+}
+.raccourciActif { background: var(--text); color: var(--bg); border-color: var(--text); }
+.dates { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+.dateChamp {
+  display: flex; flex-direction: column; gap: .35rem;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted);
+}
+.dateChamp input {
+  font-size: 14px; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--r);
+  padding: .5rem .6rem;
+}
+
 /* ---------- zone de depot ---------- */
 .zone {
   margin-top: clamp(2rem, 5vh, 3rem);

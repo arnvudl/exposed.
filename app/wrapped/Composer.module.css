@@ -1,0 +1,182 @@
+/* ============================================================
+   COMPOSITEUR  /  meme famille visuelle que StoryPlayer (plein ecran,
+   noir, mono pour les libelles). L'affiche occupe tout l'ecran ; Fond et
+   Faits sont deux tiroirs qui glissent par-dessus depuis les bords, pas des
+   colonnes qui se partagent l'espace avec elle.
+   ============================================================ */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(1rem, 3vh, 1.6rem) clamp(1.2rem, 4vw, 2rem);
+  border-bottom: 1px solid var(--line);
+}
+.titre { font-weight: 800; font-size: 1.1rem; letter-spacing: -.01em; }
+.fermer {
+  width: 32px; height: 32px; font-size: 20px; line-height: 1;
+  background: none; border: none; color: var(--text); cursor: pointer; opacity: .8;
+}
+.fermer:hover { opacity: 1; }
+
+/* Tout ce qui suit l'entete : les tiroirs et le fond assombri sont poses en
+   absolu DEDANS (pas en fixed sur tout l'ecran), donc confines sous
+   l'entete par construction — jamais besoin de deviner sa hauteur. */
+.corps {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------- l'affiche, plein ecran ---------- */
+.zonePrincipale {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vh, 2rem) clamp(1rem, 6vw, 3rem) clamp(4.5rem, 12vh, 6rem);
+}
+.canvas {
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 1080 / 1920;
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: 0 20px 60px -20px rgb(0 0 0 / 40%);
+}
+
+/* ---------- telecharger, flottant en bas ---------- */
+.telecharger {
+  position: absolute;
+  bottom: clamp(1.2rem, 4vh, 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: .85rem 1.6rem;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 50%);
+}
+.telecharger:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ---------- poignees, une par bord ---------- */
+.ongletGauche, .ongletDroit {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  padding: 1rem .55rem;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: color-mix(in oklab, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  writing-mode: vertical-rl;
+}
+.ongletGauche { left: 0; border-left: none; border-radius: 0 var(--r) var(--r) 0; }
+.ongletDroit { right: 0; border-right: none; border-radius: var(--r) 0 0 var(--r); transform: translateY(-50%) rotate(180deg); }
+.ongletValeur {
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  max-width: 14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- fond assombri quand un tiroir est ouvert ---------- */
+.fondEcran {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: color-mix(in oklab, black 60%, transparent);
+}
+
+/* ---------- les tiroirs eux-memes ---------- */
+.tiroir {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  width: min(320px, 84vw);
+  padding: clamp(1.2rem, 4vh, 1.8rem) 1.2rem;
+  /* Meme traitement que l'entete de la home (Nav.module.css) : on voit le
+     changement se faire sur l'affiche derriere, flouté plutot que masqué. */
+  background: rgb(13 11 10 / .74);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  overflow-y: auto;
+  transition: transform 240ms var(--ease-out, ease);
+}
+.tiroirGauche { left: 0; border-right: 1px solid var(--line); transform: translateX(-100%); }
+.tiroirDroit { right: 0; border-left: 1px solid var(--line); transform: translateX(100%); }
+.tiroirOuvert { transform: translateX(0); }
+
+.tiroirTitre {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 1rem;
+}
+
+.themes { display: flex; flex-wrap: wrap; gap: 8px; }
+.themeBouton {
+  padding: .55rem .9rem; font-size: 13px; font-family: var(--display);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  color: var(--text); cursor: pointer;
+}
+.themeActif { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.photoBouton {
+  display: inline-block; margin-top: .8rem; padding: .55rem .9rem;
+  font-size: 13px; border: 1px solid var(--line); border-radius: var(--r);
+  cursor: pointer; color: var(--text);
+}
+.inputCache { display: none; }
+.photoRetirer {
+  display: inline-block; margin: .8rem 0 0 .6rem; padding: .55rem .9rem;
+  font-size: 13px; background: none; border: 1px solid var(--line); border-radius: var(--r);
+  color: var(--muted); cursor: pointer;
+}
+
+.listeFaits { display: flex; flex-direction: column; gap: 1.1rem; }
+.groupeChapitre { display: flex; flex-direction: column; gap: 6px; }
+.chapitreLabel {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 2px;
+}
+.faitBouton {
+  text-align: left;
+  padding: .65rem .85rem;
+  font-size: 13.5px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--text);
+  cursor: pointer;
+}
+.faitChoisi { border-color: var(--vert); background: color-mix(in oklab, var(--vert) 14%, var(--surface)); }
+.faitBouton:disabled { opacity: .35; cursor: not-allowed; }

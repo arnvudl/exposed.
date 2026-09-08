@@ -10,19 +10,26 @@
   background: var(--bg);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(1rem, 4vh, 2rem) clamp(1rem, 4vw, 2rem);
+  touch-action: none;
+}
+
+/* Un vrai bandeau, dans le flux normal : il reserve sa propre hauteur, la
+   carte ne peut donc jamais se retrouver dessous (c'etait le bug rapporte
+   sur iPhone : boutons et titre de carte qui se chevauchaient en haut a
+   droite quand la carte montait haut dans un viewport etroit). */
+.header {
+  flex: none;
+  position: relative;
+  z-index: 3;
+  padding: clamp(.8rem, 2.5vh, 1.4rem) clamp(1rem, 4vw, 2rem) 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(.6rem, 1.6vh, .9rem);
 }
 
 .barres {
-  position: absolute;
-  top: clamp(.8rem, 2.5vh, 1.4rem);
-  left: clamp(1rem, 4vw, 2rem);
-  right: clamp(1rem, 4vw, 2rem);
   display: flex;
   gap: 5px;
-  z-index: 3;
 }
 .segment {
   flex: 1;
@@ -39,11 +46,15 @@
   border-radius: inherit;
 }
 
+.headerLigne {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+}
+
 .controles {
-  position: absolute;
-  top: clamp(.7rem, 2.2vh, 1.2rem);
-  right: clamp(1rem, 4vw, 2rem);
-  z-index: 3;
+  flex: none;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -60,32 +71,60 @@
 .pause { font-size: 13px; letter-spacing: 1px; }
 .fermer { font-size: 20px; }
 
+.partager {
+  height: 32px;
+  display: flex; align-items: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  color: var(--text);
+  background: none; border: 1px solid color-mix(in oklab, var(--text) 45%, transparent);
+  border-radius: var(--r);
+  padding: 0 10px;
+  cursor: pointer;
+  opacity: .85;
+}
+.partager:hover { opacity: 1; border-color: var(--text); }
+
 .entete {
-  position: absolute;
-  top: clamp(2.2rem, 6vh, 3.2rem);
-  left: clamp(1rem, 4vw, 2rem);
-  z-index: 3;
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--muted);
+  /* Le libelle de chapitre le plus long ne doit jamais pousser les boutons
+     hors ecran ni passer en dessous : une ligne, tronquee au besoin. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.scene { touch-action: none; }
+/* Le corps prend le reste de la hauteur et centre la carte dedans : c'est
+   ici, pas sur `.scene`, que le centrage vertical se fait desormais, pour
+   que le bandeau au-dessus garde toujours sa place. */
+.corps {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(.8rem, 3vh, 1.6rem) clamp(1rem, 4vw, 2rem);
+}
 
 .stage {
   position: relative;
-  height: min(76dvh, 680px);
+  height: 100%;
+  max-height: 680px;
   aspect-ratio: 9 / 13;
   max-width: 100%;
 }
 .stage > * { width: 100%; height: 100%; }
 
-/* Zones de tap invisibles, sur tout l'ecran (pas seulement la carte) : sur
+/* Zones de tap invisibles, sur tout le corps (pas seulement la carte) : sur
    desktop, la carte est encadree de noir de chaque cote, et cet espace
    reste cliquable, comme dans une vraie story. */
-.zones { position: fixed; inset: 0; display: flex; z-index: 2; }
+.zones { position: absolute; inset: 0; display: flex; z-index: 2; }
 .zoneGauche { flex: 0 0 32%; cursor: w-resize; }
 .zoneDroite { flex: 1; cursor: e-resize; }
 
@@ -155,13 +194,27 @@
 }
 
 /* ---------- fin du parcours ---------- */
+.finFermer {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  padding: clamp(.7rem, 2.2vh, 1.2rem) clamp(1rem, 4vw, 2rem) 0;
+}
 .fin {
   text-align: center;
-  max-width: 40ch;
+  /* 40ch depasse la largeur d'un telephone etroit avec certaines polices :
+     jamais plus que l'espace dispo (bug constate : le texte debordait des
+     deux cotes de l'ecran). */
+  max-width: min(40ch, 100%);
+  margin-inline: auto;
 }
 .finTitre { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -.02em; }
 .finSub { color: var(--muted); margin-top: .8rem; }
 .finBouton { margin-top: 1.8rem; }
+/* Le bouton partage un composant commun pense pour un libelle court en une
+   ligne (`white-space: nowrap`) ; celui-ci est plus long et debordait sur un
+   telephone etroit. Seule cette instance passe en plusieurs lignes. */
+.finBoutonTexte { white-space: normal; text-align: center; max-width: 100%; }
 
 @media (prefers-reduced-motion: reduce) {
   .segmentRemplissage { transition: none !important; }

@@ -3,9 +3,8 @@
    Chaque fonction est pure : conversations en entree, resultat en sortie.
    Validees sur un vrai export dans le script Node avant d'atterrir ici.
    ============================================================ */
-import { mediane, tokeniser, MOTS_VIDES } from './decode';
-import { apercu } from './format';
-import { COMPTE_SUPPRIME, identifiantAffichable, type Conversation, type Message } from './parse';
+import { mediane } from './decode';
+import { COMPTE_SUPPRIME, identifiantAffichable, nomExpediteur, type Conversation } from './parse';
 
 /* ============================================================
    01 — TON CERCLE RÉEL
@@ -19,10 +18,12 @@ export function chapitre01(conversations: Conversation[], soi: string): LigneCer
     if (c.participants.length !== 2 || autres.length !== 1) continue;
     const autre = autres[0];
     if (autre === COMPTE_SUPPRIME) continue;
+    const idxSoi = c.expediteurs.indexOf(soi);
+    const idxAutre = c.expediteurs.indexOf(autre);
     let recus = 0, envoyes = 0;
     for (const m of c.messages) {
-      if (m.sender === soi) envoyes++;
-      else if (m.sender === autre) recus++;
+      if (m.sender === idxSoi) envoyes++;
+      else if (m.sender === idxAutre) recus++;
     }
     const total = recus + envoyes;
     if (total === 0) continue;
@@ -36,21 +37,6 @@ export function chapitre01(conversations: Conversation[], soi: string): LigneCer
    ============================================================ */
 const SEUIL_MESSAGES_ACTIF = 50;
 const SEUIL_JOURS_RECENCE = 365;
-
-const MOTS_INSULTES = [
-  'connard', 'connasse', 'abruti', 'abrutie', 'débile', 'con', 'conne',
-  'idiot', 'idiote', 'pute', 'salope', 'bâtard', 'batard', 'merde',
-  'enculé', 'enculée', 'crétin', 'crétine', 'stupide', 'ntm', 'ta gueule',
-];
-function compteInsultes(texte: string): number {
-  const t = texte.toLowerCase();
-  let n = 0;
-  for (const mot of MOTS_INSULTES) {
-    const re = new RegExp(`\\b${mot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
-    n += (t.match(re) ?? []).length;
-  }
-  return n;
-}
 
 export type GroupeStats = {
   titre: string;
@@ -71,10 +57,11 @@ export function chapitre02(conversations: Conversation[], soi: string) {
 
   for (const c of conversations) {
     if (c.participants.length < 3 || c.messages.length === 0) continue;
+    const idxSoi = c.expediteurs.indexOf(soi);
     const dernierMessage = c.messages[c.messages.length - 1].ts;
     const joursDepuis = (maintenant - dernierMessage) / 86_400_000;
-    const toiEnvoyes = c.messages.filter((m) => m.sender === soi).length;
-    const insultes = c.messages.reduce((acc, m) => acc + (m.content ? compteInsultes(m.content) : 0), 0);
+    const toiEnvoyes = c.messages.filter((m) => m.sender === idxSoi).length;
+    const insultes = c.insultes;
     const actif = c.messages.length >= SEUIL_MESSAGES_ACTIF && joursDepuis <= SEUIL_JOURS_RECENCE;
     const facteurRecence = Math.max(0.15, Math.min(1, 1 - joursDepuis / SEUIL_JOURS_RECENCE));
 
@@ -137,18 +124,12 @@ export function chapitre03(followers: Set<string>, following: Set<string>) {
 
 /* ============================================================
    04 — TES MOTS
+   Le compte par mot est deja fait pendant le parse (voir parse.ts,
+   Accumulateur.ingerer), pour chaque expediteur : il ne reste plus qu'a
+   prendre l'entree de `soi`, une fois `soi` connu.
    ============================================================ */
-export function chapitre04(conversations: Conversation[], soi: string): [string, number][] {
-  const compte = new Map<string, number>();
-  for (const c of conversations) {
-    for (const m of c.messages) {
-      if (m.sender !== soi || !m.content) continue;
-      for (const mot of tokeniser(m.content)) {
-        if (mot.length < 2 || MOTS_VIDES.has(mot)) continue;
-        compte.set(mot, (compte.get(mot) ?? 0) + 1);
-      }
-    }
-  }
+export function chapitre04(motsParExpediteur: Map<string, Map<string, number>>, soi: string): [string, number][] {
+  const compte = motsParExpediteur.get(soi) ?? new Map<string, number>();
   return [...compte.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
 }
 
@@ -190,6 +171,7 @@ export function chapitre05(conversations: Conversation[], soi: string) {
     const autres = c.participants.filter((p) => p !== soi);
     const est1to1 = c.participants.length === 2 && autres.length === 1;
     const avec = est1to1 ? identifiantAffichable(c, autres[0]) : c.titre;
+    const idxSoi = c.expediteurs.indexOf(soi);
 
     for (const m of c.messages) {
       const jour = jourCle(m.ts);
@@ -200,10 +182,10 @@ export function chapitre05(conversations: Conversation[], soi: string) {
 
     for (let i = 0; i < c.messages.length; i++) {
       const m = c.messages[i];
-      if (m.sender === soi) {
+      if (m.sender === idxSoi) {
         const minutes = minutesDansLaNuit(m.ts);
         if (!plusTardif || minutes > plusTardif.minutes) {
-          plusTardif = { ts: m.ts, avec, minutes, message: apercu(m) };
+          plusTardif = { ts: m.ts, avec, minutes, message: m.apercu };
         }
       }
       if (i === 0) continue;
@@ -211,16 +193,16 @@ export function chapitre05(conversations: Conversation[], soi: string) {
       if (prec.sender !== m.sender) {
         const delta = m.ts - prec.ts;
         if (delta <= 0) continue;
-        if (prec.sender !== soi && m.sender === soi) {
+        if (prec.sender !== idxSoi && m.sender === idxSoi) {
           if (!remisInflige || delta > remisInflige.ms) {
-            remisInflige = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: apercu(prec), messageApres: apercu(m) };
+            remisInflige = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: prec.apercu, messageApres: m.apercu };
           }
           if (delta >= SEUIL_REPONSE_RAPIDE_MS && (!reponseRapide || delta < reponseRapide.ms)) {
-            reponseRapide = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: apercu(prec), messageApres: apercu(m) };
+            reponseRapide = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: prec.apercu, messageApres: m.apercu };
           }
-        } else if (prec.sender === soi && m.sender !== soi) {
+        } else if (prec.sender === idxSoi && m.sender !== idxSoi) {
           if (!remisSubi || delta > remisSubi.ms) {
-            remisSubi = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: apercu(prec), messageApres: apercu(m) };
+            remisSubi = { ms: delta, debut: prec.ts, ts: m.ts, avec, messageAvant: prec.apercu, messageApres: m.apercu };
           }
         }
       }
@@ -253,10 +235,11 @@ export function chapitre06(conversations: Conversation[], soi: string) {
     // du groupe sinon. Et qui a ecrit ce message, parce qu'un premier message
     // recu et un premier message envoye ne racontent pas la meme chose.
     const avec = est1to1 ? identifiantAffichable(c, autres[0]) : (c.titre || autres.join(', '));
+    const idxSoi = c.expediteurs.indexOf(soi);
     for (const m of c.messages) {
-      const de = m.sender === soi ? 'Toi' : m.sender;
-      if (!premier || m.ts < premier.ts) premier = { ts: m.ts, avec, de, message: apercu(m) };
-      if (!dernier || m.ts > dernier.ts) dernier = { ts: m.ts, avec, de, message: apercu(m) };
+      const de = m.sender === idxSoi ? 'Toi' : nomExpediteur(c, m);
+      if (!premier || m.ts < premier.ts) premier = { ts: m.ts, avec, de, message: m.apercu };
+      if (!dernier || m.ts > dernier.ts) dernier = { ts: m.ts, avec, de, message: m.apercu };
     }
   }
   return { premier, dernier };
@@ -278,16 +261,17 @@ export function chapitre07(conversations: Conversation[], soi: string) {
 
   for (const c of uns1to1) {
     if (c.messages.length === 0) continue;
-    const totalToi = c.messages.filter((m: Message) => m.sender === soi).length;
+    const idxSoi = c.expediteurs.indexOf(soi);
+    const totalToi = c.messages.filter((m) => m.sender === idxSoi).length;
     const totalAutre = c.messages.length - totalToi;
     if (totalToi + totalAutre >= 5) {
       partenairesActifs.add(c.dossier);
       conversationsCompteesPourLancement++;
-      if (c.messages[0].sender === soi) lancements++;
+      if (c.messages[0].sender === idxSoi) lancements++;
     }
     for (let i = 1; i < c.messages.length; i++) {
       const prec = c.messages[i - 1], cur = c.messages[i];
-      if (prec.sender !== soi && cur.sender === soi) {
+      if (prec.sender !== idxSoi && cur.sender === idxSoi) {
         const delta = cur.ts - prec.ts;
         if (delta > 0 && delta < 7 * 86_400_000) deltasReponse.push(delta / 60_000);
       }
@@ -295,8 +279,9 @@ export function chapitre07(conversations: Conversation[], soi: string) {
   }
 
   for (const c of conversations) {
+    const idxSoi = c.expediteurs.indexOf(soi);
     for (const m of c.messages) {
-      if (m.sender === soi && m.content) longueursMessages.push(m.content.length);
+      if (m.sender === idxSoi && m.longueur > 0) longueursMessages.push(m.longueur);
     }
   }
 

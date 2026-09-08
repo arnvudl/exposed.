@@ -1,5 +1,5 @@
 /* ============================================================
-   ZIP  /  les fichiers deposes -> une FileMap
+   ZIP  /  les fichiers deposes -> consomme chaque .json au fil de la lecture
    Un export Instagram complet (avec les photos/videos) depasse souvent
    2 Go. Charger tout le ZIP en un seul buffer memoire echoue de facon
    systematique et reproductible dans Chrome au-dela de ~2 Go
@@ -9,14 +9,15 @@
 
    La solution n'est donc pas de decouper la LECTURE (deja tente, ca ne
    change rien puisque le buffer final restait un seul gros bloc) mais de ne
-   JAMAIS reconstituer l'archive entiere en memoire. zip.js lit le ZIP par
-   petits acces cibles directement depuis le fichier (via `Blob.slice()`),
-   entree par entree, et ne decompresse que celles qu'on lui demande — donc
-   jamais plus que quelques Ko a la fois pour les JSON qui nous interessent,
-   quelle que soit la taille du ZIP.
+   JAMAIS reconstituer l'archive entiere en memoire, NI garder le texte de
+   toutes les entrees a la fois. zip.js lit le ZIP par petits acces cibles
+   directement depuis le fichier (via `Blob.slice()`), entree par entree, et
+   ne decompresse que celles qu'on lui demande. On va plus loin : le texte
+   d'une entree est passe au consommateur puis aussitot relache (rien n'est
+   stocke ici), donc le pic ne depend plus du nombre ni de la taille des
+   fichiers JSON, seulement de la taille du plus gros d'entre eux.
    ============================================================ */
 import { BlobReader, TextWriter, ZipReader } from '@zip.js/zip.js';
-import type { FileMap } from './parse';
 
 // Un ZIP peut envelopper le contenu dans un dossier (nom du compte, date...) :
 // on ancre chaque chemin a partir du repere qui compte vraiment, pour que
@@ -57,14 +58,30 @@ export class ErreurExportVide extends Error {
   }
 }
 
-export async function construireFileMap(
+/** Appele pour chaque entree `.json` d'un ZIP, avec son texte. Le texte n'est
+    plus valide une fois l'appel termine : ce qu'il faut en garder doit etre
+    extrait tout de suite. */
+export type Consommateur = (chemin: string, texte: string) => void;
+
+// Rendre la main tous les N fichiers ingeres, pas a chaque fichier (le cout
+// d'un setTimeout(0) additionne sur des milliers de petits JSON) ni jamais
+// (le texte des fichiers precedents resterait reference plus longtemps que
+// necessaire par la pile d'appels, retardant le ramasse-miettes).
+const FICHIERS_ENTRE_RESPIRATIONS = 25;
+
+function respirer(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+export async function lireZips(
   fichiers: File[],
+  consommer: Consommateur,
   onProgress?: (etape: string, fait: number, total: number) => void,
-): Promise<FileMap> {
-  const map: FileMap = new Map();
+): Promise<void> {
   // Compte sur l'ensemble des ZIP, pas par fichier : Instagram decoupe un
   // gros export en parties, et une partie peut ne contenir que des medias.
   let htmlVu = false;
+  let entreesJsonVues = 0;
 
   for (let i = 0; i < fichiers.length; i++) {
     onProgress?.('zip', i, fichiers.length);
@@ -76,7 +93,9 @@ export async function construireFileMap(
         if (entree.filename.endsWith('.html')) { htmlVu = true; continue; }
         if (!entree.filename.endsWith('.json')) continue;
         const texte = await entree.getData(new TextWriter());
-        map.set(normaliserChemin(entree.filename), texte);
+        consommer(normaliserChemin(entree.filename), texte);
+        entreesJsonVues++;
+        if (entreesJsonVues % FICHIERS_ENTRE_RESPIRATIONS === 0) await respirer();
       }
     } catch (cause) {
       throw new ErreurLectureZip(fichiers[i].name, cause);
@@ -86,7 +105,5 @@ export async function construireFileMap(
   }
   onProgress?.('zip', fichiers.length, fichiers.length);
 
-  if (map.size === 0) throw htmlVu ? new ErreurExportHtml() : new ErreurExportVide();
-
-  return map;
+  if (entreesJsonVues === 0) throw htmlVu ? new ErreurExportHtml() : new ErreurExportVide();
 }

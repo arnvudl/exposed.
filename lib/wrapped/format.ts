@@ -1,8 +1,6 @@
 /* ============================================================
    FORMAT  /  mise en forme partagee des resultats
    ============================================================ */
-import type { Message } from './parse';
-
 const FMT_DATE = new Intl.DateTimeFormat('fr-FR', {
   timeZone: 'Europe/Paris', day: 'numeric', month: 'long', year: 'numeric',
   hour: '2-digit', minute: '2-digit',
@@ -47,11 +45,12 @@ export function formatDureeCourte(ms: number): string {
 }
 
 /** Un aperçu court du message : le vrai texte, ou une etiquette si le
-    message n'a pas de texte (photo, appel, message supprime...). */
-export function apercu(m: Message | undefined): string {
-  if (!m) return '';
-  if (m.content) return m.content.length > 140 ? `${m.content.slice(0, 140)}…` : m.content;
-  if (m.estSupprime) return '(message supprimé)';
-  if (m.aDesMedias) return '(photo, vidéo ou audio, sans texte)';
+    message n'a pas de texte (photo, appel, message supprime...). Appele au
+    moment du parse (voir parse.ts), pendant que le contenu brut existe
+    encore : Message ne garde que le resultat, jamais le texte complet. */
+export function apercu(content: string | undefined, estSupprime: boolean, aDesMedias: boolean): string {
+  if (content) return content.length > 140 ? `${content.slice(0, 140)}…` : content;
+  if (estSupprime) return '(message supprimé)';
+  if (aDesMedias) return '(photo, vidéo ou audio, sans texte)';
   return '(message vide)';
 }

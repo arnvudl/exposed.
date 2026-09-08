@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Nav from '@/components/Nav';
 import Pied from '@/components/Pied';
 import type { DonneesAffiche } from '@/components/Affiche';
@@ -9,8 +9,24 @@ import {
   mapChapitre01, mapChapitre02, mapChapitre03, mapChapitre04,
   mapChapitre05, mapChapitre06, mapChapitre07,
 } from '@/lib/wrapped/mapper';
+import { construireFaits, type DonneesBrutesChapitres } from '@/lib/partage/faits';
+import type { Periode } from '@/lib/wrapped/parse';
 import StoryPlayer from './StoryPlayer';
 import s from './wrapped.module.css';
+
+type Raccourci = 'tout' | 3 | 6 | 12 | 'perso';
+const MOIS_RACCOURCIS: { valeur: 3 | 6 | 12; label: string }[] = [
+  { valeur: 3, label: '3 derniers mois' },
+  { valeur: 6, label: '6 derniers mois' },
+  { valeur: 12, label: '1 an' },
+];
+/** yyyy-mm-dd en heure locale (pas `toISOString`, qui bascule en UTC et peut
+    afficher la veille du jour choisi selon le fuseau). */
+function jourLocal(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function debutJournee(jour: string): number { return new Date(`${jour}T00:00:00`).getTime(); }
+function finJournee(jour: string): number { return new Date(`${jour}T23:59:59.999`).getTime(); }
 
 const LABELS_ETAPE: Record<string, string> = {
   lecture_zip: 'Lecture de tes fichiers…',
@@ -29,8 +45,27 @@ export default function Wrapped() {
   // comptes qui ne suivent pas en retour), affichees hors du defilement de
   // la story : voir StoryPlayer, prop `details`.
   const [details, setDetails] = useState<Record<string, string[]>>({});
+  // Resultats bruts des chapitres (pas les DonneesAffiche de la story) :
+  // sert de source a la bibliotheque de faits du compositeur de partage,
+  // qui a besoin de plus de detail que ce que montre une carte de story.
+  const [donneesChapitres, setDonneesChapitres] = useState<DonneesBrutesChapitres>({});
   const [messageErreur, setMessageErreur] = useState<string | null>(null);
   const [dragActif, setDragActif] = useState(false);
+  // Periode optionnelle a appliquer a l'analyse : par defaut « Tout », donc
+  // aucun filtre, comportement identique a avant cette fonctionnalite.
+  const [raccourci, setRaccourci] = useState<Raccourci>('tout');
+  const [debut, setDebut] = useState('');
+  const [fin, setFin] = useState('');
+
+  function appliquerRaccourci(r: 'tout' | 3 | 6 | 12) {
+    setRaccourci(r);
+    if (r === 'tout') { setDebut(''); setFin(''); return; }
+    const maintenant = new Date();
+    const bornDebut = new Date(maintenant);
+    bornDebut.setMonth(bornDebut.getMonth() - r);
+    setDebut(jourLocal(bornDebut));
+    setFin(jourLocal(maintenant));
+  }
 
   const workerRef = useRef<Worker | null>(null);
   const queueRef = useRef<EvenementAnalyse[]>([]);
@@ -52,6 +87,7 @@ export default function Wrapped() {
         evt.numero === 6 ? mapChapitre06(evt.donnees) :
         mapChapitre07(evt.donnees);
       setCartes((prev) => [...prev, ...nouvelles]);
+      setDonneesChapitres((d) => ({ ...d, [evt.numero]: evt.donnees }));
       if (evt.numero === 3) {
         setDetails((d) => ({ ...d, 'follow-back': evt.donnees.neSuiventPas }));
       }
@@ -62,6 +98,10 @@ export default function Wrapped() {
       setStatut('erreur');
     }
   }
+
+  // Recalcule seulement quand un nouveau chapitre arrive, pas a chaque
+  // rendu : construireFaits relit tout ce qui est deja connu a chaque appel.
+  const faitsPartage = useMemo(() => construireFaits(donneesChapitres), [donneesChapitres]);
 
   async function consommer() {
     consommeRef.current = true;
@@ -81,9 +121,15 @@ export default function Wrapped() {
     setStatut('chargement');
     setCartes([]);
     setDetails({});
+    setDonneesChapitres({});
     setMessageErreur(null);
     setLabelEtape('Lecture de tes fichiers…');
     queueRef.current = [];
+
+    const periode: Periode = {
+      debut: debut ? debutJournee(debut) : undefined,
+      fin: fin ? finJournee(fin) : undefined,
+    };
 
     const worker = new Worker(new URL('./analyse.worker.ts', import.meta.url));
     workerRef.current = worker;
@@ -91,7 +137,7 @@ export default function Wrapped() {
       queueRef.current.push(e.data);
       if (!consommeRef.current) consommer();
     };
-    worker.postMessage({ fichiers: fichiersZip });
+    worker.postMessage({ fichiers: fichiersZip, periode });
   }
 
   function fermerStory() {
@@ -105,6 +151,7 @@ export default function Wrapped() {
       <StoryPlayer
         cartes={cartes}
         details={details}
+        faits={faitsPartage}
         enCoursDeChargement={statut === 'chargement'}
         onFermer={fermerStory}
       />
@@ -127,6 +174,55 @@ export default function Wrapped() {
 
         {statut === 'erreur' && (
           <div className={s.erreur} role="alert">{messageErreur}</div>
+        )}
+
+        {/* Le filtre s'applique message par message pendant la lecture du
+            ZIP (voir Accumulateur.horsPeriode) : deposer tout l'export et ne
+            garder que les 3 derniers mois marche donc sans le redemander a
+            Instagram. */}
+        {(statut === 'attente' || statut === 'erreur') && (
+          <div className={s.periode}>
+            <p className={s.periodeLabel}>Période à analyser (optionnel)</p>
+            <div className={s.raccourcis}>
+              <button
+                type="button"
+                className={`${s.raccourciBouton} ${raccourci === 'tout' ? s.raccourciActif : ''}`}
+                onClick={() => appliquerRaccourci('tout')}
+              >
+                Tout
+              </button>
+              {MOIS_RACCOURCIS.map(({ valeur, label }) => (
+                <button
+                  key={valeur}
+                  type="button"
+                  className={`${s.raccourciBouton} ${raccourci === valeur ? s.raccourciActif : ''}`}
+                  onClick={() => appliquerRaccourci(valeur)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className={s.dates}>
+              <label className={s.dateChamp}>
+                Du
+                <input
+                  type="date"
+                  value={debut}
+                  max={fin || undefined}
+                  onChange={(e) => { setDebut(e.target.value); setRaccourci('perso'); }}
+                />
+              </label>
+              <label className={s.dateChamp}>
+                Au
+                <input
+                  type="date"
+                  value={fin}
+                  min={debut || undefined}
+                  onChange={(e) => { setFin(e.target.value); setRaccourci('perso'); }}
+                />
+              </label>
+            </div>
+          </div>
         )}
 
         {/* La zone reste en place apres une erreur : on redepose le bon
