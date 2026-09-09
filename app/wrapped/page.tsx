@@ -11,6 +11,7 @@ import {
 } from '@/lib/wrapped/mapper';
 import { construireFaits, type DonneesBrutesChapitres } from '@/lib/partage/faits';
 import type { Periode } from '@/lib/wrapped/parse';
+import { genererDemo, CLE_DEMO } from '@/lib/wrapped/demo';
 import StoryPlayer from './StoryPlayer';
 import s from './wrapped.module.css';
 
@@ -73,6 +74,21 @@ export default function Wrapped() {
 
   useEffect(() => () => workerRef.current?.terminate(), []);
 
+  // Arrivee depuis le bouton demo de l'accueil ou du guide : la cle est
+  // deposee juste avant la navigation, consommee une seule fois ici.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(CLE_DEMO) === '1') {
+        sessionStorage.removeItem(CLE_DEMO);
+        lancerDemo();
+      }
+    } catch {
+      // sessionStorage indisponible (navigation privee stricte) : tant pis,
+      // le bouton demo de cette page reste utilisable normalement.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function appliquer(evt: EvenementAnalyse) {
     if (evt.type === 'etape') {
       setLabelEtape(LABELS_ETAPE[evt.etape] ?? '');
@@ -111,6 +127,18 @@ export default function Wrapped() {
       await new Promise((r) => setTimeout(r, 0));
     }
     consommeRef.current = false;
+  }
+
+  // Donnees inventees, generees dans l'onglet, jamais ecrites ni envoyees :
+  // memes etats reactifs que la vraie analyse, juste sans worker ni fichier.
+  function lancerDemo() {
+    workerRef.current?.terminate();
+    const { cartes: c, details: d, donneesChapitres: dc } = genererDemo();
+    setCartes(c);
+    setDetails(d);
+    setDonneesChapitres(dc);
+    setMessageErreur(null);
+    setStatut('fini');
   }
 
   function demarrer(fichiersChoisis: File[]) {
@@ -257,6 +285,12 @@ export default function Wrapped() {
               />
             </label>
           </div>
+        )}
+
+        {(statut === 'attente' || statut === 'erreur') && (
+          <button type="button" className={s.demoLien} onClick={lancerDemo}>
+            Pas de fichier sous la main ? Voir une démo
+          </button>
         )}
 
         {statut === 'chargement' && cartes.length === 0 && (

@@ -5,6 +5,7 @@ import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
 import Affiche from '@/components/Affiche';
 import { BoutonLien } from '@/components/Bouton';
+import LienDemo from '@/components/LienDemo';
 import ListeProfils from '@/components/ListeProfils';
 import { revelations, afficheHero, afficheDossier, profils } from '@/content/revelations';
 import s from './page.module.css';
@@ -43,6 +44,7 @@ export default function Accueil() {
             </p>
             <div className={s.heroCta}>
               <BoutonLien href="/#chemin">Ouvrir mon dossier</BoutonLien>
+              <LienDemo />
             </div>
           </div>
 

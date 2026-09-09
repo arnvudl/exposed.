@@ -119,4 +119,4 @@
 }
 .finH { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -.02em; line-height: 1.1; }
 .finD { color: var(--muted); margin-top: .8rem; max-width: 52ch; }
-.finCta { margin-top: 1.8rem; }
+.finCta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1.8rem; }

@@ -17,7 +17,7 @@ export type AxesProfil = {
   axeLongueurCaracteres: number; // taille mediane d'un message
 };
 
-type Signature = { quiLance: number; ampleur: number; rapidite: number; longueur: number };
+export type Signature = { quiLance: number; ampleur: number; rapidite: number; longueur: number };
 
 const PROFILS: { nom: string; note: string; signature: Signature }[] = [
   {
@@ -95,4 +95,30 @@ export function determinerProfil(axes: AxesProfil): { nom: string; note: string 
     if (d < meilleureDistance) { meilleureDistance = d; meilleur = p; }
   }
   return { nom: meilleur.nom, note: meilleur.note };
+}
+
+/* ============================================================
+   Utilise par le mode demo (lib/wrapped/demo.ts) : tirer un profil au hasard
+   et fabriquer des axes qui y retombent exactement, plutot que d'exposer
+   toute la liste PROFILS (sa "note" appartient a cette regle de calcul, pas
+   au generateur de fausses donnees).
+   ============================================================ */
+export function nomsProfils(): string[] {
+  return PROFILS.map((p) => p.nom);
+}
+
+export function signaturePourNom(nom: string): Signature {
+  return (PROFILS.find((p) => p.nom === nom) ?? PROFILS[0]).signature;
+}
+
+/** L'inverse exact de `normaliser` : des axes qui, une fois renormalises,
+    retombent a distance 0 de cette signature, donc que `determinerProfil`
+    fait forcement ressortir. */
+export function axesDepuisSignature(s: Signature): AxesProfil {
+  return {
+    axeQuiLance: s.quiLance,
+    axeAmpleur: s.ampleur * 50,
+    axeVitesseMinutes: (1 - s.rapidite) * 120,
+    axeLongueurCaracteres: s.longueur * 60,
+  };
 }

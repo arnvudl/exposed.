@@ -4,6 +4,7 @@ import Nav from '@/components/Nav';
 import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
 import { BoutonLien } from '@/components/Bouton';
+import LienDemo from '@/components/LienDemo';
 import s from './guide.module.css';
 
 export const metadata: Metadata = {
@@ -193,6 +194,7 @@ export default function Guide() {
           </p>
           <div className={s.finCta}>
             <BoutonLien href="/wrapped/">Déposer mon fichier</BoutonLien>
+            <LienDemo />
           </div>
         </div>
       </div>

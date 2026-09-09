@@ -64,6 +64,14 @@
 .zoneBouton:hover { background: var(--text); color: var(--bg); }
 .inputCache { display: none; }
 
+.demoLien {
+  display: block; margin: 1.1rem auto 0; padding: 0;
+  background: none; border: 0; cursor: pointer;
+  font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.demoLien:hover { color: var(--text); }
+
 /* ---------- chargement ---------- */
 .chargement {
   margin-top: clamp(2rem, 5vh, 3rem);
