@@ -5,6 +5,7 @@ import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
 import { BoutonLien } from '@/components/Bouton';
 import LienDemo from '@/components/LienDemo';
+import RappelIcs from '@/components/RappelIcs';
 import RappelSurScroll from '@/components/RappelSurScroll';
 import s from './guide.module.css';
 
@@ -164,6 +165,7 @@ export default function Guide() {
           >
             Ouvrir Instagram
           </BoutonLien>
+          <RappelIcs />
         </div>
       </header>
 

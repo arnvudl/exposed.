@@ -7,7 +7,7 @@
 .teteSub { margin-top: 1.4rem; }
 
 /* Le raccourci direct vers Instagram, sous le chapo. */
-.cta { margin-top: clamp(1.8rem, 4vh, 2.6rem); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(1.8rem, 4vh, 2.6rem); }
 
 /* ---------- les etapes ---------- */
 .steps { margin-top: clamp(2.5rem, 6vh, 4rem); }
