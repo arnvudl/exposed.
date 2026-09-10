@@ -3,7 +3,7 @@ import Link from 'next/link';
 import PageTexte from '@/components/PageTexte';
 
 export const metadata: Metadata = {
-  title: 'Mentions légales. Exposed',
+  title: 'Mentions légales',
   description: 'Éditeur, hébergeur et contact du site Exposed, le Wrapped de tes DMs Instagram lu dans ton navigateur.',
 };
 

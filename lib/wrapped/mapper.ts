@@ -12,7 +12,7 @@
    ============================================================ */
 import type { DonneesAffiche } from '@/components/Affiche';
 import type {
-  Borne, chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07,
+  Borne, chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07, StatsMedias,
 } from './chapitres';
 import { determinerProfil } from './profil';
 import { profils as PROFILS_COMPLETS } from '@/content/revelations';
@@ -354,4 +354,75 @@ export function mapChapitre07(c: C07): DonneesAffiche[] {
       { nom: 'faisceau', w: 78, ton: 'moyen' },
     ],
   }];
+}
+
+/* ============================================================
+   BONUS — TES MÉDIAS  (voir chapitreMedias, lib/wrapped/chapitres.ts : ce
+   n'est pas un huitieme chapitre, le site promet « sept chapitres » partout.
+   Ces cartes suivent le chapitre 07, sous l'etiquette « Bonus », une par
+   type de media reellement present -- jamais une carte a « 0 ». Ton 9 et 10
+   n'etaient pris par aucun des sept chapitres, reserves pour ca.)
+   ============================================================ */
+const PIECE_BONUS = 'Bonus · Tes médias';
+
+export function mapBonusMedias(m: StatsMedias): DonneesAffiche[] {
+  const cartes: DonneesAffiche[] = [];
+
+  if (m.vocaux.toi + m.vocaux.autres > 0) {
+    cartes.push({
+      piece: PIECE_BONUS,
+      titre: 'Tes vocaux',
+      paire: [
+        { k: 'Reçus', v: nb(m.vocaux.autres) },
+        { k: 'Envoyés', v: nb(m.vocaux.toi) },
+      ],
+      note: 'messages vocaux échangés.',
+      ton: 9,
+      formes: [{ nom: 'faisceau', w: 82, ton: 'moyen' }, { nom: 'arc', w: 46 }],
+    });
+  }
+
+  if (m.photos.toi + m.photos.autres > 0) {
+    cartes.push({
+      piece: PIECE_BONUS,
+      titre: 'Tes photos',
+      paire: [
+        { k: 'Reçues', v: nb(m.photos.autres) },
+        { k: 'Envoyées', v: nb(m.photos.toi) },
+      ],
+      note: 'photos échangées, stories et pièces jointes comprises.',
+      ton: 9,
+      formes: [{ nom: 'disques', w: 90, dx: 20 }],
+    });
+  }
+
+  if (m.stickers.toi + m.stickers.autres > 0) {
+    cartes.push({
+      piece: PIECE_BONUS,
+      titre: 'Tes stickers',
+      paire: [
+        { k: 'Reçus', v: nb(m.stickers.autres) },
+        { k: 'Envoyés', v: nb(m.stickers.toi) },
+      ],
+      note: 'stickers échangés.',
+      ton: 9,
+      formes: [{ nom: 'trame', w: 68 }, { nom: 'cadre', w: 44, ton: 'moyen' }],
+    });
+  }
+
+  if (m.appelsAudio + m.appelsVideo > 0) {
+    cartes.push({
+      piece: PIECE_BONUS,
+      titre: 'Tes appels',
+      paire: [
+        { k: 'Vidéo', v: nb(m.appelsVideo) },
+        { k: 'Normaux', v: nb(m.appelsAudio) },
+      ],
+      note: 'appels passés ou reçus, manqués compris.',
+      ton: 9,
+      formes: [{ nom: 'barres', w: 60 }, { nom: 'stries', w: 52, dx: -16, ton: 'moyen' }],
+    });
+  }
+
+  return cartes;
 }

@@ -205,6 +205,11 @@ export default function Guide() {
             Dépose tes ZIP, tous en même temps. Ils sont lus directement dans ton navigateur,
             rien ne sort de ton appareil.
           </p>
+          <p className={s.finD}>
+            Pour être cash : pas par vertu. Garder tes données me coûterait des serveurs à
+            payer, et un fichier stocké quelque part est une responsabilité juridique dont je
+            n’ai aucune envie. Ne rien garder, c’est juste le plus simple.
+          </p>
           <div className={s.finCta}>
             <BoutonLien href="/wrapped/">Déposer mon fichier</BoutonLien>
             <LienDemo />

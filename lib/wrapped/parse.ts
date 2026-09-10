@@ -11,6 +11,18 @@ import { decodeMojibake, tokeniser, MOTS_VIDES } from './decode';
 import { apercu } from './format';
 import { compteInsultes } from './lexique';
 
+/** Ce qu'un message transporte au-dela du texte, quand il y a quelque
+    chose : vocal(aux), photo(s), sticker, ou appel classe audio/video. Champ
+    optionnel plutot que des zeros partout -- l'immense majorite des messages
+    sont du texte pur, et chaque octet compte sur un export de plusieurs
+    centaines de milliers de messages (voir docs/GROS_EXPORTS_MOBILE.md). */
+export type Medias = {
+  photos?: number;
+  vocaux?: number;
+  stickers?: number;
+  appel?: 'audio' | 'video';
+};
+
 export type Message = {
   /** Index dans `expediteurs` (voir Conversation) : une chaine par message
       couterait dix fois plus cher qu'un entier sur un export de plusieurs
@@ -21,6 +33,7 @@ export type Message = {
   longueur: number;
   aDesMedias: boolean;
   estSupprime: boolean;
+  medias?: Medias;
 };
 
 export type Conversation = {
@@ -183,8 +196,36 @@ export class Accumulateur {
           idx = entree.expediteurs.length - 1;
         }
 
-        const aDesMedias = !!(m.photos?.length || m.videos?.length || m.audio_files?.length || m.share || m.call_duration != null);
+        const aDesMedias = !!(
+          m.photos?.length || m.videos?.length || m.audio_files?.length
+          || m.sticker || m.share || m.call_duration != null
+        );
         const estSupprime = !!m.is_unsent;
+
+        // Un appel se reconnait a `call_duration` (present meme a 0, un appel
+        // manque ou tres court) ; son type (audio/video) ne vit que dans le
+        // texte du message systeme -- deja lu juste au-dessus, jamais ecrit
+        // ailleurs dans le JSON. Verifie sur un vrai corpus : "Audio call
+        // ended" et "Video chat ended" (Instagram ecrit ses messages systeme
+        // en anglais, meme sur un export francais -- meme raison que
+        // MOTS_SYSTEME plus haut).
+        let appel: 'audio' | 'video' | undefined;
+        if (m.call_duration != null && contenuBrut) {
+          if (/audio/i.test(contenuBrut)) appel = 'audio';
+          else if (/vid(e|é)o/i.test(contenuBrut)) appel = 'video';
+        }
+        const nbPhotos = m.photos?.length ?? 0;
+        const nbVocaux = m.audio_files?.length ?? 0;
+        const nbStickers = m.sticker ? 1 : 0;
+        const medias: Medias | undefined = (nbPhotos || nbVocaux || nbStickers || appel)
+          ? {
+            photos: nbPhotos || undefined,
+            vocaux: nbVocaux || undefined,
+            stickers: nbStickers || undefined,
+            appel,
+          }
+          : undefined;
+
         entree.messages.push({
           sender: idx,
           ts: m.timestamp_ms,
@@ -192,6 +233,7 @@ export class Accumulateur {
           longueur: contenuBrut?.length ?? 0,
           aDesMedias,
           estSupprime,
+          medias,
         });
 
         if (contenuBrut) {

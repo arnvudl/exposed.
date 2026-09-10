@@ -3,7 +3,7 @@ import Link from 'next/link';
 import PageTexte from '@/components/PageTexte';
 
 export const metadata: Metadata = {
-  title: 'Conditions d’utilisation. Exposed',
+  title: 'Conditions d’utilisation',
   description: 'Les conditions d’utilisation d’Exposed : usage personnel, 15 ans ou plus, résultats sans garantie, cartes qui t’appartiennent.',
 };
 

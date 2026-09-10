@@ -8,11 +8,15 @@ import type { DonneesAffiche } from '@/components/Affiche';
 import type { EvenementAnalyse } from '@/lib/wrapped/analyser';
 import {
   mapChapitre01, mapChapitre02, mapChapitre03, mapChapitre04,
-  mapChapitre05, mapChapitre06, mapChapitre07,
+  mapChapitre05, mapChapitre06, mapChapitre07, mapBonusMedias,
 } from '@/lib/wrapped/mapper';
 import { construireFaits, type DonneesBrutesChapitres } from '@/lib/partage/faits';
 import type { Periode } from '@/lib/wrapped/parse';
 import { genererDemo, CLE_DEMO } from '@/lib/wrapped/demo';
+import {
+  construireDevineTop, construireDevineVersusContacts, construireDevineVersusGroupes,
+  construireDevineVersusMedia, type DonneesDevine, type ContextePeriode,
+} from '@/lib/wrapped/jeu';
 import StoryPlayer from './StoryPlayer';
 import s from './wrapped.module.css';
 
@@ -29,6 +33,18 @@ function jourLocal(d: Date): string {
 }
 function debutJournee(jour: string): number { return new Date(`${jour}T00:00:00`).getTime(); }
 function finJournee(jour: string): number { return new Date(`${jour}T23:59:59.999`).getTime(); }
+
+const FMT_MOIS_ANNEE_DEVINE = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
+/** "3 mars 2026", "1er septembre 2022" : pour donner du contexte a une
+    devinette ("Entre le X et le Y, à qui..."), seulement quand l'utilisateur
+    a vraiment choisi une periode -- jamais de date inventee sur un export
+    complet ("Tout"). Le "1er" est ecrit a la main : `Intl.DateTimeFormat`
+    n'a pas d'ordinal francais pour `day: 'numeric'`. */
+function jourLong(jour: string): string {
+  const d = new Date(`${jour}T00:00:00`);
+  const quantieme = d.getDate() === 1 ? '1er' : String(d.getDate());
+  return `${quantieme} ${FMT_MOIS_ANNEE_DEVINE.format(d)}`;
+}
 
 const LABELS_ETAPE: Record<string, string> = {
   lecture_zip: 'Lecture de tes fichiers…',
@@ -51,6 +67,10 @@ export default function Wrapped() {
   // sert de source a la bibliotheque de faits du compositeur de partage,
   // qui a besoin de plus de detail que ce que montre une carte de story.
   const [donneesChapitres, setDonneesChapitres] = useState<DonneesBrutesChapitres>({});
+  // Devinettes a poser juste avant certaines cartes, indexees par la
+  // position qu'elles occuperont dans `cartes` (voir lib/wrapped/jeu.ts) :
+  // un index sans entree veut juste dire « pas de question ici ».
+  const [devines, setDevines] = useState<Record<number, DonneesDevine>>({});
   const [messageErreur, setMessageErreur] = useState<string | null>(null);
   const [dragActif, setDragActif] = useState(false);
   // Periode optionnelle a appliquer a l'analyse : par defaut « Tout », donc
@@ -72,6 +92,10 @@ export default function Wrapped() {
   const workerRef = useRef<Worker | null>(null);
   const queueRef = useRef<EvenementAnalyse[]>([]);
   const consommeRef = useRef(false);
+  // Miroir synchrone de `cartes`, pour connaitre l'index d'insertion d'une
+  // devinette au moment ou un chapitre arrive (le state React ne se relit
+  // pas de facon fiable entre deux evenements traites dans la meme boucle).
+  const cartesRef = useRef<DonneesAffiche[]>([]);
 
   useEffect(() => () => workerRef.current?.terminate(), []);
 
@@ -90,6 +114,14 @@ export default function Wrapped() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // La periode choisie par l'utilisateur (voir le formulaire plus bas),
+  // formatee pour habiller une devinette de son contexte -- vide sur "Tout" :
+  // jamais de date fabriquee. `debut`/`fin` sont geles a leur valeur du clic
+  // sur "demarrer" (fermeture normale de `appliquer`, comme pour `periode`
+  // envoyee au worker dans `demarrer`).
+  const periodeDevine: ContextePeriode | undefined =
+    debut && fin ? { debut: jourLong(debut), fin: jourLong(fin) } : undefined;
+
   function appliquer(evt: EvenementAnalyse) {
     if (evt.type === 'etape') {
       setLabelEtape(LABELS_ETAPE[evt.etape] ?? '');
@@ -103,11 +135,49 @@ export default function Wrapped() {
         evt.numero === 5 ? mapChapitre05(evt.donnees) :
         evt.numero === 6 ? mapChapitre06(evt.donnees) :
         mapChapitre07(evt.donnees);
-      setCartes((prev) => [...prev, ...nouvelles]);
+      // L'index ou ces cartes atterrissent, avant qu'on les y ajoute : c'est
+      // la position a laquelle une devinette doit surgir pour precede la
+      // premiere d'entre elles.
+      const indexDebut = cartesRef.current.length;
+      cartesRef.current = [...cartesRef.current, ...nouvelles];
+      setCartes(cartesRef.current);
       setDonneesChapitres((d) => ({ ...d, [evt.numero]: evt.donnees }));
+      if (evt.numero === 1) {
+        const nouvellesDevines: Record<number, DonneesDevine> = {};
+        const devineTop = construireDevineTop(evt.donnees, periodeDevine);
+        if (devineTop) nouvellesDevines[indexDebut] = devineTop;
+        // La deuxieme carte du chapitre 01 est le classement complet : une
+        // deuxieme devinette, differente de la premiere, juste avant.
+        if (nouvelles.length > 1) {
+          const devineVersus = construireDevineVersusContacts(evt.donnees, periodeDevine);
+          if (devineVersus) nouvellesDevines[indexDebut + 1] = devineVersus;
+        }
+        if (Object.keys(nouvellesDevines).length) {
+          setDevines((d) => ({ ...d, ...nouvellesDevines }));
+        }
+      }
+      if (evt.numero === 2) {
+        const devineGroupes = construireDevineVersusGroupes(evt.donnees, periodeDevine);
+        if (devineGroupes) setDevines((d) => ({ ...d, [indexDebut]: devineGroupes }));
+      }
       if (evt.numero === 3) {
         setDetails((d) => ({ ...d, 'follow-back': evt.donnees.neSuiventPas }));
       }
+    } else if (evt.type === 'medias') {
+      // Pas un chapitre numerote (voir lib/wrapped/mapper.ts, mapBonusMedias) :
+      // meme mecanique d'insertion, juste apres tout ce qui precede.
+      const nouvelles = mapBonusMedias(evt.stats);
+      if (nouvelles.length === 0) return;
+      const indexDebut = cartesRef.current.length;
+      cartesRef.current = [...cartesRef.current, ...nouvelles];
+      setCartes(cartesRef.current);
+      // Une seule devinette, sur le classement le plus fourni des deux
+      // (vocaux prefere : plus personnel, plus amusant a deviner que les
+      // photos) -- pas la peine d'en poser une par carte bonus.
+      const devineMedia = evt.vocaux.length >= 2
+        ? construireDevineVersusMedia(evt.vocaux, 'Qui t’envoie le plus de messages vocaux ?', 'devine-vocaux', periodeDevine)
+        : construireDevineVersusMedia(evt.photos, 'Qui t’envoie le plus de photos ?', 'devine-photos', periodeDevine);
+      if (devineMedia) setDevines((d) => ({ ...d, [indexDebut]: devineMedia }));
     } else if (evt.type === 'termine') {
       setStatut('fini');
     } else if (evt.type === 'erreur') {
@@ -134,10 +204,12 @@ export default function Wrapped() {
   // memes etats reactifs que la vraie analyse, juste sans worker ni fichier.
   function lancerDemo() {
     workerRef.current?.terminate();
-    const { cartes: c, details: d, donneesChapitres: dc } = genererDemo();
+    const { cartes: c, details: d, donneesChapitres: dc, devines: dv } = genererDemo();
+    cartesRef.current = c;
     setCartes(c);
     setDetails(d);
     setDonneesChapitres(dc);
+    setDevines(dv);
     setMessageErreur(null);
     setStatut('fini');
   }
@@ -148,9 +220,11 @@ export default function Wrapped() {
 
     workerRef.current?.terminate();
     setStatut('chargement');
+    cartesRef.current = [];
     setCartes([]);
     setDetails({});
     setDonneesChapitres({});
+    setDevines({});
     setMessageErreur(null);
     setLabelEtape('Lecture de tes fichiers…');
     queueRef.current = [];
@@ -172,6 +246,7 @@ export default function Wrapped() {
   function fermerStory() {
     workerRef.current?.terminate();
     setStatut('attente');
+    cartesRef.current = [];
     setCartes([]);
   }
 
@@ -181,6 +256,7 @@ export default function Wrapped() {
         cartes={cartes}
         details={details}
         faits={faitsPartage}
+        devines={devines}
         enCoursDeChargement={statut === 'chargement'}
         onFermer={fermerStory}
       />

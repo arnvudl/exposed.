@@ -127,6 +127,16 @@ export default function Accueil() {
             regardes sans la publier. Rien n’est envoyé, rien n’est gardé. Tu fermes l’onglet
             et tout a disparu.
           </p>
+          {/* Pas de la vertu : la vraie raison, pour qu'on te croie plus
+              facilement que sur une simple promesse. */}
+          <p className={`${s.privacyPourquoi} reveal`} style={{ '--d': '140ms' } as Style}>
+            Et pour être cash : pas par grandeur d’âme. Garder tes données me coûterait{' '}
+            <strong className={s.privacyFort}>des serveurs à payer</strong>, et un fichier
+            stocké quelque part, c’est <strong className={s.privacyFort}>une responsabilité
+            juridique</strong> dont je n’ai aucune envie.{' '}
+            <strong className={s.privacyFort}>N’importe qui pourrait me poursuivre</strong> en
+            cas de fuite. Ne rien garder, c’est juste le plus simple, pour moi comme pour toi.
+          </p>
         </div>
       </section>
 

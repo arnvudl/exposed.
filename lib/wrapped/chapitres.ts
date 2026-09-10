@@ -4,7 +4,7 @@
    Validees sur un vrai export dans le script Node avant d'atterrir ici.
    ============================================================ */
 import { mediane } from './decode';
-import { COMPTE_SUPPRIME, identifiantAffichable, nomExpediteur, type Conversation } from './parse';
+import { COMPTE_SUPPRIME, identifiantAffichable, nomExpediteur, type Conversation, type Message } from './parse';
 
 /* ============================================================
    01 — TON CERCLE RÉEL
@@ -326,4 +326,75 @@ export function chapitre07(conversations: Conversation[], soi: string) {
     axeVitesseMinutes: mediane(deltasReponse),
     axeLongueurCaracteres: mediane(longueursMessages),
   };
+}
+
+/* ============================================================
+   BONUS — TES MÉDIAS  (pas un huitieme chapitre : le site promet « sept
+   chapitres » partout, sur l'accueil comme dans le guide -- ces cartes
+   s'ajoutent APRES le chapitre 07, etiquetees « Bonus », sans renumeroter
+   ni casser cette promesse.)
+   ============================================================ */
+export type StatsMedias = {
+  vocaux: { toi: number; autres: number };
+  photos: { toi: number; autres: number };
+  stickers: { toi: number; autres: number };
+  appelsAudio: number;
+  appelsVideo: number;
+};
+
+export function chapitreMedias(conversations: Conversation[], soi: string): StatsMedias {
+  const s: StatsMedias = {
+    vocaux: { toi: 0, autres: 0 },
+    photos: { toi: 0, autres: 0 },
+    stickers: { toi: 0, autres: 0 },
+    appelsAudio: 0,
+    appelsVideo: 0,
+  };
+  for (const c of conversations) {
+    const idxSoi = c.expediteurs.indexOf(soi);
+    for (const m of c.messages) {
+      if (!m.medias) continue;
+      const cote = m.sender === idxSoi ? 'toi' : 'autres';
+      if (m.medias.vocaux) s.vocaux[cote] += m.medias.vocaux;
+      if (m.medias.photos) s.photos[cote] += m.medias.photos;
+      if (m.medias.stickers) s.stickers[cote] += m.medias.stickers;
+      if (m.medias.appel === 'audio') s.appelsAudio++;
+      if (m.medias.appel === 'video') s.appelsVideo++;
+    }
+  }
+  return s;
+}
+
+export type LigneMedia = { qui: string; total: number };
+
+/** Classement des 1:1, par ce que CETTE PERSONNE t'a envoye pour un type de
+    media donne (pas le total echange dans les deux sens) : c'est la
+    question qui interesse ("qui m'envoie le plus de vocaux"), pas un total
+    neutre. `compter` lit un seul message et renvoie combien il contribue. */
+function classementParContact(
+  conversations: Conversation[],
+  soi: string,
+  compter: (m: Message) => number,
+): LigneMedia[] {
+  const lignes: LigneMedia[] = [];
+  for (const c of conversations) {
+    const autres = c.participants.filter((p) => p !== soi);
+    if (c.participants.length !== 2 || autres.length !== 1) continue;
+    const autre = autres[0];
+    if (autre === COMPTE_SUPPRIME) continue;
+    const idxAutre = c.expediteurs.indexOf(autre);
+    let total = 0;
+    for (const m of c.messages) {
+      if (m.sender === idxAutre) total += compter(m);
+    }
+    if (total > 0) lignes.push({ qui: identifiantAffichable(c, autre), total });
+  }
+  return lignes.sort((a, b) => b.total - a.total);
+}
+
+export function classementVocaux(conversations: Conversation[], soi: string): LigneMedia[] {
+  return classementParContact(conversations, soi, (m) => m.medias?.vocaux ?? 0);
+}
+export function classementPhotos(conversations: Conversation[], soi: string): LigneMedia[] {
+  return classementParContact(conversations, soi, (m) => m.medias?.photos ?? 0);
 }

@@ -32,6 +32,10 @@ const sections: Section[] = [
         q: 'Comment je peux le vérifier moi-même ?',
         r: 'Tu n’as pas à nous croire sur parole. Avant de déposer ton fichier, ouvre les outils de ton navigateur (clic droit → Inspecter → onglet Réseau) : tu verras qu’aucune donnée ne part. Tu peux même couper ta connexion, le site marche quand même.',
       },
+      {
+        q: 'Pourquoi je devrais te faire confiance ?',
+        r: 'Pour être cash, ce n’est pas de la vertu : garder tes données me coûterait des serveurs à payer, et un fichier stocké quelque part est une responsabilité juridique dont je n’ai aucune envie — n’importe qui pourrait me poursuivre en cas de fuite. Ne rien garder, c’est juste le plus simple, pour moi comme pour toi.',
+      },
     ],
   },
   {

@@ -116,6 +116,19 @@
   max-width: 24ch;
 }
 .privacyClaim em { font-style: normal; color: var(--signal); }
+.privacyPourquoi {
+  margin-top: 1rem;
+  max-width: 58ch;
+  color: var(--muted);
+  /* Plus grand que le texte courant (16px), mais clairement sous le lede
+     juste au-dessus (19px) : cette ligne reste une precision, pas un
+     deuxieme sous-titre. Taille fixe (pas de clamp) : la marge avec le
+     corps de texte est trop etroite pour rester lisible a toutes les
+     largeurs si elle retombe en vw. */
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+.privacyFort { color: var(--text); font-weight: 800; font-size: 1.14em; }
 
 /* ============================================================
    5. LE CHEMIN  /  pile verticale, filets rares

@@ -4,15 +4,23 @@ import { useEffect, useRef, useState } from 'react';
 import Affiche, { type DonneesAffiche } from '@/components/Affiche';
 import { Bouton } from '@/components/Bouton';
 import type { Fait } from '@/lib/partage/faits';
+import type { DonneesDevine } from '@/lib/wrapped/jeu';
 import Composer from './Composer';
 import s from './StoryPlayer.module.css';
 
 const DUREE_MS = 6000;
+// Le temps laisse pour voir le bon/mauvais choix en couleur avant que la
+// carte reelle n'apparaisse -- assez long pour lire, pas assez pour lasser.
+const DUREE_FEEDBACK_MS = 1200;
+
+type Pointage = { bonnes: number; total: number; serie: number; meilleureSerie: number };
+const POINTAGE_VIDE: Pointage = { bonnes: 0, total: 0, serie: 0, meilleureSerie: 0 };
 
 export default function StoryPlayer({
   cartes,
   details,
   faits,
+  devines,
   enCoursDeChargement,
   onFermer,
 }: {
@@ -24,6 +32,9 @@ export default function StoryPlayer({
   /** Bibliotheque de faits pour le compositeur de partage (voir
       docs/CARTES_PERSONNALISABLES.md), independante des cartes affichees. */
   faits: Fait[];
+  /** Devinettes a poser juste avant certaines cartes, indexees par position
+      dans `cartes` (voir lib/wrapped/jeu.ts). */
+  devines: Record<number, DonneesDevine>;
   enCoursDeChargement: boolean;
   onFermer: () => void;
 }) {
@@ -34,22 +45,63 @@ export default function StoryPlayer({
   const [termine, setTermine] = useState(false);
   const [vueDetail, setVueDetail] = useState<string | null>(null);
   const [compositeurOuvert, setCompositeurOuvert] = useState(false);
-  // Quatre raisons distinctes de retenir la story, qui ne s'annulent pas
-  // entre elles : une pause posee au bouton survit a un tap pour changer de
-  // carte, et le compositeur suspend tout tant qu'il est ouvert.
-  const enPause = pauseManuelle || enAppui || vueDetail !== null || compositeurOuvert;
+  // Les devinettes deja repondues : une fois dans cet ensemble, l'index ne
+  // repose plus la question (utile si on revient en arriere avec la fleche).
+  const [repondues, setRepondues] = useState<Set<number>>(new Set());
+  // Le choix qui vient d'etre fait, le temps du feedback colore avant que la
+  // vraie carte n'apparaisse. `null` = pas de reponse en attente d'affichage.
+  const [choixFait, setChoixFait] = useState<number | null>(null);
+  const [pointage, setPointage] = useState<Pointage>(POINTAGE_VIDE);
+  // La devinette a poser pour la carte courante, si elle existe et n'a pas
+  // deja ete repondue : tant qu'elle est vraie, la carte qu'elle precede
+  // reste cachee et l'avance automatique est suspendue.
+  const devineActuelle = devines[index] && !repondues.has(index) ? devines[index] : null;
+  // Cinq raisons distinctes de retenir la story, qui ne s'annulent pas entre
+  // elles : une pause posee au bouton survit a un tap pour changer de carte,
+  // et une devinette non repondue bloque l'avance comme le compositeur.
+  const enPause = pauseManuelle || enAppui || vueDetail !== null || compositeurOuvert || !!devineActuelle;
 
   const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const animRef = useRef<Animation | null>(null);
   const downTsRef = useRef(0);
+  // Miroir de `devineActuelle` toujours a jour, pour la fonction `avancer`
+  // capturee par la fermeture du clavier (effet a dependances volontairement
+  // reduites plus bas) : sans ca, la fleche droite pourrait sauter une
+  // devinette posee apres que le clavier ait ete branche.
+  const devineActuelleRef = useRef<DonneesDevine | null>(null);
+  devineActuelleRef.current = devineActuelle;
 
   function avancer() {
+    if (devineActuelleRef.current) return;
     setIndex((i) => {
       if (i + 1 < cartes.length) { setEnAttente(false); return i + 1; }
       if (enCoursDeChargement) { setEnAttente(true); return i; }
       setTermine(true);
       return i;
     });
+  }
+
+  // Enregistre le choix, met a jour le pointage, puis laisse le temps de
+  // voir la couleur avant de reveler la vraie carte (marquer la devinette
+  // comme repondue la fait disparaitre).
+  function repondre(i: number) {
+    if (!devineActuelle || choixFait !== null) return;
+    const optionChoisie = devineActuelle.options[i];
+    setChoixFait(i);
+    setPointage((p) => {
+      const serie = optionChoisie.correcte ? p.serie + 1 : 0;
+      return {
+        bonnes: p.bonnes + (optionChoisie.correcte ? 1 : 0),
+        total: p.total + 1,
+        serie,
+        meilleureSerie: Math.max(p.meilleureSerie, serie),
+      };
+    });
+    const indexRepondu = index;
+    setTimeout(() => {
+      setChoixFait(null);
+      setRepondues((r) => new Set(r).add(indexRepondu));
+    }, DUREE_FEEDBACK_MS);
   }
   function reculer() {
     setIndex((i) => Math.max(0, i - 1));
@@ -121,6 +173,11 @@ export default function StoryPlayer({
           <div className={s.fin}>
             <p className={s.finTitre}>C’est tout.</p>
             <p className={s.finSub}>Tes {cartes.length} cartes, calculées dans ton navigateur, jamais envoyées nulle part.</p>
+            {pointage.total > 0 && (
+              <p className={s.finJeu}>
+                {pointage.bonnes}/{pointage.total} bonnes réponses aux devinettes, meilleure série : {pointage.meilleureSerie}.
+              </p>
+            )}
             <div className={s.finBouton}>
               <Bouton ton="paper" onClick={onFermer} className={s.finBoutonTexte}>Recommencer avec un autre fichier</Bouton>
             </div>
@@ -174,7 +231,9 @@ export default function StoryPlayer({
             >
               {pauseManuelle ? '▶' : '❚❚'}
             </button>
-            {faits.length > 0 && (
+            {/* Pas de partage tant que la devinette n'est pas repondue : rien
+                de la vraie carte n'est encore revele. */}
+            {faits.length > 0 && !devineActuelle && (
               <button
                 className={s.partager}
                 onClick={() => setCompositeurOuvert(true)}
@@ -188,7 +247,7 @@ export default function StoryPlayer({
         </div>
       </div>
 
-      {carte.alerte && (
+      {!devineActuelle && carte.alerte && (
         // Dans le flux normal, entre le bandeau et la carte -- jamais DANS
         // la carte : celle-ci est en `overflow: hidden` a hauteur fixe, et
         // ce texte doit rester lisible meme quand la carte affiche deja une
@@ -209,28 +268,60 @@ export default function StoryPlayer({
         {/* Les zones couvrent tout le corps, pas seulement la carte : sur
             desktop la carte est encadree de noir, et cet espace doit rester
             cliquable (exactement comme les stories, ou la zone de tap deborde
-            largement le contenu visible). */}
-        <div className={s.zones}>
-          <div
-            className={s.zoneGauche}
-            onPointerDown={surAppui}
-            onPointerUp={() => surRelache('arriere')}
-            onPointerLeave={() => setEnAppui(false)}
-          />
-          <div
-            className={s.zoneDroite}
-            onPointerDown={surAppui}
-            onPointerUp={() => surRelache('avant')}
-            onPointerLeave={() => setEnAppui(false)}
-          />
-        </div>
+            largement le contenu visible). Absentes pendant une devinette : on
+            repond en touchant un choix, pas en tapant pour avancer. */}
+        {!devineActuelle && (
+          <div className={s.zones}>
+            <div
+              className={s.zoneGauche}
+              onPointerDown={surAppui}
+              onPointerUp={() => surRelache('arriere')}
+              onPointerLeave={() => setEnAppui(false)}
+            />
+            <div
+              className={s.zoneDroite}
+              onPointerDown={surAppui}
+              onPointerUp={() => surRelache('avant')}
+              onPointerLeave={() => setEnAppui(false)}
+            />
+          </div>
+        )}
 
         <div className={s.stage}>
-          <Affiche a={carte} marque="exposed." />
-          {enAttente && <div className={s.attente}>La suite arrive…</div>}
+          {devineActuelle ? (
+            <div className={s.devine}>
+              <p className={s.devineQuestion}>{devineActuelle.question}</p>
+              <div className={s.devineOptions}>
+                {devineActuelle.options.map((o, i) => {
+                  const revele = choixFait !== null;
+                  const classe = !revele ? '' : o.correcte ? s.devineCorrecte
+                    : i === choixFait ? s.devineRatee : s.devineEstompee;
+                  return (
+                    <button
+                      key={o.texte}
+                      type="button"
+                      className={`${s.devineOption} ${classe}`}
+                      onClick={() => repondre(i)}
+                      disabled={revele}
+                    >
+                      {o.texte}
+                    </button>
+                  );
+                })}
+              </div>
+              {pointage.serie >= 2 && choixFait === null && (
+                <p className={s.devineSerie}>{pointage.serie} bonnes réponses d’affilée.</p>
+              )}
+            </div>
+          ) : (
+            <>
+              <Affiche a={carte} marque="exposed." />
+              {enAttente && <div className={s.attente}>La suite arrive…</div>}
+            </>
+          )}
         </div>
 
-        {carte.id && details[carte.id] && (
+        {!devineActuelle && carte.id && details[carte.id] && (
           <button className={s.voirTout} onClick={() => ouvrirDetail(carte.id!)}>
             Voir les {details[carte.id].length} comptes en entier
           </button>

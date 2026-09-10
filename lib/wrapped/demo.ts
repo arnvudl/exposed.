@@ -10,12 +10,19 @@
    ============================================================ */
 import type { DonneesAffiche } from '@/components/Affiche';
 import type { DonneesBrutesChapitres } from '@/lib/partage/faits';
-import type { chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07, GroupeStats } from './chapitres';
+import type {
+  chapitre01, chapitre02, chapitre03, chapitre05, chapitre06, chapitre07,
+  GroupeStats, StatsMedias, LigneMedia,
+} from './chapitres';
 import {
   mapChapitre01, mapChapitre02, mapChapitre03, mapChapitre04,
-  mapChapitre05, mapChapitre06, mapChapitre07,
+  mapChapitre05, mapChapitre06, mapChapitre07, mapBonusMedias,
 } from './mapper';
 import { nomsProfils, signaturePourNom, axesDepuisSignature, type Signature } from './profil';
+import {
+  construireDevineTop, construireDevineVersusContacts, construireDevineVersusGroupes,
+  construireDevineVersusMedia, type DonneesDevine, type ContextePeriode,
+} from './jeu';
 
 type C01 = ReturnType<typeof chapitre01>;
 type C02 = ReturnType<typeof chapitre02>;
@@ -201,13 +208,41 @@ function genererBornes(pseudo: () => string, maintenant: number): C06 {
   };
 }
 
+/** Meme esprit que le reste de la demo : des totaux plausibles, mis a
+    l'echelle par `sig.ampleur`, plus un classement par contact (pour la
+    devinette) aux totaux volontairement rapproches -- voir
+    construireDevineVersusMedia, qui cherche deja la paire la plus proche,
+    mais autant lui donner une vraie tranche resserree des le depart. */
+function genererMedias(pseudo: () => string, sig: Signature): { stats: StatsMedias; vocaux: LigneMedia[]; photos: LigneMedia[] } {
+  const base = 40 + Math.round(sig.ampleur * 260);
+  const stats: StatsMedias = {
+    vocaux: { toi: alea(Math.round(base * 0.3), Math.round(base * 0.8)), autres: alea(Math.round(base * 0.4), Math.round(base * 0.9)) },
+    photos: { toi: alea(Math.round(base * 0.4), Math.round(base * 1.0)), autres: alea(Math.round(base * 0.5), Math.round(base * 1.2)) },
+    stickers: { toi: alea(0, 12), autres: alea(0, 12) },
+    appelsAudio: alea(0, 30),
+    appelsVideo: alea(0, 18),
+  };
+
+  const nContacts = alea(4, 7);
+  const classement = (haut: number): LigneMedia[] =>
+    Array.from({ length: nContacts }, () => ({ qui: `@${pseudo()}`, total: alea(2, haut) }))
+      .sort((a, b) => b.total - a.total);
+
+  return { stats, vocaux: classement(80), photos: classement(110) };
+}
+
 /** Cle sessionStorage utilisee par le bouton demo de l'accueil et du guide
     pour dire a /wrapped de lancer la demo des l'arrivee sur la page, sans
     passer par un parametre d'URL (evite le Suspense qu'impose
     useSearchParams en export statique pour un simple aller aussi leger). */
 export const CLE_DEMO = 'exposed:demo';
 
-export function genererDemo(): { cartes: DonneesAffiche[]; details: Record<string, string[]>; donneesChapitres: DonneesBrutesChapitres } {
+export function genererDemo(): {
+  cartes: DonneesAffiche[];
+  details: Record<string, string[]>;
+  donneesChapitres: DonneesBrutesChapitres;
+  devines: Record<number, DonneesDevine>;
+} {
   const nom = choisir(nomsProfils());
   const sig = signaturePourNom(nom);
   const pseudo = creerGenerateurPseudos();
@@ -220,13 +255,54 @@ export function genererDemo(): { cartes: DonneesAffiche[]; details: Record<strin
   const c5 = genererRecords(pseudo, sig, maintenant);
   const c6 = genererBornes(pseudo, maintenant);
   const c7: C07 = axesDepuisSignature(sig);
+  const cMedias = genererMedias(pseudo, sig);
 
   const donneesChapitres: DonneesBrutesChapitres = { 1: c1, 2: c2, 3: c3, 4: c4, 5: c5, 6: c6, 7: c7 };
 
+  // Les devinettes montrent aussi le contexte de periode : on fabrique la
+  // meme forme que page.tsx (des dates deja formatees), a partir des bornes
+  // premier/dernier deja generees pour le chapitre 06 -- toujours connues en
+  // demo (genererBornes ne renvoie jamais null), donc `periodeDevine` existe
+  // toujours ici, contrairement a la vraie analyse ou "Tout" ne donne rien.
+  const FMT_MOIS_ANNEE_DEVINE = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
+  // "1er" ecrit a la main, meme raison que jourLong() dans app/wrapped/page.tsx.
+  const jourLongDemo = (ts: number): string => {
+    const d = new Date(ts);
+    const quantieme = d.getDate() === 1 ? '1er' : String(d.getDate());
+    return `${quantieme} ${FMT_MOIS_ANNEE_DEVINE.format(d)}`;
+  };
+  const periodeDevine: ContextePeriode = {
+    debut: jourLongDemo(c6.premier!.ts),
+    fin: jourLongDemo(c6.dernier!.ts),
+  };
+
+  const cartes1 = mapChapitre01(c1);
+  const cartes2 = mapChapitre02(c2);
+  const cartesBonus = mapBonusMedias(cMedias.stats);
   const cartes: DonneesAffiche[] = [
-    ...mapChapitre01(c1), ...mapChapitre02(c2), ...mapChapitre03(c3),
+    ...cartes1, ...cartes2, ...mapChapitre03(c3),
     ...mapChapitre04(c4), ...mapChapitre05(c5), ...mapChapitre06(c6), ...mapChapitre07(c7),
+    ...cartesBonus,
   ];
 
-  return { cartes, details: { 'follow-back': c3.neSuiventPas }, donneesChapitres };
+  // Memes devinettes que sur une vraie analyse (lib/wrapped/jeu.ts), placees
+  // aux memes positions relatives, pour que la demo montre le jeu aussi.
+  const devines: Record<number, DonneesDevine> = {};
+  const devineTop = construireDevineTop(c1, periodeDevine);
+  if (devineTop) devines[0] = devineTop;
+  if (cartes1.length > 1) {
+    const devineVersus = construireDevineVersusContacts(c1, periodeDevine);
+    if (devineVersus) devines[1] = devineVersus;
+  }
+  const devineGroupes = construireDevineVersusGroupes(c2, periodeDevine);
+  if (devineGroupes) devines[cartes1.length] = devineGroupes;
+  if (cartesBonus.length > 0) {
+    const indexBonus = cartes.length - cartesBonus.length;
+    const devineMedia = construireDevineVersusMedia(
+      cMedias.vocaux, 'Qui t’envoie le plus de messages vocaux ?', 'devine-vocaux', periodeDevine,
+    );
+    if (devineMedia) devines[indexBonus] = devineMedia;
+  }
+
+  return { cartes, details: { 'follow-back': c3.neSuiventPas }, donneesChapitres, devines };
 }

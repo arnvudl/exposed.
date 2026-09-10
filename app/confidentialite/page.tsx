@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import PageTexte from '@/components/PageTexte';
 
 export const metadata: Metadata = {
-  title: 'Confidentialité. Exposed',
+  title: 'Confidentialité',
   description:
     'Ton export Instagram est lu dans ton navigateur et ne quitte jamais ton appareil. Ce que ce site collecte (rien), et comment le vérifier.',
 };

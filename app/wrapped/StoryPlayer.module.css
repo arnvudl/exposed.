@@ -166,6 +166,87 @@
   pointer-events: none;
 }
 
+/* ---------- devinette intercalee ---------- */
+/* Meme boite que l'affiche qu'elle precede (memes dimensions dans `.stage`),
+   pour que le passage question -> carte ne saute pas visuellement. Ni gris
+   plat (pas assez vivant) ni un seul ton plein comme une vraie carte (ça se
+   confondrait avec une revelation) : un degrade a trois tons pioches dans la
+   meme palette que les chapitres, jamais une seule couleur unie, pour que la
+   devinette se lise d'un coup d'oeil comme un moment a part. Le melange est
+   assez fourni (68%) pour que le passage vers la carte pleine couleur qui
+   suit ne tombe pas d'un fond trop sombre a un aplat vif -- premiere version
+   a 47% jugee trop terne a cote de l'affiche d'apres. */
+.devine {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.6rem, 4cqw, 2.2rem);
+  padding: clamp(1.6rem, 7cqw, 2.6rem);
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--t1) 68%, var(--bg)) 0%,
+    color-mix(in oklab, var(--t7) 64%, var(--bg)) 52%,
+    color-mix(in oklab, var(--t5) 68%, var(--bg)) 100%
+  );
+  border: 1px solid color-mix(in oklab, var(--paper) 30%, transparent);
+  border-radius: var(--r);
+}
+.devineQuestion {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.3rem, 6.4cqw, 1.9rem);
+  letter-spacing: -.02em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.devineOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* Blanc, encre noire : les memes deux couleurs que le bouton "paper" du
+   site (Bouton.module.css), pas une teinte par choix -- plus lisible sur le
+   degrade, et l'accent reste au vert/rouge de la reponse. */
+.devineOption {
+  text-align: left;
+  padding: 14px 18px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(.95rem, 4cqw, 1.08rem);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: filter 140ms var(--ease-out), background 140ms var(--ease-out), opacity 140ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .devineOption:not(:disabled):hover { filter: brightness(.94); }
+}
+.devineOption:disabled { cursor: default; }
+/* Petite pulsation sur le choix revele, victoire ou defaite : assez discrete
+   pour ne pas distraire d'une story qui va reprendre dans la seconde. */
+.devineOption.devineCorrecte, .devineOption.devineRatee { animation: devinePulse 360ms var(--ease-out); }
+.devineOption.devineCorrecte { background: var(--vert); border-color: var(--vert); color: #0E1210; }
+.devineOption.devineRatee { background: var(--signal); border-color: var(--signal); color: #1A0C09; }
+.devineOption.devineEstompee { opacity: .38; }
+@keyframes devinePulse {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .devineCorrecte, .devineRatee { animation: none; }
+}
+.devineSerie {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+
 /* ---------- voir la liste complete ---------- */
 .voirTout {
   position: fixed;
@@ -237,6 +318,7 @@
 }
 .finTitre { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; letter-spacing: -.02em; }
 .finSub { color: var(--muted); margin-top: .8rem; }
+.finJeu { color: var(--muted); margin-top: .5rem; font-size: 14px; }
 .finBouton { margin-top: 1.8rem; }
 /* Le bouton partage un composant commun pense pour un libelle court en une
    ligne (`white-space: nowrap`) ; celui-ci est plus long et debordait sur un

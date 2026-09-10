@@ -9,6 +9,7 @@ import { Accumulateur, detecterSoi, type Periode } from './parse';
 import {
   chapitre01, chapitre02, chapitre03, chapitre04,
   chapitre05, chapitre06, chapitre07,
+  chapitreMedias, classementVocaux, classementPhotos,
 } from './chapitres';
 
 export type EvenementAnalyse =
@@ -20,6 +21,12 @@ export type EvenementAnalyse =
   | { type: 'chapitre'; numero: 5; donnees: ReturnType<typeof chapitre05> }
   | { type: 'chapitre'; numero: 6; donnees: ReturnType<typeof chapitre06> }
   | { type: 'chapitre'; numero: 7; donnees: ReturnType<typeof chapitre07> }
+  | {
+    type: 'medias';
+    stats: ReturnType<typeof chapitreMedias>;
+    vocaux: ReturnType<typeof classementVocaux>;
+    photos: ReturnType<typeof classementPhotos>;
+  }
   | { type: 'termine'; conversations: number; soi: string }
   | { type: 'erreur'; message: string };
 
@@ -76,6 +83,14 @@ export async function analyser(
     await respirer();
 
     emettre({ type: 'chapitre', numero: 7, donnees: chapitre07(conversations, soi) });
+    await respirer();
+
+    emettre({
+      type: 'medias',
+      stats: chapitreMedias(conversations, soi),
+      vocaux: classementVocaux(conversations, soi),
+      photos: classementPhotos(conversations, soi),
+    });
 
     emettre({ type: 'termine', conversations: conversations.length, soi });
   } catch (erreur) {
