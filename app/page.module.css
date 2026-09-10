@@ -134,6 +134,7 @@
 .pathH { font-size: clamp(1.45rem, 2.9vw, 1.8rem); letter-spacing: -.02em; line-height: 1.1; }
 .pathD { font-size: clamp(1rem, 1.35vw, 1.125rem); color: var(--muted); margin-top: .9rem; max-width: 52ch; line-height: 1.62; }
 .pathD strong { color: var(--text); font-weight: 700; }
+.pathRappel { margin-top: 1.4rem; }
 
 .pathStepMain {
   display: grid;

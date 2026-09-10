@@ -5,7 +5,7 @@ import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
 import { BoutonLien } from '@/components/Bouton';
 import LienDemo from '@/components/LienDemo';
-import LienInstagramAvecRappel from '@/components/LienInstagramAvecRappel';
+import RappelSurScroll from '@/components/RappelSurScroll';
 import s from './guide.module.css';
 
 export const metadata: Metadata = {
@@ -156,11 +156,14 @@ export default function Guide() {
         </p>
 
         {/* Le raccourci direct vers le Centre de comptes, pour ceux qui veulent
-            aller droit au but sans dérouler tout le guide. Ouvre un nouvel
-            onglet (Instagram), donc celui-ci reste en place : c'est le seul
-            moment fiable pour proposer un rappel, juste avant l'attente. */}
+            aller droit au but sans dérouler tout le guide. */}
         <div className={`${s.cta} reveal`} style={{ '--d': '140ms' } as Style}>
-          <LienInstagramAvecRappel />
+          <BoutonLien
+            href="https://accountscenter.instagram.com/info_and_permissions/dyi/"
+            target="_blank"
+          >
+            Ouvrir Instagram
+          </BoutonLien>
         </div>
       </header>
 
@@ -187,6 +190,11 @@ export default function Guide() {
             </div>
           ))}
         </div>
+
+        {/* Le marqueur invisible de RappelSurScroll vit juste avant ce bloc :
+            quand il entre dans le viewport, l'utilisateur a lu tout le guide
+            et arrive au bout, le bon moment pour proposer un rappel. */}
+        <RappelSurScroll />
 
         {/* La sortie : on renvoie vers le depot. */}
         <div className={`${s.fin} reveal`}>

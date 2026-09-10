@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
+import RappelIcs from '@/components/RappelIcs';
 import s from './faq.module.css';
 
 export const metadata: Metadata = {
@@ -172,9 +173,12 @@ export default function Faq() {
                   Récupérer ton fichier, choisir le bon format, gérer les blocages : tout est
                   réuni dans le guide d’export.
                 </p>
-                <a className={s.renvoiLien} href="/guide/">
-                  Voir le guide d’export <span className="fleche" aria-hidden="true">→</span>
-                </a>
+                <div className={s.renvoiActions}>
+                  <a className={s.renvoiLien} href="/guide/">
+                    Voir le guide d’export <span className="fleche" aria-hidden="true">→</span>
+                  </a>
+                  <RappelIcs />
+                </div>
               </div>
             )}
           </div>

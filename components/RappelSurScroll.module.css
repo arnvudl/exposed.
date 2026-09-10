@@ -1,3 +1,7 @@
+/* Un <div> vide a une hauteur nulle : sans aire reelle, l'IntersectionObserver
+   ne le declenche jamais (verifie directement, meme avec threshold: 0). */
+.marqueur { height: 1px; }
+
 .fond {
   position: fixed;
   inset: 0;
