@@ -7,7 +7,16 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: var(--bg);
+  /* Une lueur douce de la couleur du chapitre en cours, pas un noir plat :
+     `--lueur` est pose en style inline par StoryPlayer (couleur du `ton` de
+     la carte affichee), et retombe sur `--bg` la ou elle n'est pas definie
+     (l'ecran de fin, qui n'a plus de carte). */
+  background: radial-gradient(
+    120% 85% at 50% 12%,
+    color-mix(in oklab, var(--lueur, var(--bg)) 30%, var(--bg)) 0%,
+    var(--bg) 62%
+  );
+  transition: background 480ms ease;
   display: flex;
   flex-direction: column;
   touch-action: none;
@@ -70,6 +79,24 @@
 .pause:hover, .fermer:hover { opacity: 1; }
 .pause { font-size: 13px; letter-spacing: 1px; }
 .fermer { font-size: 20px; }
+
+/* Un vrai avertissement, pas une nuance : rouge signal, jamais cache. Dans
+   le flux normal (pas dans la carte, en overflow: hidden a hauteur fixe) :
+   voir le commentaire dans StoryPlayer.tsx. Meme grammaire que .alerte du
+   guide (app/guide/guide.module.css, etape 09) : pas d'encadre — le site
+   n'en a nulle part ailleurs pour un avertissement, juste du texte rouge
+   gras en tete de phrase, le reste en encre normale. */
+.alerte {
+  flex: none;
+  margin: 1rem clamp(1rem, 4vw, 2rem) 0;
+  color: var(--text);
+  font-size: clamp(14px, 1.6vw, 16px);
+  line-height: 1.55;
+}
+.alerteFort {
+  color: var(--signal);
+  font-weight: 700;
+}
 
 .partager {
   height: 32px;

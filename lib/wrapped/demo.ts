@@ -137,6 +137,12 @@ function genererFollowBack(pseudo: () => string): C03 {
     neSuiventPas: melanger(Array.from({ length: ecart }, () => pseudo())).sort(),
     followers,
     following,
+    // La demo n'a pas besoin de simuler le piege de periode tronquee (voir
+    // chapitre03 dans lib/wrapped/chapitres.ts) : ces trois champs restent
+    // au cas "pas de decalage detecte", identique a un export complet.
+    followingDansLaPeriode: following,
+    decalageDetecte: false,
+    depuisDate: null,
   };
 }
 

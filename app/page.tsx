@@ -43,7 +43,7 @@ export default function Accueil() {
               Dépose les fichiers ZIP que t’envoie Instagram, souvent plusieurs. Ton navigateur les lit.
             </p>
             <div className={s.heroCta}>
-              <BoutonLien href="/#chemin">Ouvrir mon dossier</BoutonLien>
+              <BoutonLien href="/wrapped/">Ouvrir mon dossier</BoutonLien>
               <LienDemo />
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function Accueil() {
             <div className={`${s.pathStep} reveal`}>
               <p className={`${s.pathI} num`}>02</p>
               <div>
-                <h3 className={s.pathH}>Attends</h3>
+                <h3 className={s.pathH}>Attends (ouais la partie chiante)</h3>
                 <p className={s.pathD}>
                   Instagram met de quelques minutes à <strong>48 heures</strong> à préparer le
                   fichier, puis t’envoie une notification. C’est là que la plupart des gens
@@ -204,7 +204,7 @@ export default function Accueil() {
         <div className="wrap">
           <h2 className="t-xl reveal">Tout est déjà<br />dans tes messages.</h2>
           <div className="reveal" style={{ '--d': '100ms', marginTop: '2.6rem' } as Style}>
-            <BoutonLien href="/#chemin" ton="paper">Ouvrir mon dossier</BoutonLien>
+            <BoutonLien href="/wrapped/" ton="paper">Ouvrir mon dossier</BoutonLien>
           </div>
         </div>
       </section>

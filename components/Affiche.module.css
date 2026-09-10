@@ -97,9 +97,6 @@
   background-size: 5cqw 5cqw;
 }
 
-/* Languette de chemise cartonnee. */
-.onglet { aspect-ratio: 3.4; background: var(--ink); border-radius: 2px 2px 0 0; }
-
 /* ---------- le texte, toujours au-dessus ---------- */
 /* Les textes secondaires restent en encre pleine : sur l'onglet rouge, la
    moindre attenuation passe sous 4.5:1 (l'encre y est deja a 5.4). La

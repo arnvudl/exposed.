@@ -43,11 +43,14 @@ export async function analyser(
 
     emettre({ type: 'etape', etape: 'reconstruction' });
     const { conversations, followers, following, motsParExpediteur } = acc.terminer();
-    if (conversations.length === 0) {
+    // Le chapitre 03 (follow-back) ne depend que de followers/following, pas
+    // des messages : un export sans « Messages » cochee (ou une periode qui
+    // les elimine tous) doit encore le montrer, pas bloquer toute la page.
+    if (conversations.length === 0 && followers.size === 0 && following.size === 0) {
       emettre({
         type: 'erreur',
-        message: 'Aucune conversation dans cet export : la catégorie « Messages » n’a pas été ' +
-          'cochée au moment de la demande. Refais la demande à Instagram en l’incluant.',
+        message: 'Aucune donnée dans cet export : ni messages, ni abonnés/abonnements. Refais ' +
+          'la demande à Instagram en cochant au moins l’une des deux catégories.',
       });
       return;
     }

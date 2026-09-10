@@ -6,6 +6,7 @@
    ============================================================ */
 .tete { padding-bottom: clamp(2rem, 5vh, 3.5rem); }
 .tete p { margin-top: .9rem; max-width: 56ch; }
+.guideBouton { margin-top: 1.6rem; }
 
 /* ---------- periode a analyser (optionnel) ---------- */
 .periode {

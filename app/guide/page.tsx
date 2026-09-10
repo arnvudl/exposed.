@@ -5,6 +5,7 @@ import Pied from '@/components/Pied';
 import Mouvement from '@/components/Mouvement';
 import { BoutonLien } from '@/components/Bouton';
 import LienDemo from '@/components/LienDemo';
+import LienInstagramAvecRappel from '@/components/LienInstagramAvecRappel';
 import s from './guide.module.css';
 
 export const metadata: Metadata = {
@@ -106,7 +107,11 @@ const etapes: Etape[] = [
       <>
         Plus bas, dans <strong>Connexions</strong>, coche <strong>Contacts</strong> et{' '}
         <strong>Abonné(e)s et suivi(e)s</strong> (<span className={s.orig}>Followers and following</span>). Laisse{' '}
-        <strong>Informations personnelles</strong> décoché.
+        <strong>Informations personnelles</strong> décoché.{' '}
+        <span className={s.alerte}>Piège Instagram :</span> si tu choisis une période limitée, tes{' '}
+        <strong>abonnés</strong> seront coupés à cette période, mais tes <strong>abonnements</strong> remonteront
+        quand même jusqu’à la création du compte. Pour comparer les deux sur toute leur histoire (savoir qui ne te
+        suit pas en retour, par exemple), choisis la période la plus longue possible.
       </>
     ),
     shot: '/guide/08-connexions.png',
@@ -125,6 +130,7 @@ const etapes: Etape[] = [
     titre: 'Vérifie, puis lance',
     corps: (
       <>
+        <span className={s.grand}>Cette partie est chiante, on le sait.</span>
         Relis le récapitulatif : les catégories cochées, le format <strong>JSON</strong>. Puis
         appuie sur <strong>Créer les fichiers</strong> (<span className={s.orig}>Start export</span>). Instagram
         t’envoie une notification dès que c’est prêt, de quelques minutes à 48 heures.
@@ -150,14 +156,11 @@ export default function Guide() {
         </p>
 
         {/* Le raccourci direct vers le Centre de comptes, pour ceux qui veulent
-            aller droit au but sans dérouler tout le guide. */}
+            aller droit au but sans dérouler tout le guide. Ouvre un nouvel
+            onglet (Instagram), donc celui-ci reste en place : c'est le seul
+            moment fiable pour proposer un rappel, juste avant l'attente. */}
         <div className={`${s.cta} reveal`} style={{ '--d': '140ms' } as Style}>
-          <BoutonLien
-            href="https://accountscenter.instagram.com/info_and_permissions/dyi/"
-            target="_blank"
-          >
-            Ouvrir Instagram
-          </BoutonLien>
+          <LienInstagramAvecRappel />
         </div>
       </header>
 

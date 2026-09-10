@@ -63,7 +63,8 @@ const MOTS_SYSTEME = [
   /^Vous avez configuré une disparition/i, /^.+ a configuré une disparition/i,
   // Anglais (appels, groupes, notifications systeme)
   /started an (audio|video) call/i, /started a video chat/i, /^Video chat started/i,
-  /^Video chat ended/i, /missed (your|an|a) (video |audio )?call/i,
+  /^Video chat ended/i, /^Audio call started/i, /^Audio call ended/i,
+  /missed (your|an|a) (video |audio )?call/i, /created the group chat/i,
   /wasn't notified about this message/i, /reacted .+ to (your|.+'s) message/i,
   /changed the group photo/i, /changed the group name/i, /named the group/i,
   /set (the|your|.+'s) nickname/i, /cleared (the|your|.+'s) nickname/i,
@@ -88,18 +89,24 @@ const RE_FOLLOWERS = /connections\/followers_and_following\/followers_\d+\.json$
 const RE_FOLLOWING = /connections\/followers_and_following\/following\.json$/;
 
 /** Les fichiers followers_N.json / following.json ont la meme forme : soit
-    un tableau direct, soit un objet avec une cle contenant le tableau. */
-function nomsDepuisRelations(texte: string, cle: string): string[] {
+    un tableau direct, soit un objet avec une cle contenant le tableau. Le
+    timestamp de chaque entree est garde (pas juste le nom) : Instagram le
+    limite a la periode choisie a la demande d'export pour "followers",
+    mais jamais pour "following", qui remonte toujours a la creation du
+    compte — voir chapitre03 et son commentaire pour ce que ça implique. */
+function relationsAvecDate(texte: string, cle: string): { nom: string; ts: number }[] {
   const data = JSON.parse(texte);
   const liste = Array.isArray(data) ? data : (data[cle] ?? []);
-  const noms: string[] = [];
+  const relations: { nom: string; ts: number }[] = [];
   for (const entree of liste) {
     const titre = entree.title;
-    const valeur = entree.string_list_data?.[0]?.value;
-    const identifiant = (titre && titre.length > 0 ? titre : valeur) as string | undefined;
-    if (identifiant) noms.push(decodeMojibake(identifiant).toLowerCase());
+    const donnee = entree.string_list_data?.[0];
+    const identifiant = (titre && titre.length > 0 ? titre : donnee?.value) as string | undefined;
+    if (identifiant) {
+      relations.push({ nom: decodeMojibake(identifiant).toLowerCase(), ts: (donnee?.timestamp ?? 0) * 1000 });
+    }
   }
-  return noms;
+  return relations;
 }
 
 type ConversationEnCours = {
@@ -122,8 +129,9 @@ export type Periode = { debut?: number; fin?: number };
     jamais garde : seul ce qui est extrait ci-dessous survit a l'appel. */
 export class Accumulateur {
   private parDossier = new Map<string, ConversationEnCours>();
-  private followers = new Set<string>();
-  private following = new Set<string>();
+  /** nom -> date a laquelle la relation a commence. */
+  private followers = new Map<string, number>();
+  private following = new Map<string, number>();
   /** Compte de mots par expediteur (nom brut), tous dossiers confondus : on
       ne sait pas encore qui est `soi` pendant le parse (il faut avoir tout
       lu pour le deviner), donc chapitre04 ne peut pas filtrer avant coup.
@@ -200,19 +208,19 @@ export class Accumulateur {
       return;
     }
     if (RE_FOLLOWERS.test(chemin)) {
-      for (const n of nomsDepuisRelations(texte, 'relationships_followers')) this.followers.add(n);
+      for (const { nom, ts } of relationsAvecDate(texte, 'relationships_followers')) this.followers.set(nom, ts);
       return;
     }
     if (RE_FOLLOWING.test(chemin)) {
-      for (const n of nomsDepuisRelations(texte, 'relationships_following')) this.following.add(n);
+      for (const { nom, ts } of relationsAvecDate(texte, 'relationships_following')) this.following.set(nom, ts);
       return;
     }
   }
 
   terminer(): {
     conversations: Conversation[];
-    followers: Set<string>;
-    following: Set<string>;
+    followers: Map<string, number>;
+    following: Map<string, number>;
     motsParExpediteur: Map<string, Map<string, number>>;
   } {
     const conversations: Conversation[] = [];

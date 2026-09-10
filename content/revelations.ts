@@ -32,7 +32,6 @@ export const revelations: DonneesAffiche[] = [
     ton: 1,
     formes: [
       { nom: 'disques', w: 98, dx: 34 },
-      { nom: 'onglet', place: 'coin', x: 62, y: -3, w: 46, ton: 'moyen' },
     ],
   },
   {
@@ -90,7 +89,6 @@ export const revelations: DonneesAffiche[] = [
     ton: 7,
     formes: [
       { nom: 'stries', w: 56, dx: -26, ton: 'moyen' },
-      { nom: 'onglet', place: 'coin', x: 58, y: -4, w: 52 },
     ],
   },
   {
@@ -115,7 +113,6 @@ export const afficheHero: DonneesAffiche = {
   ton: 6,
   formes: [
     { nom: 'arc', w: 88, dx: 34 },
-    { nom: 'onglet', place: 'coin', x: 68, y: -4, w: 46, ton: 'moyen' },
   ],
 };
 

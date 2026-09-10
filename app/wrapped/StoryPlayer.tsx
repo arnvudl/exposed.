@@ -151,7 +151,7 @@ export default function StoryPlayer({
   const faitInitial = faits.find((f) => f.label.split('·')[0].trim() === prefixeCarte);
 
   return (
-    <div className={s.scene}>
+    <div className={s.scene} style={{ '--lueur': `var(--t${carte.ton})` } as React.CSSProperties}>
       {/* Un vrai bandeau, dans le flux normal : les barres/entete/controles
           reservent leur propre hauteur au lieu d'etre poses en absolu
           par-dessus la carte, ce qui pouvait les faire chevaucher son coin
@@ -187,6 +187,19 @@ export default function StoryPlayer({
           </div>
         </div>
       </div>
+
+      {carte.alerte && (
+        // Dans le flux normal, entre le bandeau et la carte -- jamais DANS
+        // la carte : celle-ci est en `overflow: hidden` a hauteur fixe, et
+        // ce texte doit rester lisible meme quand la carte affiche deja une
+        // liste de dix lignes qui remplit tout l'espace disponible. Meme
+        // grammaire que .alerte du guide (span rouge en tete de phrase,
+        // reste en encre normale) : pas d'encadre, le site n'en a nulle
+        // part ailleurs pour un avertissement.
+        <p className={s.alerte} role="alert">
+          <span className={s.alerteFort}>Chiffre incomplet.</span> {carte.alerte}
+        </p>
+      )}
 
       {compositeurOuvert && (
         <Composer faits={faits} faitInitial={faitInitial} onFermer={() => setCompositeurOuvert(false)} />

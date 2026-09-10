@@ -50,6 +50,10 @@ const sections: Section[] = [
         r: 'Oui, dans la limite de ce qu’Instagram te donne. Les chiffres viennent directement de ton export officiel. Si une conversation manque dans ton fichier, elle manquera dans ton dossier : on ne peut compter que ce qui est là.',
       },
       {
+        q: 'Pourquoi le follow-back ne marche pas ?',
+        r: 'Ce n’est pas un bug, c’est Instagram : quand tu choisis une période à la demande d’export, elle limite tes abonnés à cette fenêtre, mais jamais tes abonnements, qui remontent toujours à la création du compte. Comparer les deux tel quel ferait ressortir à tort des centaines de comptes suivis depuis longtemps. Le site compare donc les deux sur la même période dès qu’il détecte l’écart, et te le dit sur la carte. Pour avoir vraiment tout, redemande ton export en choisissant la période la plus longue possible.',
+      },
+      {
         q: 'Pourquoi il faut déposer un fichier et pas juste mon pseudo ?',
         r: 'Parce qu’avec juste ton pseudo, on n’aurait accès à rien, et c’est tant mieux. Tes messages t’appartiennent, Instagram te les donne à toi. Le fichier, c’est ta copie, que tu gardes en main du début à la fin.',
       },

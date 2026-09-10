@@ -147,15 +147,6 @@ export const THEME_DOSSIER: Theme = {
       ctx.globalAlpha = 1;
     }
 
-    // Languette de chemise cartonnee, coin haut-droit (cf. .onglet du site).
-    ctx.save();
-    ctx.globalAlpha = 0.35;
-    ctx.fillStyle = INK;
-    const coinW = w * 0.38, coinH = coinW / 3.4;
-    tracerRectArrondi(ctx, w - w * 0.08 - coinW, -h * 0.008, coinW, coinH, { basGauche: 2, basDroit: 2 });
-    ctx.fill();
-    ctx.restore();
-
     ctx.fillStyle = INK;
     ctx.textBaseline = 'alphabetic';
     ctx.globalAlpha = 0.9;

@@ -1,0 +1,57 @@
+.fond {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: color-mix(in oklab, black 55%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.4rem;
+}
+
+.boite {
+  position: relative;
+  width: min(420px, 100%);
+  padding: clamp(1.8rem, 4vw, 2.4rem);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+
+.fermer {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.fermer:hover { color: var(--text); }
+
+.titre {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.25rem, 2.6vw, 1.55rem);
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  max-width: 22ch;
+  padding-right: 1.6rem;
+}
+
+.texte {
+  margin-top: .9rem;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.55;
+  max-width: 40ch;
+}
+
+.cta { margin-top: 1.6rem; }

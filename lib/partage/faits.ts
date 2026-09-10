@@ -94,9 +94,20 @@ export function construireFaits(d: DonneesBrutesChapitres): Fait[] {
   }
 
   if (d[3]) {
+    // Meme logique que la carte de la story (lib/wrapped/mapper.ts) : le
+    // chiffre compare des comptes suivis sur la meme fenetre que les
+    // abonnes connus (followingDansLaPeriode), jamais le total brut, sinon
+    // il inclurait des annees que les abonnes ne couvrent pas. Ce fait part
+    // en carte partageable, donc c'est ici que le disclaimer protege le
+    // plus — celui qui partage ne doit pas se faire contredire par un
+    // compte suivi de longue date qu'Instagram n'a pas remonte comme
+    // abonne recent.
+    const bornage = d[3].decalageDetecte ? ` depuis le ${d[3].depuisDate}` : '';
     faits.push({
       type: 'atomique', label: 'Chapitre 03 · Qui ne te suit pas en retour',
-      chiffre: String(d[3].neSuiventPas.length), note: `sur ${nb(d[3].following)} comptes que tu suis.`,
+      chiffre: String(d[3].neSuiventPas.length),
+      note: `sur ${nb(d[3].followingDansLaPeriode)} comptes suivis${bornage}, ${nb(d[3].followers)} ` +
+        `abonnés. D’après l’export, pas en direct.`,
     });
   }
 
@@ -129,7 +140,7 @@ export function construireFaits(d: DonneesBrutesChapitres): Fait[] {
     faits.push({ type: 'paire', label: 'Chapitre 06 · Le dernier message', quand: dateAvecAnnee(p.ts), avec: p.avec, citation: citation(p.de, p.message) });
   }
 
-  if (d[7]) {
+  if (d[7] && (d[7].axeAmpleur > 0 || d[7].axeLongueurCaracteres > 0)) {
     const profil = determinerProfil(d[7]);
     const complet = PROFILS_COMPLETS.find((p) => p.nom === profil.nom);
     faits.push({

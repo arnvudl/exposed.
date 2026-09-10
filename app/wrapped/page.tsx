@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Nav from '@/components/Nav';
 import Pied from '@/components/Pied';
+import { BoutonLien } from '@/components/Bouton';
 import type { DonneesAffiche } from '@/components/Affiche';
 import type { EvenementAnalyse } from '@/lib/wrapped/analyser';
 import {
@@ -198,6 +199,9 @@ export default function Wrapped() {
             Dépose le ou les fichiers ZIP qu’Instagram t’a envoyés. Tout se calcule dans ton
             navigateur : rien n’est envoyé nulle part, jamais.
           </p>
+          <div className={s.guideBouton}>
+            <BoutonLien href="/guide/" ton="paper">Guide d’export</BoutonLien>
+          </div>
         </header>
 
         {statut === 'erreur' && (

@@ -62,7 +62,6 @@ export function mapChapitre01(c: C01): DonneesAffiche[] {
     ton: 1,
     formes: [
       { nom: 'disques', w: 98, dx: 34 },
-      { nom: 'onglet', place: 'coin', x: 62, y: -3, w: 46, ton: 'moyen' },
     ],
   };
   if (c.length === 0) return [reveal];
@@ -73,7 +72,7 @@ export function mapChapitre01(c: C01): DonneesAffiche[] {
     liste: c.map((l, i) => ({ rang: i + 1, texte: `${l.qui} · ${nb(l.total)}` })),
     note: 'total de messages échangés, tous les deux sens confondus.',
     ton: 1,
-    formes: [{ nom: 'onglet', place: 'coin', x: 60, y: -4, w: 48, ton: 'moyen' }],
+    formes: [],
   };
   return [reveal, classement];
 }
@@ -111,7 +110,7 @@ export function mapChapitre02(c: C02): DonneesAffiche[] {
     cartes.push({
       piece: piece(2), titre: 'Le plus bondé', chiffre: cat.leBondé.titre,
       note: `${nb(cat.leBondé.membres)} membres dans ce groupe.`,
-      ton: 2, formes: [{ nom: 'disques', w: 92, dx: 24 }, { nom: 'onglet', place: 'coin', x: 64, y: -3, w: 42, ton: 'moyen' }],
+      ton: 2, formes: [{ nom: 'disques', w: 92, dx: 24 }],
     });
   }
   if (cat.tuDebites) {
@@ -162,15 +161,34 @@ function echantillon<T>(liste: T[], n: number): T[] {
 export function mapChapitre03(c: C03): DonneesAffiche[] {
   const exemples = echantillon(c.neSuiventPas, MAX_EXEMPLES_FOLLOWBACK);
   const reste = c.neSuiventPas.length - exemples.length;
+  // Le chiffre du haut compare toujours des comptes suivis sur la MEME
+  // fenetre que les abonnes connus (voir chapitre03) : la note doit donc
+  // parler de `followingDansLaPeriode`, pas du total `following` (qui, sur
+  // un export tronque, inclurait des annees que les abonnes ne couvrent
+  // pas et rendrait le chiffre du haut incoherent avec ce qu'elle annonce).
+  const base = reste > 0
+    ? `parmi d’autres, sur ${nb(c.followingDansLaPeriode)} comptes suivis`
+    : `sur ${nb(c.followingDansLaPeriode)} comptes que tu suis`;
   return [{
     id: 'follow-back',
     piece: piece(3),
     titre: 'Qui ne te suit pas en retour',
     chiffre: String(c.neSuiventPas.length),
     liste: exemples.length ? exemples.map((n, i) => ({ rang: i + 1, texte: `@${n}` })) : undefined,
-    note: reste > 0
-      ? `parmi d’autres, sur ${nb(c.following)} comptes suivis.`
-      : `sur ${nb(c.following)} comptes que tu suis.`,
+    note: c.decalageDetecte ? `${base}, depuis le ${c.depuisDate}.` : `${base}.`,
+    // Un vrai piege Instagram, pas une nuance : la periode choisie a la
+    // demande d'export limite les ABONNES a cette fenetre, jamais les
+    // ABONNEMENTS, qui remontent toujours a la creation du compte. Vu
+    // seulement quand la difference est prouvee (chapitre03,
+    // decalageDetecte), pas a chaque fois. Les deux totaux bruts vivent ici
+    // (pas dans une bulle a part) : c'est justement ce qui explique le
+    // chiffre du haut, ça doit se lire sans avoir a chercher.
+    alerte: c.decalageDetecte
+      ? `${nb(c.followers)} abonnés, ${nb(c.following)} abonnements au total, mais ton export ne ` +
+        `connaît tes abonnés que depuis le ${c.depuisDate}. Instagram limite ça à la période ` +
+        `choisie à la demande, jamais les abonnements. Pour tout voir, redemande ton export depuis ` +
+        `le début.`
+      : undefined,
     ton: 3,
     formes: [
       { nom: 'stries', w: 86, dx: -26 },
@@ -216,7 +234,7 @@ export function mapChapitre05(c: C05): DonneesAffiche[] {
     cartes.push({
       piece: piece(5), titre: 'Le plus long remis (toi)', chiffre: dureeCourte(c.remisInflige.debut, c.remisInflige.ts),
       note: `avant que tu répondes à ${c.remisInflige.avec}.`,
-      ton: 6, formes: [{ nom: 'stries', w: 82, dx: -20, ton: 'moyen' }, { nom: 'onglet', place: 'coin', x: 60, y: -4, w: 44 }],
+      ton: 6, formes: [{ nom: 'stries', w: 82, dx: -20, ton: 'moyen' }],
     });
   }
   if (c.remisSubi) {
@@ -237,7 +255,7 @@ export function mapChapitre05(c: C05): DonneesAffiche[] {
     cartes.push({
       piece: piece(5), titre: 'Ta journée la plus intense', chiffre: nb(c.jourRecord.messages),
       note: `messages le ${c.jourRecord.date}.`,
-      ton: 6, formes: [{ nom: 'arc', w: 88, dx: 34 }, { nom: 'onglet', place: 'coin', x: 68, y: -4, w: 46, ton: 'moyen' }],
+      ton: 6, formes: [{ nom: 'arc', w: 88, dx: 34 }],
     });
   }
 
@@ -297,11 +315,9 @@ export function mapChapitre06(c: C06): DonneesAffiche[] {
   return [
     carteBorne('Le premier message', c.premier, [
       { nom: 'stries', w: 56, dx: -26, ton: 'moyen' },
-      { nom: 'onglet', place: 'coin', x: 58, y: -4, w: 52 },
     ]),
     carteBorne('Le dernier message', c.dernier, [
       { nom: 'arc', w: 62, dx: 18, ton: 'moyen' },
-      { nom: 'onglet', place: 'coin', x: 58, y: -4, w: 52 },
     ]),
   ];
 }
@@ -312,6 +328,19 @@ export function mapChapitre06(c: C06): DonneesAffiche[] {
    une version raccourcie inventee pour tenir dans une carte)
    ============================================================ */
 export function mapChapitre07(c: C07): DonneesAffiche[] {
+  // Aucun message de toi nulle part (mediane de rien = 0) et aucun 1:1 actif :
+  // determinerProfil renverrait quand meme un profil, mais sur du vide, ce
+  // qui contredit la promesse « rien d'invente ».
+  if (c.axeAmpleur === 0 && c.axeLongueurCaracteres === 0) {
+    return [{
+      piece: piece(7),
+      titre: 'Ton profil relationnel',
+      chiffre: '—',
+      note: 'Pas assez de messages pour en tirer un profil.',
+      ton: 8,
+      formes: [{ nom: 'barres', w: 42 }, { nom: 'faisceau', w: 78, ton: 'moyen' }],
+    }];
+  }
   const profil = determinerProfil(c);
   const complet = PROFILS_COMPLETS.find((p) => p.nom === profil.nom);
   return [{

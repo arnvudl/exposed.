@@ -111,14 +111,49 @@ export function chapitre02(conversations: Conversation[], soi: string) {
 
 /* ============================================================
    03 — QUI NE TE SUIT PAS EN RETOUR
-   Simple difference d'ensembles. Rien d'autre : ni historique de messages,
-   ni appel reseau, ni service tiers.
+   Simple difference d'ensembles — sauf sur un piege reel d'Instagram :
+   quand on choisit une periode a la demande d'export, elle limite les
+   ABONNE(E)S ("followers") a cette fenetre, mais jamais les ABONNEMENTS
+   ("following"), qui remontent toujours a la creation du compte. Comparer
+   tel quel ferait ressortir comme "ne suit pas en retour" tout compte
+   suivi avant la fenetre des abonnes -- des centaines de faux positifs sur
+   un vieux compte. La comparaison est donc bornee a la meme fenetre que
+   les abonnes (leur date la plus ancienne), des qu'on en a une.
    ============================================================ */
-export function chapitre03(followers: Set<string>, following: Set<string>) {
+function dateLaPlusAncienne(m: Map<string, number>): number | null {
+  let min: number | null = null;
+  for (const ts of m.values()) if (min === null || ts < min) min = ts;
+  return min;
+}
+
+const FMT_DATE_LONGUE = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris', day: 'numeric', month: 'long', year: 'numeric',
+});
+
+// Sur un compte tout neuf, le tout premier abonnement peut precede le tout
+// premier abonne de quelques minutes (l'ordre naturel : on suit avant qu'on
+// nous suive) -- pas une preuve de troncature. Seul un ecart d'au moins une
+// semaine est retenu comme signe reel que l'export des abonnes est limite a
+// une periode plus courte que celui des abonnements.
+const SEUIL_DECALAGE_MS = 7 * 86_400_000;
+
+export function chapitre03(followers: Map<string, number>, following: Map<string, number>) {
+  const depuisTs = dateLaPlusAncienne(followers);
+  const followingLePlusAncien = dateLaPlusAncienne(following);
+  const decalageDetecte = depuisTs !== null && followingLePlusAncien !== null
+    && depuisTs - followingLePlusAncien >= SEUIL_DECALAGE_MS;
+
+  const followingDansLaPeriode = depuisTs === null
+    ? [...following.keys()]
+    : [...following.entries()].filter(([, ts]) => ts >= depuisTs).map(([n]) => n);
+
   return {
-    neSuiventPas: [...following].filter((n) => !followers.has(n)).sort(),
+    neSuiventPas: followingDansLaPeriode.filter((n) => !followers.has(n)).sort(),
     followers: followers.size,
     following: following.size,
+    followingDansLaPeriode: followingDansLaPeriode.length,
+    decalageDetecte,
+    depuisDate: depuisTs !== null ? FMT_DATE_LONGUE.format(new Date(depuisTs)) : null,
   };
 }
 

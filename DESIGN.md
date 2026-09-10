@@ -67,7 +67,7 @@ for the privacy numbers, where green says "safe".
 This is what fills the poster. A poster with a single small shape and lots of
 empty space falls flat: color alone doesn't carry it, **layering** does.
 
-Eight shapes, flat and geometric, all borrowed from the world of the case file, all in CSS.
+Seven shapes, flat and geometric, all borrowed from the world of the case file, all in CSS.
 
 | Shape | Description | Where it's used |
 |---|---|---|
@@ -78,7 +78,10 @@ Eight shapes, flat and geometric, all borrowed from the world of the case file, 
 | Frame | Rectangle with 3px border | Frames the number, like a piece of evidence |
 | Beam | Triangles from an edge | Photocopier light above the document |
 | Halftone | Regular dots, `radial-gradient` | Zone background, never over text |
-| Tab | Rectangular tab at the top | Cardboard folder tab |
+
+An eighth shape, the Tab (a rectangular cardboard-folder tab in the top
+corner), was retired: it sat right where the chapter label lives, and never
+read as distinct from that text.
 
 **The five composition rules, mobile first.** The poster is drawn at 320px
 wide and only grows from there. It's never recomposed for desktop.

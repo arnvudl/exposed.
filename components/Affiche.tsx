@@ -1,12 +1,16 @@
 import styles from './Affiche.module.css';
 
-/* Les huit formes du vocabulaire (cf. DESIGN.md). Elles tiennent toutes en un
+/* Les sept formes du vocabulaire (cf. DESIGN.md). Elles tiennent toutes en un
    rectangle, un cercle, un arc ou une repetition : c'est le critere
    d'admission, parce que chaque affiche doit pouvoir etre redessinee dans un
-   canvas au moment de l'export. */
+   canvas au moment de l'export.
+
+   La huitieme, l'onglet (languette en coin haut-droit), a ete retiree :
+   elle chevauchait systematiquement le libelle de chapitre au-dessus de la
+   carte, jamais assez distincte du texte pour rester lisible. */
 export type NomDeForme =
   | 'barres' | 'disques' | 'stries' | 'arc'
-  | 'cadre' | 'faisceau' | 'trame' | 'onglet';
+  | 'cadre' | 'faisceau' | 'trame';
 
 /* Deux emplacements, et la difference est ce qui empeche une collision.
 
@@ -47,6 +51,15 @@ export type DonneesAffiche = {
       liste plutot qu'un chiffre unique. Remplace chiffre/paire. */
   liste?: { rang: number; texte: string }[];
   note: string;
+  /** Avertissement reel, pas une nuance — rendu par StoryPlayer (pas ce
+      composant), dans le flux normal entre le bandeau et la carte : la
+      carte est en `overflow: hidden` a hauteur fixe, un texte de plus
+      dedans risquerait d'etre tronque sans prevenir (deja arrive avec le
+      disclaimer du chapitre 03 avant qu'il devienne `infoBulle`). Reserve
+      a un fait qui peut induire en erreur si on ne le voit pas — pas pour
+      de la simple prudence : DESIGN.md garde le rouge pour une seule regle
+      a la fois. */
+  alerte?: string;
   /** Index de l'onglet de couleur, de 1 a 10. */
   ton: number;
   formes: Forme[];

@@ -80,6 +80,20 @@
 /* L'avertissement du format JSON, seule regle vraiment obligatoire. */
 .alerte { color: var(--signal); font-weight: 700; }
 
+/* Le seul aveu du guide, assez gros pour qu'on voie qu'on l'assume : pas un
+   encadre a part, juste la premiere ligne de l'etape 10, en display plutot
+   qu'en texte courant. */
+.grand {
+  display: block;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.3rem, 2.6vw, 1.7rem);
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  margin-bottom: .7rem;
+  color: var(--text);
+}
+
 /* ---------- le cadre 9:16 avec la vraie capture ---------- */
 .shot {
   width: clamp(200px, 32vw, 320px);
