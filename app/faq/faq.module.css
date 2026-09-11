@@ -100,7 +100,12 @@
   border-radius: var(--r);
 }
 .renvoiTexte { max-width: 46ch; color: color-mix(in oklab, var(--text) 82%, var(--bg)); }
-.renvoiActions { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: .9rem; }
+/* flex: 1 1 auto + min-width: 0 (pas flex: none) : sur mobile, "Me le
+   rappeler demain" (Bouton, white-space: nowrap) est plus large que l'espace
+   restant apres le lien "Voir le guide d'export" -- sans la permission de
+   retrecir, flex-wrap ne peut jamais s'activer et le bouton deborde de
+   l'ecran au lieu de passer a la ligne. */
+.renvoiActions { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: .9rem; }
 .renvoiLien {
   flex: none;
   display: inline-flex;
