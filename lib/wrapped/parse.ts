@@ -21,6 +21,12 @@ export type Medias = {
   vocaux?: number;
   stickers?: number;
   appel?: 'audio' | 'video';
+  /** Duree en secondes, uniquement pour un appel (`call_duration` du JSON) :
+      les vocaux n'ont pas d'equivalent -- Instagram ne stocke que l'URI et
+      l'horodatage du fichier audio, jamais sa duree, verifie sur un vrai
+      export (aucun champ duration/length dans audio_files[]). Impossible
+      donc de compter des minutes de vocaux, seulement des appels. */
+  dureeSecondes?: number;
 };
 
 export type Message = {
@@ -150,13 +156,22 @@ export class Accumulateur {
       lu pour le deviner), donc chapitre04 ne peut pas filtrer avant coup.
       Une fois `soi` connu, seule son entree est gardee (voir chapitres.ts). */
   private motsParExpediteur = new Map<string, Map<string, number>>();
+  /** Total de tokens BRUTS (avant filtre MOTS_VIDES) par expediteur : sert
+      au "total de mots tapes" (chapitre04), un vrai volume d'ecriture, pas
+      le compte de mots distinctifs qu'utilise le top 10. */
+  private motsTotalParExpediteur = new Map<string, number>();
+  /** Total de messages par expediteur, tous dossiers confondus. */
+  private messagesParExpediteur = new Map<string, number>();
+  /** Le plus long message envoye, par expediteur (un seul candidat garde,
+      voir le commentaire au point d'ecriture dans `ingerer`). */
+  private plusLongMessageParExpediteur = new Map<string, { dossier: string; ts: number; longueur: number; texte: string }>();
 
   constructor(private periode: Periode = {}) {}
 
   /** Un message hors de la periode choisie ne doit exister nulle part : ni
       dans `messages`, ni dans le compte de mots, ni dans les insultes. Filtrer
       ici, au seul endroit qui voit chaque message avant que son contenu soit
-      jete, evite de refiltrer separement chacun des 7 chapitres. */
+      jete, evite de refiltrer separement chacun des 8 chapitres. */
   private horsPeriode(ts: number): boolean {
     const { debut, fin } = this.periode;
     return (debut != null && ts < debut) || (fin != null && ts > fin);
@@ -186,15 +201,17 @@ export class Accumulateur {
 
         const contenuBrut = typeof m.content === 'string' ? decodeMojibake(m.content) : undefined;
         // Un texte systeme (« Not everyone can message this profile. »,
-        // notification d'appel...) n'est pas un tour de conversation.
-        if (contenuBrut && estContenuSysteme(contenuBrut)) continue;
+        // notification d'appel...) n'est pas un tour de conversation -- SAUF
+        // s'il porte un media reel (surtout : une notification d'appel,
+        // "Audio call ended", qui est A LA FOIS du texte systeme ET le seul
+        // porteur de `call_duration`). Piege trouve le 2026-09-11 : le
+        // `continue` ici tournait AVANT la detection d'appel plus bas, donc
+        // chaque appel reel etait jete avant d'etre compte -- `chapitreMedias`
+        // affichait 0 appel sur tous les comptes reels, jamais repere car
+        // seul le mode demo (donnees fabriquees) avait ete verifie a l'oeil.
+        const estSysteme = !!(contenuBrut && estContenuSysteme(contenuBrut));
 
         const nomExp = decodeMojibake(m.sender_name ?? '');
-        let idx = entree.expediteurs.indexOf(nomExp);
-        if (idx === -1) {
-          entree.expediteurs.push(nomExp);
-          idx = entree.expediteurs.length - 1;
-        }
 
         const aDesMedias = !!(
           m.photos?.length || m.videos?.length || m.audio_files?.length
@@ -223,25 +240,63 @@ export class Accumulateur {
             vocaux: nbVocaux || undefined,
             stickers: nbStickers || undefined,
             appel,
+            dureeSecondes: appel ? Math.round(m.call_duration) : undefined,
           }
           : undefined;
+
+        // Texte systeme SANS media : du vrai bruit ("a change le nom du
+        // groupe", "a reagi a ton message"...), ignore completement, comme
+        // avant. Texte systeme AVEC media (un appel) : garde, pour que
+        // chapitreMedias puisse le compter -- seul son texte reste exclu du
+        // comptage de mots plus bas.
+        if (estSysteme && !medias) continue;
+
+        let idx = entree.expediteurs.indexOf(nomExp);
+        if (idx === -1) {
+          entree.expediteurs.push(nomExp);
+          idx = entree.expediteurs.length - 1;
+        }
 
         entree.messages.push({
           sender: idx,
           ts: m.timestamp_ms,
           apercu: apercu(contenuBrut, estSupprime, aDesMedias),
-          longueur: contenuBrut?.length ?? 0,
+          // Le texte d'une notification d'appel ("Audio call ended") n'est
+          // pas un vrai message ecrit : compter ses caracteres fausserait la
+          // longueur mediane (chapitre07) comme si tu l'avais tape.
+          longueur: estSysteme ? 0 : (contenuBrut?.length ?? 0),
           aDesMedias,
           estSupprime,
           medias,
         });
+        this.messagesParExpediteur.set(nomExp, (this.messagesParExpediteur.get(nomExp) ?? 0) + 1);
 
-        if (contenuBrut) {
+        // !estSysteme : le texte d'une notification d'appel qui a survecu au
+        // `continue` plus haut (parce qu'elle porte un appel) ne doit quand
+        // meme pas polluer les mots, les insultes ou le "plus long message".
+        if (contenuBrut && !estSysteme) {
           entree.insultes += compteInsultes(contenuBrut);
+
+          // Un seul candidat garde en memoire par expediteur (remplace des
+          // qu'un plus long apparait), jamais tous les messages : le texte
+          // complet n'est normalement jamais conserve au-dela de cet appel
+          // (voir le commentaire de la classe) -- ici c'est le seul endroit
+          // ou une exception, bornee a une entree par expediteur, est faite.
+          if (!estSupprime) {
+            const actuel = this.plusLongMessageParExpediteur.get(nomExp);
+            if (!actuel || contenuBrut.length > actuel.longueur) {
+              this.plusLongMessageParExpediteur.set(nomExp, {
+                dossier, ts: m.timestamp_ms, longueur: contenuBrut.length, texte: contenuBrut,
+              });
+            }
+          }
+
+          const tokens = tokeniser(contenuBrut);
+          this.motsTotalParExpediteur.set(nomExp, (this.motsTotalParExpediteur.get(nomExp) ?? 0) + tokens.length);
 
           let motsExp = this.motsParExpediteur.get(nomExp);
           if (!motsExp) { motsExp = new Map(); this.motsParExpediteur.set(nomExp, motsExp); }
-          for (const mot of tokeniser(contenuBrut)) {
+          for (const mot of tokens) {
             if (mot.length < 2 || MOTS_VIDES.has(mot)) continue;
             motsExp.set(mot, (motsExp.get(mot) ?? 0) + 1);
           }
@@ -264,6 +319,9 @@ export class Accumulateur {
     followers: Map<string, number>;
     following: Map<string, number>;
     motsParExpediteur: Map<string, Map<string, number>>;
+    motsTotalParExpediteur: Map<string, number>;
+    messagesParExpediteur: Map<string, number>;
+    plusLongMessageParExpediteur: Map<string, { dossier: string; ts: number; longueur: number; texte: string }>;
   } {
     const conversations: Conversation[] = [];
     for (const [dossier, { titre, participants, expediteurs, messages, insultes }] of this.parDossier) {
@@ -272,7 +330,15 @@ export class Accumulateur {
       messages.sort((a, b) => a.ts - b.ts);
       conversations.push({ dossier, titre, participants, expediteurs, messages, insultes });
     }
-    return { conversations, followers: this.followers, following: this.following, motsParExpediteur: this.motsParExpediteur };
+    return {
+      conversations,
+      followers: this.followers,
+      following: this.following,
+      motsParExpediteur: this.motsParExpediteur,
+      motsTotalParExpediteur: this.motsTotalParExpediteur,
+      messagesParExpediteur: this.messagesParExpediteur,
+      plusLongMessageParExpediteur: this.plusLongMessageParExpediteur,
+    };
   }
 }
 

@@ -1,7 +1,7 @@
 /* ============================================================
    FAITS  /  bibliotheque de contenu selectionnable pour une carte
    Voir docs/CARTES_PERSONNALISABLES.md §4. Construit a partir des resultats
-   BRUTS des 7 chapitres (pas des DonneesAffiche de la story) : la story
+   BRUTS des 8 chapitres (pas des DonneesAffiche de la story) : la story
    figure certains faits en plusieurs cartes (ex. chapitre 01 -> reveal +
    top 10), le compositeur veut au contraire des faits ATOMIQUES et courts
    (top 3, jamais top 10) pour tenir a plusieurs sur une seule carte.
@@ -35,10 +35,6 @@ const nb = (n: number) => n.toLocaleString('fr-FR');
 // Petits utilitaires de mise en forme, duplique de lib/wrapped/mapper.ts :
 // deux fichiers legers cote navigateur, meme raison que la-bas (pas d'acces
 // fs pour partager avec le script Node).
-function heureCourte(ts: number): string {
-  return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
-    .format(new Date(ts)).replace(':', ' h ');
-}
 function dateAvecAnnee(ts: number): string {
   return new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(ts));
 }
@@ -86,11 +82,10 @@ export function construireFaits(d: DonneesBrutesChapitres): Fait[] {
 
   if (d[2] && !d[2].abandon && d[2].categories) {
     const cat = d[2].categories;
-    if (cat.qg) faits.push({ type: 'atomique', label: 'Chapitre 02 · Ton QG', chiffre: cat.qg.titre, note: `${nb(cat.qg.totalMessages)} messages, ton groupe le plus vivant.` });
-    if (cat.leBondé) faits.push({ type: 'atomique', label: 'Chapitre 02 · Le plus bondé', chiffre: cat.leBondé.titre, note: `${nb(cat.leBondé.membres)} membres dans ce groupe.` });
-    if (cat.tuDebites) faits.push({ type: 'atomique', label: 'Chapitre 02 · Tu débites ici', chiffre: nb(cat.tuDebites.toiEnvoyes), note: `messages de toi dans « ${cat.tuDebites.titre} ».` });
-    if (cat.inutile) faits.push({ type: 'atomique', label: 'Chapitre 02 · Ton groupe inutile', chiffre: `${Math.round(cat.inutile.toiPart * 100)}%`, note: `de tes messages dans « ${cat.inutile.titre} ».` });
-    if (cat.leRing) faits.push({ type: 'atomique', label: 'Chapitre 02 · Le ring', chiffre: String(cat.leRing.insultes), note: `vannes échangées dans « ${cat.leRing.titre} ».` });
+    if (cat.qg) faits.push({ type: 'atomique', label: 'Chapitre 04 · Ton QG', chiffre: cat.qg.titre, note: `${nb(cat.qg.totalMessages)} messages, ton groupe le plus vivant.` });
+    if (cat.leBondé) faits.push({ type: 'atomique', label: 'Chapitre 04 · Le plus bondé', chiffre: cat.leBondé.titre, note: `${nb(cat.leBondé.membres)} membres dans ce groupe.` });
+    if (cat.tuDebites) faits.push({ type: 'atomique', label: 'Chapitre 04 · Tu débites ici', chiffre: nb(cat.tuDebites.toiEnvoyes), note: `messages de toi dans « ${cat.tuDebites.titre} ».` });
+    if (cat.inutile) faits.push({ type: 'atomique', label: 'Chapitre 04 · Ton groupe inutile', chiffre: `${Math.round(cat.inutile.toiPart * 100)}%`, note: `de tes messages dans « ${cat.inutile.titre} ».` });
   }
 
   if (d[3]) {
@@ -104,47 +99,70 @@ export function construireFaits(d: DonneesBrutesChapitres): Fait[] {
     // abonne recent.
     const bornage = d[3].decalageDetecte ? ` depuis le ${d[3].depuisDate}` : '';
     faits.push({
-      type: 'atomique', label: 'Chapitre 03 · Qui ne te suit pas en retour',
+      type: 'atomique', label: 'Chapitre 05 · Qui ne te suit pas en retour',
       chiffre: String(d[3].neSuiventPas.length),
       note: `sur ${nb(d[3].followingDansLaPeriode)} comptes suivis${bornage}, ${nb(d[3].followers)} ` +
         `abonnés. D’après l’export, pas en direct.`,
     });
   }
 
-  if (d[4]?.length) {
-    const [mot, occurrences] = d[4][0];
-    faits.push({ type: 'atomique', label: 'Chapitre 04 · Ton mot signature', chiffre: `« ${mot} »`, note: `${nb(occurrences)} fois.` });
-    if (d[4].length > 1) {
+  if (d[4]?.top.length) {
+    const [mot, occurrences] = d[4].top[0];
+    faits.push({ type: 'atomique', label: 'Chapitre 02 · Ton mot signature', chiffre: `« ${mot} »`, note: `${nb(occurrences)} fois.` });
+    if (d[4].top.length > 1) {
       faits.push({
-        type: 'mini-liste', label: 'Chapitre 04 · Ton top 3 mots',
-        lignes: d[4].slice(0, 3).map(([m, n], i) => ({ rang: i + 1, texte: `« ${m} » · ${nb(n)}` })),
+        type: 'mini-liste', label: 'Chapitre 02 · Ton top 3 mots',
+        lignes: d[4].top.slice(0, 3).map(([m, n], i) => ({ rang: i + 1, texte: `« ${m} » · ${nb(n)}` })),
+      });
+    }
+    if (d[4].totalMessages > 0) {
+      faits.push({
+        type: 'atomique', label: 'Chapitre 02 · Ton total de messages',
+        chiffre: nb(d[4].totalMessages), note: `${nb(d[4].totalMots)} mots tapés au total.`,
       });
     }
   }
 
   if (d[5]) {
     const r = d[5];
-    if (r.plusTardif) faits.push({ type: 'atomique', label: 'Chapitre 05 · Le plus tardif', chiffre: heureCourte(r.plusTardif.ts), note: `avec ${r.plusTardif.avec}.` });
-    if (r.remisInflige) faits.push({ type: 'atomique', label: 'Chapitre 05 · Le plus long remis (toi)', chiffre: dureeCourte(r.remisInflige.debut, r.remisInflige.ts), note: `avant que tu répondes à ${r.remisInflige.avec}.` });
-    if (r.remisSubi) faits.push({ type: 'atomique', label: 'Chapitre 05 · Le plus long remis (subi)', chiffre: dureeCourte(r.remisSubi.debut, r.remisSubi.ts), note: `avant que ${r.remisSubi.avec} te réponde.` });
-    if (r.reponseRapide) faits.push({ type: 'atomique', label: 'Chapitre 05 · Ta réponse la plus rapide', chiffre: formatDureeCourteLocale(r.reponseRapide.ms), note: `à ${r.reponseRapide.avec}.` });
-    if (r.jourRecord) faits.push({ type: 'atomique', label: 'Chapitre 05 · Ta journée la plus intense', chiffre: nb(r.jourRecord.messages), note: `messages le ${r.jourRecord.date}.` });
+    if (r.remisInflige) faits.push({ type: 'atomique', label: 'Chapitre 06 · Le plus long remis (toi)', chiffre: dureeCourte(r.remisInflige.debut, r.remisInflige.ts), note: `avant que tu répondes à ${r.remisInflige.avec}.` });
+    if (r.remisSubi) faits.push({ type: 'atomique', label: 'Chapitre 06 · Le plus long remis (subi)', chiffre: dureeCourte(r.remisSubi.debut, r.remisSubi.ts), note: `avant que ${r.remisSubi.avec} te réponde.` });
+    if (r.reponseRapide) faits.push({ type: 'atomique', label: 'Chapitre 06 · Ta réponse la plus rapide', chiffre: formatDureeCourteLocale(r.reponseRapide.ms), note: `à ${r.reponseRapide.avec}.` });
+    if (r.jourRecord) faits.push({ type: 'atomique', label: 'Chapitre 06 · Ta journée la plus intense', chiffre: nb(r.jourRecord.messages), note: `messages le ${r.jourRecord.date}.` });
+    if (r.jourRecord?.topContacts.length) {
+      faits.push({
+        type: 'mini-liste', label: 'Chapitre 06 · Ce jour-là, surtout eux',
+        lignes: r.jourRecord.topContacts.map((l, i) => ({ rang: i + 1, texte: `${l.qui} · ${nb(l.total)}` })),
+      });
+    }
+    if (r.plusLongMessage) {
+      faits.push({
+        type: 'atomique', label: 'Chapitre 06 · Ton plus long message',
+        chiffre: `${nb(r.plusLongMessage.longueur)} caractères`, note: `à ${r.plusLongMessage.avec}.`,
+      });
+    }
+    if (r.tirade) {
+      faits.push({
+        type: 'atomique', label: 'Chapitre 06 · Ta plus longue tirade',
+        chiffre: `${nb(r.tirade.messages)} messages`, note: `à la suite, sans réponse, à ${r.tirade.avec}.`,
+      });
+    }
   }
 
   if (d[6]?.premier) {
     const p = d[6].premier;
-    faits.push({ type: 'paire', label: 'Chapitre 06 · Le premier message', quand: dateAvecAnnee(p.ts), avec: p.avec, citation: citation(p.de, p.message) });
+    faits.push({ type: 'paire', label: 'Chapitre 07 · Le premier message', quand: dateAvecAnnee(p.ts), avec: p.avec, citation: citation(p.de, p.message) });
   }
   if (d[6]?.dernier) {
     const p = d[6].dernier;
-    faits.push({ type: 'paire', label: 'Chapitre 06 · Le dernier message', quand: dateAvecAnnee(p.ts), avec: p.avec, citation: citation(p.de, p.message) });
+    faits.push({ type: 'paire', label: 'Chapitre 07 · Le dernier message', quand: dateAvecAnnee(p.ts), avec: p.avec, citation: citation(p.de, p.message) });
   }
 
   if (d[7] && (d[7].axeAmpleur > 0 || d[7].axeLongueurCaracteres > 0)) {
     const profil = determinerProfil(d[7]);
     const complet = PROFILS_COMPLETS.find((p) => p.nom === profil.nom);
     faits.push({
-      type: 'atomique', label: 'Chapitre 07 · Ton profil relationnel',
+      type: 'atomique', label: 'Chapitre 08 · Ton profil relationnel',
       chiffre: profil.nom, note: complet ? complet.description : profil.note,
     });
   }

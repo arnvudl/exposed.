@@ -19,6 +19,7 @@ const POINTAGE_VIDE: Pointage = { bonnes: 0, total: 0, serie: 0, meilleureSerie:
 export default function StoryPlayer({
   cartes,
   details,
+  detailsTexte,
   faits,
   devines,
   enCoursDeChargement,
@@ -29,6 +30,11 @@ export default function StoryPlayer({
       montrees hors du defilement : une liste de 118 comptes n'a pas sa
       place dans une story qui avance toute seule. */
   details: Record<string, string[]>;
+  /** Meme esprit que `details`, pour un texte long (prose) plutot qu'une
+      liste d'elements courts -- le "plus long message" du chapitre 05.
+      Deux maps separees plutot qu'une union dans une seule : le rendu
+      (grille de pseudos vs. paragraphe qui coule) differe completement. */
+  detailsTexte: Record<string, string>;
   /** Bibliotheque de faits pour le compositeur de partage (voir
       docs/CARTES_PERSONNALISABLES.md), independante des cartes affichees. */
   faits: Fait[];
@@ -162,6 +168,20 @@ export default function StoryPlayer({
   // defilement automatique : la story est retenue tant qu'elle est ouverte.
   function ouvrirDetail(id: string) { setVueDetail(id); }
   function fermerDetail() { setVueDetail(null); }
+
+  // Telechargement local pur (Blob + <a download>), aucun appel reseau :
+  // meme promesse "rien ne sort de ton appareil" que le reste du site, ce
+  // fichier va juste du navigateur vers le disque de l'utilisateur.
+  function exporterDetail(id: string, comptes: string[]) {
+    const contenu = comptes.map((c) => `@${c}`).join('\n');
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `exposed-${id}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (termine) {
     return (
@@ -326,17 +346,39 @@ export default function StoryPlayer({
             Voir les {details[carte.id].length} comptes en entier
           </button>
         )}
+        {!devineActuelle && carte.id && !details[carte.id] && detailsTexte[carte.id] && (
+          <button className={s.voirTout} onClick={() => ouvrirDetail(carte.id!)}>
+            Voir le message en entier
+          </button>
+        )}
       </div>
 
       {vueDetail && details[vueDetail] && (
         <div className={s.detail}>
           <div className={s.detailTete}>
             <p className={s.detailTitre}>{carte.titre} · {details[vueDetail].length}</p>
-            <button className={s.fermer} onClick={fermerDetail} aria-label="Fermer la liste">&times;</button>
+            <div className={s.detailActions}>
+              <button className={s.partager} onClick={() => exporterDetail(vueDetail, details[vueDetail])}>
+                Exporter
+              </button>
+              <button className={s.fermer} onClick={fermerDetail} aria-label="Fermer la liste">&times;</button>
+            </div>
           </div>
           <ul className={s.detailListe}>
             {details[vueDetail].map((compte) => <li key={compte}>@{compte}</li>)}
           </ul>
+        </div>
+      )}
+
+      {vueDetail && !details[vueDetail] && detailsTexte[vueDetail] && (
+        <div className={s.detail}>
+          <div className={s.detailTete}>
+            <p className={s.detailTitre}>{carte.titre}</p>
+            <div className={s.detailActions}>
+              <button className={s.fermer} onClick={fermerDetail} aria-label="Fermer le message">&times;</button>
+            </div>
+          </div>
+          <p className={s.detailTexte}>{detailsTexte[vueDetail]}</p>
         </div>
       )}
     </div>

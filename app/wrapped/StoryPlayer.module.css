@@ -282,6 +282,10 @@
   display: flex; align-items: center; justify-content: space-between;
   flex: none; padding-bottom: 1rem; border-bottom: 1px solid var(--line);
 }
+.detailActions {
+  flex: none;
+  display: flex; align-items: center; gap: 10px;
+}
 .detailTitre { font-size: clamp(1.1rem, 2.6vw, 1.4rem); font-weight: 800; letter-spacing: -.01em; }
 .detailListe {
   flex: 1; overflow-y: auto;
@@ -294,6 +298,16 @@
   border-bottom: 1px solid var(--line);
   font-size: 14px;
   font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+/* Un vrai paragraphe, pas une grille : le "plus long message" en entier. */
+.detailTexte {
+  flex: 1; overflow-y: auto;
+  margin: 1.2rem 0 0;
+  max-width: 62ch;
+  font-size: clamp(15px, 2.4vw, 17px);
+  line-height: 1.6;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 /* Sur un telephone, deux colonnes tronquent les pseudos longs. */

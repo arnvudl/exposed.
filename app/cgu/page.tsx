@@ -20,7 +20,7 @@ export default function Cgu() {
           corps: (
             <p>
               Exposed lit, dans ton navigateur, l’export de tes données Instagram et t’en
-              présente une lecture en sept chapitres. C’est gratuit, sans compte, et ça peut
+              présente une lecture en huit chapitres. C’est gratuit, sans compte, et ça peut
               évoluer ou s’arrêter à tout moment.
             </p>
           ),

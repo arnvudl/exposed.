@@ -8,7 +8,7 @@ import type { DonneesAffiche } from '@/components/Affiche';
 import type { EvenementAnalyse } from '@/lib/wrapped/analyser';
 import {
   mapChapitre01, mapChapitre02, mapChapitre03, mapChapitre04,
-  mapChapitre05, mapChapitre06, mapChapitre07, mapBonusMedias,
+  mapChapitre05, mapChapitre06, mapChapitre07, mapChapitreMedias, MAX_CITATION,
 } from '@/lib/wrapped/mapper';
 import { construireFaits, type DonneesBrutesChapitres } from '@/lib/partage/faits';
 import type { Periode } from '@/lib/wrapped/parse';
@@ -63,6 +63,9 @@ export default function Wrapped() {
   // comptes qui ne suivent pas en retour), affichees hors du defilement de
   // la story : voir StoryPlayer, prop `details`.
   const [details, setDetails] = useState<Record<string, string[]>>({});
+  // Meme esprit que `details`, pour un texte long plutot qu'une liste (le
+  // "plus long message" du chapitre 05) : voir StoryPlayer, prop `detailsTexte`.
+  const [detailsTexte, setDetailsTexte] = useState<Record<string, string>>({});
   // Resultats bruts des chapitres (pas les DonneesAffiche de la story) :
   // sert de source a la bibliotheque de faits du compositeur de partage,
   // qui a besoin de plus de detail que ce que montre une carte de story.
@@ -163,17 +166,27 @@ export default function Wrapped() {
       if (evt.numero === 3) {
         setDetails((d) => ({ ...d, 'follow-back': evt.donnees.neSuiventPas }));
       }
+      if (evt.numero === 5 && evt.donnees.plusLongMessage) {
+        const { texte } = evt.donnees.plusLongMessage;
+        // Seulement si la note l'a vraiment tronque (voir `citation`,
+        // lib/wrapped/mapper.ts) : pas de bouton "voir en entier" qui
+        // ouvrirait sur exactement le meme texte deja visible.
+        if (texte.length > MAX_CITATION) {
+          setDetailsTexte((d) => ({ ...d, 'plus-long-message': texte }));
+        }
+      }
     } else if (evt.type === 'medias') {
-      // Pas un chapitre numerote (voir lib/wrapped/mapper.ts, mapBonusMedias) :
+      setLabelEtape('Tes médias…');
+      // Chapitre 03 affiche (voir lib/wrapped/mapper.ts, mapChapitreMedias) :
       // meme mecanique d'insertion, juste apres tout ce qui precede.
-      const nouvelles = mapBonusMedias(evt.stats);
+      const nouvelles = mapChapitreMedias(evt.stats, evt.vocaux, evt.appels);
       if (nouvelles.length === 0) return;
       const indexDebut = cartesRef.current.length;
       cartesRef.current = [...cartesRef.current, ...nouvelles];
       setCartes(cartesRef.current);
       // Une seule devinette, sur le classement le plus fourni des deux
       // (vocaux prefere : plus personnel, plus amusant a deviner que les
-      // photos) -- pas la peine d'en poser une par carte bonus.
+      // photos) -- pas la peine d'en poser une par carte media.
       const devineMedia = evt.vocaux.length >= 2
         ? construireDevineVersusMedia(evt.vocaux, 'Qui t’envoie le plus de messages vocaux ?', 'devine-vocaux', periodeDevine)
         : construireDevineVersusMedia(evt.photos, 'Qui t’envoie le plus de photos ?', 'devine-photos', periodeDevine);
@@ -204,10 +217,11 @@ export default function Wrapped() {
   // memes etats reactifs que la vraie analyse, juste sans worker ni fichier.
   function lancerDemo() {
     workerRef.current?.terminate();
-    const { cartes: c, details: d, donneesChapitres: dc, devines: dv } = genererDemo();
+    const { cartes: c, details: d, detailsTexte: dt, donneesChapitres: dc, devines: dv } = genererDemo();
     cartesRef.current = c;
     setCartes(c);
     setDetails(d);
+    setDetailsTexte(dt);
     setDonneesChapitres(dc);
     setDevines(dv);
     setMessageErreur(null);
@@ -223,6 +237,7 @@ export default function Wrapped() {
     cartesRef.current = [];
     setCartes([]);
     setDetails({});
+    setDetailsTexte({});
     setDonneesChapitres({});
     setDevines({});
     setMessageErreur(null);
@@ -255,6 +270,7 @@ export default function Wrapped() {
       <StoryPlayer
         cartes={cartes}
         details={details}
+        detailsTexte={detailsTexte}
         faits={faitsPartage}
         devines={devines}
         enCoursDeChargement={statut === 'chargement'}
@@ -270,7 +286,7 @@ export default function Wrapped() {
       <main className="wrap" style={{ paddingTop: 'clamp(3rem, 8vh, 6rem)', paddingBottom: 'clamp(4rem, 10vh, 7rem)' }}>
         <header className={s.tete}>
           <p className="kicker">Ton dossier</p>
-          <h1 className="t-xl">Tes 7 chapitres.</h1>
+          <h1 className="t-xl">Tes 8 chapitres.</h1>
           <p className="lede">
             Dépose le ou les fichiers ZIP qu’Instagram t’a envoyés. Tout se calcule dans ton
             navigateur : rien n’est envoyé nulle part, jamais.

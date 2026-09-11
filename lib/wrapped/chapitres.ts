@@ -85,19 +85,15 @@ export function chapitre02(conversations: Conversation[], soi: string) {
     return { abandon: true as const, totalGroupes: groupes.length, actifs: [] as GroupeStats[], categories: null };
   }
 
-  // « Le ring » utilise un TAUX (insultes / messages), pas un total brut :
-  // sinon le groupe le plus bavard gagne mecaniquement cette categorie
-  // aussi, juste parce qu'il genere plus de tout.
   const classements: Record<string, GroupeStats[]> = {
     qg: [...actifs].sort((a, b) => b.score - a.score),
     leBondé: [...actifs].sort((a, b) => b.membres - a.membres),
     tuDebites: [...actifs].sort((a, b) => b.toiEnvoyes - a.toiEnvoyes),
     inutile: [...actifs].sort((a, b) => a.toiPart - b.toiPart),
-    leRing: [...actifs].filter((g) => g.insultes > 0).sort((a, b) => b.tauxInsultes - a.tauxInsultes),
   };
 
   // Un meme groupe ne remporte pas deux titres.
-  const ordre = ['qg', 'leBondé', 'tuDebites', 'inutile', 'leRing'] as const;
+  const ordre = ['qg', 'leBondé', 'tuDebites', 'inutile'] as const;
   const dejaPris = new Set<string>();
   const categories: Record<string, GroupeStats | null> = {};
   for (const cle of ordre) {
@@ -161,28 +157,31 @@ export function chapitre03(followers: Map<string, number>, following: Map<string
    04 — TES MOTS
    Le compte par mot est deja fait pendant le parse (voir parse.ts,
    Accumulateur.ingerer), pour chaque expediteur : il ne reste plus qu'a
-   prendre l'entree de `soi`, une fois `soi` connu.
-   ============================================================ */
-export function chapitre04(motsParExpediteur: Map<string, Map<string, number>>, soi: string): [string, number][] {
+   prendre l'entree de `soi`, une fois `soi` connu. `motsTotalParExpediteur`
+   et `messagesParExpediteur` (compteurs bruts, non filtres, voir parse.ts)
+   donnent le vrai volume d'ecriture -- distinct du top 10 qui, lui, exclut
+   les mots vides. */
+export type StatsMots = { top: [string, number][]; totalMots: number; totalMessages: number };
+
+export function chapitre04(
+  motsParExpediteur: Map<string, Map<string, number>>,
+  motsTotalParExpediteur: Map<string, number>,
+  messagesParExpediteur: Map<string, number>,
+  soi: string,
+): StatsMots {
   const compte = motsParExpediteur.get(soi) ?? new Map<string, number>();
-  return [...compte.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+  return {
+    top: [...compte.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10),
+    totalMots: motsTotalParExpediteur.get(soi) ?? 0,
+    totalMessages: messagesParExpediteur.get(soi) ?? 0,
+  };
 }
 
 /* ============================================================
-   05 — TES CINQ RECORDS  (1:1 uniquement, pour un « avec qui » net)
+   05 — TES SIX RECORDS  (les delais de reponse et le "avec qui" du jour
+   record restent 1:1 uniquement, pour un « avec qui » net -- le plus long
+   message, lui, regarde aussi les groupes : un monologue s'y ecrit pareil)
    ============================================================ */
-const FMT_HEURE_MIN = new Intl.DateTimeFormat('fr-FR', {
-  timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-});
-/** Sur une echelle 0-23h brute, 23:59 bat toujours 04:00 alors que 4h du
-    matin est manifestement plus tard dans la nuit. On decale : les heures
-    avant 6h du matin comptent comme la suite de la veille (+24h). */
-function minutesDansLaNuit(ts: number): number {
-  const [h, m] = FMT_HEURE_MIN.format(new Date(ts)).split(':').map(Number);
-  const heureAjustee = h < 6 ? h + 24 : h;
-  return heureAjustee * 60 + m;
-}
-
 const FMT_JOUR = new Intl.DateTimeFormat('fr-CA', {
   timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit',
 });
@@ -194,35 +193,77 @@ function jourCle(ts: number): string { return FMT_JOUR.format(new Date(ts)); }
 const SEUIL_REPONSE_RAPIDE_MS = 2000;
 
 export type RecordDelai = { ms: number; debut: number; ts: number; avec: string; messageAvant: string; messageApres: string };
+export type LigneJour = { qui: string; total: number };
+export type PlusLongMessage = { avec: string; ts: number; longueur: number; texte: string };
+export type Tirade = { messages: number; debut: number; fin: number; avec: string };
 
-export function chapitre05(conversations: Conversation[], soi: string) {
-  let plusTardif: { ts: number; avec: string; minutes: number; message: string } | null = null;
+// En dessous, deux ou trois messages d'affilee (photo puis legende, ou un
+// simple "ah" avant la vraie reponse) ne sont pas une vraie tirade -- juste
+// le decoupage habituel d'un envoi Instagram.
+const SEUIL_TIRADE = 4;
+
+export function chapitre05(
+  conversations: Conversation[],
+  soi: string,
+  plusLongMessageParExpediteur: Map<string, { dossier: string; ts: number; longueur: number; texte: string }>,
+) {
   let remisInflige: RecordDelai | null = null; // toi -> lent a repondre
   let remisSubi: RecordDelai | null = null;    // l'autre -> lent a repondre
   let reponseRapide: RecordDelai | null = null;
+  let tirade: Tirade | null = null;
   const messagesParJour = new Map<string, number>();
+  // Meme cle que messagesParJour, mais par contact 1:1 (les groupes n'ont
+  // pas un "qui" unique) : sert au "à qui tu as le plus parlé ce jour-là".
+  const messagesParJourEtContact = new Map<string, Map<string, number>>();
+  const avecParDossier = new Map<string, string>();
+  // Bornes de la periode reellement couverte par des messages (tous
+  // dossiers confondus) : sert a calculer une vraie moyenne quotidienne
+  // (chapitre05.jourRecord.moyenneJournaliere), pas juste sur les jours ou
+  // tu as ecrit -- le meme esprit que "premier"/"dernier" au chapitre 06.
+  let totalMessages = 0;
+  let premierTs: number | null = null;
+  let dernierTs: number | null = null;
 
   for (const c of conversations) {
     const autres = c.participants.filter((p) => p !== soi);
     const est1to1 = c.participants.length === 2 && autres.length === 1;
     const avec = est1to1 ? identifiantAffichable(c, autres[0]) : c.titre;
     const idxSoi = c.expediteurs.indexOf(soi);
+    avecParDossier.set(c.dossier, avec);
 
     for (const m of c.messages) {
       const jour = jourCle(m.ts);
       messagesParJour.set(jour, (messagesParJour.get(jour) ?? 0) + 1);
+      totalMessages++;
+      if (premierTs === null || m.ts < premierTs) premierTs = m.ts;
+      if (dernierTs === null || m.ts > dernierTs) dernierTs = m.ts;
+      if (est1to1) {
+        let parContact = messagesParJourEtContact.get(jour);
+        if (!parContact) { parContact = new Map(); messagesParJourEtContact.set(jour, parContact); }
+        parContact.set(avec, (parContact.get(avec) ?? 0) + 1);
+      }
     }
 
     if (!est1to1) continue;
 
+    // Serie de messages d'affilee de ta part, sans reponse entre-deux : reset
+    // des qu'un message de l'autre s'intercale. Une conversation ne peut pas
+    // hériter la serie d'une autre.
+    let streak = 0;
+    let streakDebut = 0;
+
     for (let i = 0; i < c.messages.length; i++) {
       const m = c.messages[i];
       if (m.sender === idxSoi) {
-        const minutes = minutesDansLaNuit(m.ts);
-        if (!plusTardif || minutes > plusTardif.minutes) {
-          plusTardif = { ts: m.ts, avec, minutes, message: m.apercu };
+        if (streak === 0) streakDebut = m.ts;
+        streak++;
+        if (streak >= SEUIL_TIRADE && (!tirade || streak > tirade.messages)) {
+          tirade = { messages: streak, debut: streakDebut, fin: m.ts, avec };
         }
+      } else {
+        streak = 0;
       }
+
       if (i === 0) continue;
       const prec = c.messages[i - 1];
       if (prec.sender !== m.sender) {
@@ -245,14 +286,32 @@ export function chapitre05(conversations: Conversation[], soi: string) {
   }
 
   const jourRecordBrut = [...messagesParJour.entries()].sort((a, b) => b[1] - a[1])[0] as [string, number] | undefined;
-  let jourRecord: { date: string; messages: number } | null = null;
-  if (jourRecordBrut) {
+  let jourRecord: { date: string; messages: number; moyenneJournaliere: number; topContacts: LigneJour[] } | null = null;
+  if (jourRecordBrut && premierTs !== null && dernierTs !== null) {
     const [an, mo, jr] = jourRecordBrut[0].split('-').map(Number);
     const label = new Date(Date.UTC(an, mo - 1, jr)).toLocaleDateString('fr-FR', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
-    jourRecord = { date: label, messages: jourRecordBrut[1] };
+    // Moyenne sur toute la periode couverte (premier -> dernier message),
+    // pas seulement les jours ou tu as ecrit : une vraie moyenne "par jour
+    // depuis que tu es sur la plateforme", pour que le multiplicateur du
+    // jour record dise quelque chose de honnete.
+    const joursSpan = Math.max(1, Math.round((dernierTs - premierTs) / 86_400_000) + 1);
+    const parContact = messagesParJourEtContact.get(jourRecordBrut[0]);
+    const topContacts = parContact
+      ? [...parContact.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([qui, total]) => ({ qui, total }))
+      : [];
+    jourRecord = { date: label, messages: jourRecordBrut[1], moyenneJournaliere: totalMessages / joursSpan, topContacts };
   }
 
-  return { plusTardif, remisInflige, remisSubi, reponseRapide, jourRecord };
+  // Le plus long message envoye (par toi), tous dossiers confondus -- pas
+  // seulement les 1:1 : un monologue dans un groupe compte aussi. Le texte
+  // complet vient de l'Accumulateur (parse.ts), le seul endroit ou il
+  // survit encore, borne a un candidat par expediteur.
+  const longBrut = plusLongMessageParExpediteur.get(soi);
+  const plusLongMessage: PlusLongMessage | null = longBrut
+    ? { avec: avecParDossier.get(longBrut.dossier) ?? '', ts: longBrut.ts, longueur: longBrut.longueur, texte: longBrut.texte }
+    : null;
+
+  return { remisInflige, remisSubi, reponseRapide, jourRecord, plusLongMessage, tirade };
 }
 
 /* ============================================================
@@ -282,8 +341,24 @@ export function chapitre06(conversations: Conversation[], soi: string) {
 
 /* ============================================================
    07 — TON PROFIL RELATIONNEL (4 axes, jamais affiches tels quels)
-   ============================================================ */
+
+   Seuil "partenaire actif" et diviseur d'ampleur recalibres le 2026-09-11,
+   apres un premier retour beta ou deux comptes reels tombaient TOUJOURS sur
+   "L'Ouvert" -- verifie avec un vrai corpus (script scripts/analyse.mts) :
+   a l'ancien seuil (>= 5 messages, a vie, pour compter comme "actif"), un
+   compte moyennement social atteint facilement 200+ "partenaires actifs"
+   des les premieres annees d'usage (5 messages, meme tres vieux, est un
+   bar quasi nul) -- l'axe ampleur (divise par 50) sature alors a 1.0 pour
+   a peu pres tout le monde, et la rapidite de reponse (delai median tout
+   confondu, souvent quelques minutes chez qui chatte casuellement) sature
+   pareillement pres de 1.0 -- deux axes satures poussent mecaniquement vers
+   les profils a forte ampleur/rapidite (L'Ouvert, Le Connecteur), quels que
+   soient les deux autres axes. Seuil releve a >= 30 messages (une vraie
+   relation suivie, pas juste un "salut" isole) et diviseur d'ampleur remonte
+   en consequence dans profil.ts (voir son commentaire). Toujours une
+   premiere calibration, a revoir des que plus de vrais comptes seront vus. */
 export function chapitre07(conversations: Conversation[], soi: string) {
+  const SEUIL_PARTENAIRE_ACTIF = 30;
   const uns1to1 = conversations.filter((c) => {
     const autres = c.participants.filter((p) => p !== soi);
     return c.participants.length === 2 && autres.length === 1 && autres[0] !== COMPTE_SUPPRIME;
@@ -299,7 +374,7 @@ export function chapitre07(conversations: Conversation[], soi: string) {
     const idxSoi = c.expediteurs.indexOf(soi);
     const totalToi = c.messages.filter((m) => m.sender === idxSoi).length;
     const totalAutre = c.messages.length - totalToi;
-    if (totalToi + totalAutre >= 5) {
+    if (totalToi + totalAutre >= SEUIL_PARTENAIRE_ACTIF) {
       partenairesActifs.add(c.dossier);
       conversationsCompteesPourLancement++;
       if (c.messages[0].sender === idxSoi) lancements++;
@@ -340,6 +415,10 @@ export type StatsMedias = {
   stickers: { toi: number; autres: number };
   appelsAudio: number;
   appelsVideo: number;
+  /** Minutes cumulees, appels manques compris (duree 0). Pas d'equivalent
+      pour les vocaux : voir le commentaire de `Medias.dureeSecondes`
+      (parse.ts), Instagram ne stocke pas leur duree dans l'export. */
+  dureeAppelsMinutes: number;
 };
 
 export function chapitreMedias(conversations: Conversation[], soi: string): StatsMedias {
@@ -349,7 +428,9 @@ export function chapitreMedias(conversations: Conversation[], soi: string): Stat
     stickers: { toi: 0, autres: 0 },
     appelsAudio: 0,
     appelsVideo: 0,
+    dureeAppelsMinutes: 0,
   };
+  let dureeSecondesTotal = 0;
   for (const c of conversations) {
     const idxSoi = c.expediteurs.indexOf(soi);
     for (const m of c.messages) {
@@ -358,10 +439,12 @@ export function chapitreMedias(conversations: Conversation[], soi: string): Stat
       if (m.medias.vocaux) s.vocaux[cote] += m.medias.vocaux;
       if (m.medias.photos) s.photos[cote] += m.medias.photos;
       if (m.medias.stickers) s.stickers[cote] += m.medias.stickers;
+      if (m.medias.dureeSecondes) dureeSecondesTotal += m.medias.dureeSecondes;
       if (m.medias.appel === 'audio') s.appelsAudio++;
       if (m.medias.appel === 'video') s.appelsVideo++;
     }
   }
+  s.dureeAppelsMinutes = Math.round(dureeSecondesTotal / 60);
   return s;
 }
 
@@ -397,4 +480,25 @@ export function classementVocaux(conversations: Conversation[], soi: string): Li
 }
 export function classementPhotos(conversations: Conversation[], soi: string): LigneMedia[] {
   return classementParContact(conversations, soi, (m) => m.medias?.photos ?? 0);
+}
+
+/** Un appel n'est pas "envoye" par une des deux parties comme une photo --
+    c'est un evenement partage. Compte donc chaque appel du 1:1, quel que
+    soit qui a "termine" l'appel (le sender du message systeme), plutot que
+    de reutiliser `classementParContact` (pense pour "ce que l'AUTRE t'a
+    envoye", pas pertinent ici). */
+export function classementAppels(conversations: Conversation[], soi: string): LigneMedia[] {
+  const lignes: LigneMedia[] = [];
+  for (const c of conversations) {
+    const autres = c.participants.filter((p) => p !== soi);
+    if (c.participants.length !== 2 || autres.length !== 1) continue;
+    const autre = autres[0];
+    if (autre === COMPTE_SUPPRIME) continue;
+    let total = 0;
+    for (const m of c.messages) {
+      if (m.medias?.appel) total++;
+    }
+    if (total > 0) lignes.push({ qui: identifiantAffichable(c, autre), total });
+  }
+  return lignes.sort((a, b) => b.total - a.total);
 }

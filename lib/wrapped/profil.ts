@@ -75,7 +75,13 @@ const PROFILS: { nom: string; note: string; signature: Signature }[] = [
 function normaliser(axes: AxesProfil): Signature {
   return {
     quiLance: Math.max(0, Math.min(1, axes.axeQuiLance)),
-    ampleur: Math.max(0, Math.min(1, axes.axeAmpleur / 50)),
+    // Diviseur remonte de 50 a 120 le 2026-09-11 (voir le commentaire de
+    // chapitre07, lib/wrapped/chapitres.ts) : avec le nouveau seuil "actif"
+    // (>= 30 messages), un compte tres social mais realiste plafonne encore
+    // sous 1.0 au lieu d'y coller systematiquement -- verifie sur un vrai
+    // corpus (234 partenaires a l'ancien seuil, 103 au nouveau, pour un
+    // compte manifestement au-dessus de la moyenne).
+    ampleur: Math.max(0, Math.min(1, axes.axeAmpleur / 120)),
     // Rapidite = l'inverse du delai : moins de minutes, plus haut le score.
     rapidite: Math.max(0, Math.min(1, 1 - axes.axeVitesseMinutes / 120)),
     longueur: Math.max(0, Math.min(1, axes.axeLongueurCaracteres / 60)),
