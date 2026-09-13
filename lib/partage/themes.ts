@@ -151,7 +151,7 @@ export const THEME_DOSSIER: Theme = {
     ctx.textBaseline = 'alphabetic';
     ctx.globalAlpha = 0.9;
     ctx.font = `500 ${Math.round(w * 0.041)}px "JetBrains Mono", monospace`;
-    ctx.fillText('exposed.', padX, h * 0.055 + w * 0.041);
+    ctx.fillText('verso.', padX, h * 0.055 + w * 0.041);
     ctx.globalAlpha = 1;
 
     // Barres de censure, entre l'eyebrow et la zone de contenu.
@@ -211,7 +211,7 @@ export const THEME_POLAROID: Theme = {
 
     ctx.font = `500 ${Math.round(w * 0.028)}px "JetBrains Mono", monospace`;
     ctx.fillStyle = '#F0803C';
-    ctx.fillText('exposed.', padX, h - h * 0.035);
+    ctx.fillText('verso.', padX, h - h * 0.035);
   },
 };
 
@@ -268,7 +268,7 @@ export const THEME_ARGENTIQUE: Theme = {
     ctx.font = `500 ${Math.round(w * 0.026)}px "JetBrains Mono", monospace`;
     ctx.fillStyle = PAPER;
     ctx.globalAlpha = 0.7;
-    ctx.fillText('exposed.', padX, h - h * 0.03);
+    ctx.fillText('verso.', padX, h - h * 0.03);
     ctx.globalAlpha = 1;
   },
 };
@@ -323,7 +323,7 @@ export const THEME_TABLOID: Theme = {
     ctx.textAlign = 'center';
     ctx.save();
     ctx.letterSpacing = `${w * 0.003}px`;
-    ctx.fillText('E X P O S E D .', w / 2, h - h * 0.035);
+    ctx.fillText('V E R S O .', w / 2, h - h * 0.035);
     ctx.restore();
     ctx.textAlign = 'left';
   },
@@ -390,7 +390,7 @@ export const THEME_TICKET: Theme = {
 
     ctx.textAlign = 'center';
     ctx.font = `500 ${Math.round(w * 0.024)}px "JetBrains Mono", monospace`;
-    ctx.fillText('*** exposed. ***', w / 2, h * 0.9);
+    ctx.fillText('*** verso. ***', w / 2, h * 0.9);
     ctx.textAlign = 'left';
   },
 };
@@ -445,7 +445,7 @@ export const THEME_BADGE: Theme = {
     ctx.fillStyle = PAPER;
     ctx.globalAlpha = 0.95;
     ctx.font = `400 ${Math.round(w * 0.032)}px "Bricolage Grotesque", sans-serif`;
-    ctx.fillText('exposed.', padX, h - stripeH + stripeH * 0.6);
+    ctx.fillText('verso.', padX, h - stripeH + stripeH * 0.6);
     ctx.globalAlpha = 1;
   },
 };

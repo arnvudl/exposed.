@@ -19,8 +19,8 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://getexposed.me'),
   title: {
-    template: '%s · Exposed',
-    default: 'Exposed — Analyse tes données Instagram gratuitement',
+    template: '%s · Verso',
+    default: 'Verso — Analyse tes données Instagram gratuitement',
   },
   description:
     'Découvre ce que tes données Instagram révèlent : abonnés fantômes, conversations les plus actives, ton profil complet. Gratuit, sans compte, tout reste dans ton navigateur.',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     'instagram statistics',
   ],
   openGraph: {
-    siteName: 'Exposed',
+    siteName: 'Verso',
     locale: 'fr_BE',
     type: 'website',
     url: 'https://getexposed.me',

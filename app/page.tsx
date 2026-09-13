@@ -12,12 +12,12 @@ import { revelations, afficheHero, afficheDossier, profils } from '@/content/rev
 import s from './page.module.css';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Exposed — Analyse tes données Instagram gratuitement' },
+  title: { absolute: 'Verso — Analyse tes données Instagram gratuitement' },
   description:
     'Télécharge tes données Instagram et découvre en quelques secondes tes abonnés fantômes, tes conversations les plus actives et ton profil complet. 100 % gratuit, tout se passe dans ton navigateur.',
   alternates: { canonical: 'https://getexposed.me' },
   openGraph: {
-    title: 'Exposed — Analyse tes données Instagram',
+    title: 'Verso — Analyse tes données Instagram',
     description:
       'Abonnés fantômes, conversations les plus actives, ton profil Instagram décortiqué. Gratuit, aucun compte requis.',
     url: 'https://getexposed.me',
@@ -130,12 +130,14 @@ export default function Accueil() {
           {/* Pas de la vertu : la vraie raison, pour qu'on te croie plus
               facilement que sur une simple promesse. */}
           <p className={`${s.privacyPourquoi} reveal`} style={{ '--d': '140ms' } as Style}>
-            Et pour être cash : pas par grandeur d’âme. Garder tes données me coûterait{' '}
-            <strong className={s.privacyFort}>des serveurs à payer</strong>, et un fichier
-            stocké quelque part, c’est <strong className={s.privacyFort}>une responsabilité
-            juridique</strong> dont je n’ai aucune envie.{' '}
-            <strong className={s.privacyFort}>N’importe qui pourrait me poursuivre</strong> en
-            cas de fuite. Ne rien garder, c’est juste le plus simple, pour moi comme pour toi.
+            Et pour être cash : pas par grandeur d’âme. En déposant ton fichier,{' '}
+            <strong className={s.privacyFort}>tu consens</strong> à ce qu’il soit lu une fois,
+            c’est ta démarche volontaire qui rend ça légal. Le garder après, par contre, je
+            n’en ai <strong className={s.privacyFort}>aucun intérêt légitime</strong> : un
+            fichier de données personnelles stocké quelque part, c’est{' '}
+            <strong className={s.privacyFort}>une responsabilité</strong> dont je n’ai aucune
+            envie de m’occuper. N’importe qui pourrait me poursuivre en cas de fuite. Ne rien
+            garder, c’est juste le plus simple, pour moi comme pour toi.
           </p>
         </div>
       </section>

@@ -90,6 +90,25 @@ export default function Confidentialite() {
           ),
         },
         {
+          titre: 'Sur quelle base légale ce site traite ton fichier',
+          corps: (
+            <>
+              <p>
+                Le RGPD demande une base légale à tout traitement de données personnelles. Ici,
+                c’est le consentement : en déposant ton fichier, tu acceptes qu’il soit lu, une
+                fois, par ton propre navigateur. C’est une démarche volontaire de ta part, pas
+                une collecte de notre côté.
+              </p>
+              <p>
+                Le garder après cette lecture serait un traitement différent, et là je n’ai
+                aucun intérêt légitime à le faire : ni pour toi, ni pour moi. C’est pour ça
+                qu’il n’est jamais enregistré nulle part, ni sur un serveur ni dans ton
+                navigateur.
+              </p>
+            </>
+          ),
+        },
+        {
           titre: 'Tes droits',
           corps: (
             <>

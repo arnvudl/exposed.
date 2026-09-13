@@ -10,7 +10,7 @@ import { join } from 'node:path';
    fonctionne pas ici) pour que le build ne depende d'aucun appel reseau. */
 
 export const dynamic = 'force-static';
-export const alt = 'Exposed. Ce que tes DMs disent de toi.';
+export const alt = 'Verso. Ce que tes DMs disent de toi.';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -111,18 +111,7 @@ export default async function Image() {
               marginTop: 44,
             }}
           >
-            <span style={{ display: 'flex' }}>exp</span>
-            <span
-              style={{
-                display: 'flex',
-                width: 13,
-                height: 13,
-                borderRadius: '50%',
-                background: '#E8442A',
-                margin: '0 2px',
-              }}
-            />
-            <span style={{ display: 'flex' }}>sed.</span>
+            <span style={{ display: 'flex' }}>verso.</span>
           </div>
         </div>
       </div>

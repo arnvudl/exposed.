@@ -92,14 +92,14 @@ export default function Affiche({
   a,
   className = '',
   incline = false,
-  marque = 'exposed. / exemple',
+  marque = 'verso. / exemple',
 }: {
   a: DonneesAffiche;
   className?: string;
   incline?: boolean;
   /** Sur le site vitrine, chaque affiche montre une valeur inventee et le
       dit ("/ exemple"). Sur le vrai dossier d'un utilisateur, ce serait un
-      mensonge : la page /wrapped passe donc juste "exposed." */
+      mensonge : la page /wrapped passe donc juste "verso." */
   marque?: string;
 }) {
   const bande = a.formes.filter((f) => f.place !== 'coin');

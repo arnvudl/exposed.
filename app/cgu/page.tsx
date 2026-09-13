@@ -4,7 +4,7 @@ import PageTexte from '@/components/PageTexte';
 
 export const metadata: Metadata = {
   title: 'Conditions d’utilisation',
-  description: 'Les conditions d’utilisation d’Exposed : usage personnel, 15 ans ou plus, résultats sans garantie, cartes qui t’appartiennent.',
+  description: 'Les conditions d’utilisation de Verso : usage personnel, 15 ans ou plus, résultats sans garantie, cartes qui t’appartiennent.',
 };
 
 export default function Cgu() {
@@ -19,7 +19,7 @@ export default function Cgu() {
           titre: 'Le service',
           corps: (
             <p>
-              Exposed lit, dans ton navigateur, l’export de tes données Instagram et t’en
+              Verso lit, dans ton navigateur, l’export de tes données Instagram et t’en
               présente une lecture en huit chapitres. C’est gratuit, sans compte, et ça peut
               évoluer ou s’arrêter à tout moment.
             </p>
@@ -75,7 +75,7 @@ export default function Cgu() {
           titre: 'Instagram et Meta',
           corps: (
             <p>
-              Exposed n’est pas affilié à Instagram ni à Meta. Instagram est une marque de Meta
+              Verso n’est pas affilié à Instagram ni à Meta. Instagram est une marque de Meta
               Platforms, Inc. L’export de tes données est un droit que Meta te donne ; ce site
               se contente de le lire chez toi.
             </p>

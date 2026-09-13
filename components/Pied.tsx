@@ -8,7 +8,7 @@ export default function Pied() {
         <div className={styles.grid}>
           <div>
             <Link className="logo" href="/">
-              exp<span className="logo__o"><span className="sr-only">o</span></span>sed.
+              verso.
             </Link>
             <p className={styles.baseline}>You might see some things. We show them.</p>
           </div>
@@ -43,7 +43,7 @@ export default function Pied() {
         </div>
 
         <div className={styles.legal}>
-          <span>Exposed n’est pas affilié à Instagram ni à Meta.</span>
+          <span>Verso n’est pas affilié à Instagram ni à Meta.</span>
           <span>Instagram est une marque de Meta Platforms, Inc.</span>
         </div>
       </div>

@@ -4,7 +4,7 @@ import PageTexte from '@/components/PageTexte';
 
 export const metadata: Metadata = {
   title: 'Mentions légales',
-  description: 'Éditeur, hébergeur et contact du site Exposed, le Wrapped de tes DMs Instagram lu dans ton navigateur.',
+  description: 'Éditeur, hébergeur et contact du site Verso, le Wrapped de tes DMs Instagram lu dans ton navigateur.',
 };
 
 export default function MentionsLegales() {
@@ -20,7 +20,7 @@ export default function MentionsLegales() {
           corps: (
             <>
               <p>
-                Exposed est un site personnel, édité à titre non professionnel par{' '}
+                Verso est un site personnel, édité à titre non professionnel par{' '}
                 <strong>arnvudl</strong>, qui en est aussi le directeur de la publication.
               </p>
               <p>
@@ -59,7 +59,7 @@ export default function MentionsLegales() {
           corps: (
             <>
               <p>
-                Le nom Exposed, le logo, les textes, la charte graphique et les affiches de ce
+                Le nom Verso, le logo, les textes, la charte graphique et les affiches de ce
                 site sont la propriété de leur auteur. Toute reproduction à des fins
                 commerciales sans accord est interdite.
               </p>
@@ -74,7 +74,7 @@ export default function MentionsLegales() {
           titre: 'Instagram et Meta',
           corps: (
             <p>
-              Exposed n’est pas affilié à Instagram ni à Meta, et n’est ni approuvé ni
+              Verso n’est pas affilié à Instagram ni à Meta, et n’est ni approuvé ni
               sponsorisé par eux. Instagram est une marque de Meta Platforms, Inc. Aucun
               élément visuel de Meta n’est utilisé sur ce site.
             </p>

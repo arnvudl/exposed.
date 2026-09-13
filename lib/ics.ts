@@ -8,21 +8,21 @@ export function telechargerRappel(dansHeures = 24) {
     `T${z(dt.getUTCHours())}${z(dt.getUTCMinutes())}00Z`;
 
   const ics = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Exposed//FR',
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Verso//FR',
     'BEGIN:VEVENT',
-    `UID:${Date.now()}@exposed`,
+    `UID:${Date.now()}@verso`,
     `DTSTAMP:${tampon(new Date())}`,
     `DTSTART:${tampon(d)}`,
     `DTEND:${tampon(new Date(d.getTime() + 9e5))}`,
     'SUMMARY:Recuperer mon export Instagram',
-    'DESCRIPTION:Ton fichier Instagram devrait etre pret. Reviens sur Exposed pour lire ton dossier.',
+    'DESCRIPTION:Ton fichier Instagram devrait etre pret. Reviens sur Verso pour lire ton dossier.',
     'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n');
 
   const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'exposed-rappel.ics';
+  a.download = 'verso-rappel.ics';
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

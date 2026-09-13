@@ -11,7 +11,7 @@ export default function Nav({ page }: { page?: 'accueil' | 'wrapped' | 'guide' |
     <nav className={styles.nav}>
       <div className={styles.in}>
         <Link className="logo" href="/">
-          exp<span className="logo__o"><span className="sr-only">o</span></span>sed.
+          verso.
         </Link>
         <div className={styles.links}>
           <Link href="/" aria-current={page === 'accueil' ? 'page' : undefined}>Accueil</Link>

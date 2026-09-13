@@ -57,7 +57,7 @@ export default function PartageTest() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `exposed-test-${idTheme}-${faitsChoisis.length}faits.png`;
+      a.download = `verso-test-${idTheme}-${faitsChoisis.length}faits.png`;
       a.click();
       URL.revokeObjectURL(url);
     }, 'image/png');

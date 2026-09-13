@@ -273,7 +273,7 @@ function genererMedias(
     pour dire a /wrapped de lancer la demo des l'arrivee sur la page, sans
     passer par un parametre d'URL (evite le Suspense qu'impose
     useSearchParams en export statique pour un simple aller aussi leger). */
-export const CLE_DEMO = 'exposed:demo';
+export const CLE_DEMO = 'verso:demo';
 
 export function genererDemo(): {
   cartes: DonneesAffiche[];

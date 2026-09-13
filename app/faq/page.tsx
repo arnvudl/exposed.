@@ -8,7 +8,7 @@ import s from './faq.module.css';
 export const metadata: Metadata = {
   title: 'FAQ',
   description:
-    'Comment fonctionne Exposed ? Confidentialité des données Instagram, compatibilité iOS et Android, légal RGPD : toutes les réponses.',
+    'Comment fonctionne Verso ? Confidentialité des données Instagram, compatibilité iOS et Android, légal RGPD : toutes les réponses.',
   alternates: { canonical: 'https://getexposed.me/faq' },
 };
 
@@ -35,6 +35,10 @@ const sections: Section[] = [
       {
         q: 'Pourquoi je devrais te faire confiance ?',
         r: 'Pour être cash, ce n’est pas de la vertu : garder tes données me coûterait des serveurs à payer, et un fichier stocké quelque part est une responsabilité juridique dont je n’ai aucune envie — n’importe qui pourrait me poursuivre en cas de fuite. Ne rien garder, c’est juste le plus simple, pour moi comme pour toi.',
+      },
+      {
+        q: 'Est-ce que je consens à quelque chose en déposant mon fichier ?',
+        r: 'Oui, et c’est volontaire : en déposant ton fichier, tu consens à ce qu’il soit lu, une fois, par ton propre navigateur. C’est cette démarche qui rend l’analyse légale au sens du RGPD. Ce que je n’ai pas, en revanche, c’est un intérêt légitime à garder ce fichier après coup — donc je ne le garde pas.',
       },
     ],
   },
@@ -91,7 +95,7 @@ const sections: Section[] = [
         q: 'Comment je peux soutenir le projet ?',
         r: (
           <>
-            Exposed est gratuit et le restera. Si tu veux aider, parles-en autour de toi, ou
+            Verso est gratuit et le restera. Si tu veux aider, parles-en autour de toi, ou
             offre-moi un café sur{' '}
             <a href="https://buymeacoffee.com/arnvudl" target="_blank" rel="noopener noreferrer">
               buymeacoffee.com/arnvudl
@@ -101,7 +105,11 @@ const sections: Section[] = [
         ),
       },
       {
-        q: 'Qui est derrière Exposed ?',
+        q: 'Pourquoi « Verso » ?',
+        r: 'Le verso d’une photo, c’est la face qu’on ne regarde jamais : celle qui reste retournée, contre la table. Tes messages, c’est un peu pareil, ils existent depuis des années, mais tu ne les relis presque jamais dans leur ensemble. Ce site te montre ce verso-là : pas une image que tu donnes aux autres, juste ce qui était déjà là, à l’envers.',
+      },
+      {
+        q: 'Qui est derrière Verso ?',
         r: 'Une personne, pas une boîte. Au départ, j’avais juste envie de voir à qui je parle le plus sur Instagram, alors j’ai poussé l’analyse aussi loin que je pouvais.',
       },
     ],

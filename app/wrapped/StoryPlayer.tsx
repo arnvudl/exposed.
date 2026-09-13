@@ -178,7 +178,7 @@ export default function StoryPlayer({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `exposed-${id}.txt`;
+    a.download = `verso-${id}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -335,7 +335,7 @@ export default function StoryPlayer({
             </div>
           ) : (
             <>
-              <Affiche a={carte} marque="exposed." />
+              <Affiche a={carte} marque="verso." />
               {enAttente && <div className={s.attente}>La suite arrive…</div>}
             </>
           )}

@@ -80,7 +80,7 @@ export default function Composer({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'exposed.png';
+      a.download = 'verso.png';
       a.click();
       URL.revokeObjectURL(url);
     }, 'image/png');
