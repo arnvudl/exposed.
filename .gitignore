@@ -33,3 +33,6 @@ fixtures/real/
 next-env.d.ts
 /node_modules/
 tsconfig.tsbuildinfo
+
+# Créas de la campagne pub (local uniquement, trop lourd + photos perso)
+/docs/photo-pub/
